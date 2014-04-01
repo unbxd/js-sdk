@@ -18,16 +18,16 @@ Unbxd
 */
 var Unbxd = window.Unbxd || {};
 
-Unbxd.prepareSearch = function(query){
-	var ref = new Unbxd.search();
+Unbxd.prepareSearch = function(query, secure){
+	var ref = new Unbxd.search(secure);
 
 	ref.ruleSet = 'search';
 	ref.query = query;
 	return ref;
 }
 
-Unbxd.prepareBrowse = function(categoryId){
-	var ref = new Unbxd.search();
+Unbxd.prepareBrowse = function(categoryId, secure){
+	var ref = new Unbxd.search(secure);
 
 	ref.ruleSet = 'browse';
 	ref.categoryId = categoryId;
@@ -174,23 +174,23 @@ Unbxd.search = function(secure){
 					+ "://" + UnbxdSiteName + ".search.unbxdapi.com/" + UnbxdApiKey
 					+ "/" + this.ruleSet + "?format=json";
 		if(this.ruleSet == 'search' && this['query'] != undefined){
-			url += '&q=' + this.query;
+			url += '&q=' + encodeURIComponent(this.query);
 		}else if(this.ruleSet == 'browse' && this['categoryId'] != undefined){
-			url += '&category-id=' + this.categoryId;
+			url += '&category-id=' + encodeURIComponent(this.categoryId);
 		}
 
 		if(this.params.filters != undefined){
-			url += '&filter=' + this.params.filters.toString();
+			url += '&filter=' + encodeURIComponent(this.params.filters.toString());
 		}
 
 		if(this.params.sort != undefined){
-			url += '&sort=' + this.params.url.toString();
+			url += '&sort=' + encodeURIComponent(this.params.url.toString());
 		}
 
 		for(var key in this.params.query){
 			if (this.params.query.hasOwnProperty(key)) {
 				var value = this.params.query[key];
-				url += '&' + key + '=' + value;
+				url += '&' + key + '=' + encodeURIComponent(value);
 			}
 		}
 	}
