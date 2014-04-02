@@ -206,3 +206,107 @@ Unbxd.search = function(secure){
 	    });
 	}
 }
+
+Unbxd.widgets = {
+	version: 'v1.0',
+	region : 'apac',
+	siteName : UnbxdSiteName,
+	types : {
+		recommendationsForYou : 'recommend'
+		,recentlyVeiwed: 'recently-viewed'
+		,similarProducts : 'more-like-these'
+		,alsoViewed : 'also-viewed'
+		,alsoBought: 'also-bought'
+		,cartRecommendations: 'cart-recommend'
+		,homeTop: 'top-sellers'
+		,categoryTop: 'category-top-sellers'
+		,brandTop: 'brand-top-sellers'
+		,pdpTop: 'pdp-top-sellers'
+	},
+	format: 'JSON',
+	getUID: function(){
+		if(Unbxd.readCookie != undefined)
+			return Unbxd.readCookie('userId');
+		return null;
+	},
+	getRecommendationsForYou: function(cb){
+		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{key}/{site-name}/{widget-type}/{uid}/?ip={ip}&format={format}
+		Unbxd.widgets.getWidget('recommendationsForYou',cb);
+	},
+	getRecentlyViewed : function(cb){
+		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{key}/{site-name}/{widget-type}/{uid}/?ip={ip}&format={format}
+		Unbxd.widgets.getWidget('recentlyVeiwed',cb);
+	},
+	getMoreLikeThese: function(cb,pid){
+		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}/{pid}/?uid={userId}&ip={ip}&format={format}
+		Unbxd.widgets.getWidget('similarProducts',cb,pid);
+	},
+	getAlsoViewed: function(cb,pid){
+		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}/{pid}/?uid={userId}&ip={ip}&format={format}
+		Unbxd.widgets.getWidget('alsoViewed',cb,pid);
+	},
+	getAlsoBought: function(cb,pid){
+		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}/{pid}/?uid={userId}&ip={ip}&format={format}
+		Unbxd.widgets.getWidget('alsoBought',cb,pid);
+	},
+	getCartRecommendations: function(cb){
+		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}/{pids}/?uid={userId}&ip={ip}&format={format}
+		Unbxd.widgets.getWidget('cartRecommendations',cb);
+	},
+	getTopSellers: function(cb){
+		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}?ip={ip}&format={format}
+		Unbxd.widgets.getWidget('homeTop',cb);
+	},
+	getCategoryTopSellers: function(cb,cid){
+		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}/{categoryid}?uid={userId}&ip={ip}&format={format}
+		Unbxd.widgets.getWidget('categoryTop',cb, cid);
+	},
+	getBrandTopSellers: function(cb,bid){
+		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}/{brandid}?uid={userId}&ip={ip}&format={format}
+		Unbxd.widgets.getWidget('brandTop',cb,bid);
+	},
+	getPDPTopSellers: function(cb,pid){
+		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}/{pid}?uid={userId}&ip={ip}&format={format}
+		Unbxd.widgets.getWidget('pdpTop',cb,pid);
+	},
+	getWidget: function(type,cb,id){
+		var url = Unbxd.widgets.getURI(type,id)
+		
+		$.ajax({
+	        url: url,
+	        dataType: "jsonp",
+	        jsonp: 'json.wrf',	        
+	        success: cb
+	    });
+	},
+	getURI: function(type, arg2){
+		var url = 'http://'+ Unbxd.widgets.region +'-recommendations.unbxdapi.com/'+Unbxd.widgets.version+'/';
+
+		//lets append unbxd key if needed
+		//if(type == 'recommendationsForYou' || type == 'recentlyVeiwed' || type == 'similarProducts')
+		url += UnbxdAPIKey+'/';
+
+		//lets append site name
+		url += Unbxd.widgets.siteName+'/';
+
+		//lets add widget type to url
+		url += Unbxd.widgets.types[type] + '/';
+
+		//lets append the second argument
+		if(type == 'recommendationsForYou' || type == 'recentlyVeiwed' || type == 'cartRecommendations'){
+			url += Unbxd.widgets.getUID() +'/';
+		}else if(type != 'homeTop'){
+			url += arg2+'/';
+		}
+
+		//lets attach query parameters
+		url += '?';
+
+		if(type != 'recommendationsForYou' && type != 'recentlyVeiwed' && type != 'homeTop')
+			url += '&uid='+ encodeURIComponent(Unbxd.widgets.getUID());
+
+		url += '&format='+ Unbxd.widgets.format;
+		
+		return url;
+	}
+};
