@@ -249,10 +249,10 @@ Unbxd.widgets = {
 		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}/{pid}/?uid={userId}&ip={ip}&format={format}
 		Unbxd.widgets.getWidget('alsoBought',cb,pid);
 	},
-	getCartRecommendations: function(cb){
-		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}/{pids}/?uid={userId}&ip={ip}&format={format}
-		Unbxd.widgets.getWidget('cartRecommendations',cb);
-	},
+	// getCartRecommendations: function(cb){
+	// 	//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}/{pids}/?uid={userId}&ip={ip}&format={format}
+	// 	Unbxd.widgets.getWidget('cartRecommendations',cb);
+	// },
 	getTopSellers: function(cb){
 		//http(s)://{region}-recommendations.unbxdapi.com/{version}/{site-name}/{widget-type}?ip={ip}&format={format}
 		Unbxd.widgets.getWidget('homeTop',cb);
@@ -276,7 +276,12 @@ Unbxd.widgets = {
 	        url: url,
 	        dataType: "jsonp",
 	        jsonp: 'json.wrf',	        
-	        success: cb
+	        success: function(d){
+				if(parseInt(d.count) >= 1)
+					cb(null, d);
+				else
+					cb(d);
+			}
 	    });
 	},
 	getURI: function(type, arg2){
