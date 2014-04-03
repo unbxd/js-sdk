@@ -43,7 +43,7 @@ Unbxd.search = function(secure){
 	this.reset();
 
 	var Filters = function(){
-		this.str = '(*:* ';
+		this.str = '';
 
 		this.and = function(field, value){
 			this.str += ' AND ';
@@ -70,7 +70,13 @@ Unbxd.search = function(secure){
 		}
 
 		this.toString = function(){
-			return this.str + ")";
+			if(this.str.indexOf(' AND ') == 0)
+				this.str = this.str.substr(4);
+
+			if(this.str.indexOf(' OR ') == 0)
+				this.str = this.str.substr(3);
+
+			return "("+this.str + ")";
 		}
 	}
 
@@ -104,18 +110,30 @@ Unbxd.search = function(secure){
 	this.setFilter = function(field, value){
 		var filters = this.params['filters'] || new Filters();
 		filters.and(field, value);
+
+		if(!('filters' in this.params))
+			this.params['filters'] = new Filters();
+
 		return this;
 	}
 
 	this.andFilter = function(field, value){
 		var filters = this.params['filters'] || new Filters();
 		filters.and(field, value);
+
+		if(!('filters' in this.params))
+			this.params['filters'] = new Filters();
+
 		return this;
 	}
 
 	this.orFilter = function(field, value){
 		var filters = this.params['filters'] || new Filters();
 		filters.or(field, value);
+
+		if(!('filters' in this.params))
+			this.params['filters'] = new Filters();
+
 		return this;
 	}
 
@@ -193,6 +211,8 @@ Unbxd.search = function(secure){
 				url += '&' + key + '=' + encodeURIComponent(value);
 			}
 		}
+
+		return url;
 	}
 
 	this.call = function(callback){
