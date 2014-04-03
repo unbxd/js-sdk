@@ -38,7 +38,10 @@ Unbxd.search = function(secure){
 	this.secure = secure || false;
 
 	this.reset = function(){
-		this.params = {query : {}};
+		this.params = {
+			query : {},
+			filters : 
+		};
 	}
 	this.reset();
 
@@ -108,57 +111,44 @@ Unbxd.search = function(secure){
 	}
 
 	this.setFilter = function(field, value){
-		var filters = this.params['filters'] || new Filters();
-		filters.and(field, value);
-
-		if(!('filters' in this.params))
-			this.params['filters'] = new Filters();
+		this.params.filters = this.params['filters'] || new Filters();
+		this.params.filters.and(field, value);
 
 		return this;
 	}
 
 	this.andFilter = function(field, value){
-		var filters = this.params['filters'] || new Filters();
-		filters.and(field, value);
-
-		if(!('filters' in this.params))
-			this.params['filters'] = new Filters();
+		this.params.filters = this.params['filters'] || new Filters();
+		this.params.filters.and(field, value);
 
 		return this;
 	}
 
 	this.orFilter = function(field, value){
-		var filters = this.params['filters'] || new Filters();
-		filters.or(field, value);
-
-		if(!('filters' in this.params))
-			this.params['filters'] = new Filters();
+		this.params.filters = this.params['filters'] || new Filters();
+		this.params.filters.or(field, value);
 
 		return this;
 	}
 
 	this.setRangeFilter = function(field, lb, ub){
-		var filters = this.params['filters'] || new Filters();
-		filters.andRange(field, lb, ub);
+		this.params.filters = this.params['filters'] || new Filters();
+		this.params.filters.andRange(field, lb, ub);
+
 		return this;
 	}
 
 	this.andRangeFilter = function(field, lb, ub){
-		var filters = this.params['filters'] || new Filters();
-		filters.andRange(field, lb, ub);
+		this.params.filters = this.params['filters'] || new Filters();
+		this.params.filters.andRange(field, lb, ub);
+
 		return this;
 	}
 
 	this.orRangeFilter = function(field, lb, ub){
-		var filters = this.params['filters'] || new Filters();
-		filters.orRange(field, lb, ub);
-		return this;
-	}
+		this.params.filters = this.params['filters'] || new Filters();
+		this.params.filters.orRange(field, lb, ub);
 
-	this.addRangeFilter = function(field, values){
-		var filters = this.params['rangeFilters'] || {};
-		filters[field] = values;
-		this.params.filters = filters;
 		return this;
 	}
 
