@@ -110,44 +110,27 @@ Unbxd.search = function(secure){
 		return this;
 	}
 
-	this.setFilter = function(field, value){
-		this.params.filters = this.params['filters'] || new Filters();
-		this.params.filters.and(field, value);
+	this.params.filters = [];
+
+	this.addFilter = function(field, value){
+		
+		this.params.filters[field][value] = 1;
 
 		return this;
 	}
 
-	this.andFilter = function(field, value){
-		this.params.filters = this.params['filters'] || new Filters();
-		this.params.filters.and(field, value);
+	this.removeFilter = function(field, value){
+		if(value in this.params.filters[field])
+			delete this.params.filters[field][value];
 
 		return this;
 	}
 
-	this.orFilter = function(field, value){
-		this.params.filters = this.params['filters'] || new Filters();
-		this.params.filters.or(field, value);
+	this.params.ranges = [];
 
-		return this;
-	}
-
-	this.setRangeFilter = function(field, lb, ub){
-		this.params.filters = this.params['filters'] || new Filters();
-		this.params.filters.andRange(field, lb, ub);
-
-		return this;
-	}
-
-	this.andRangeFilter = function(field, lb, ub){
-		this.params.filters = this.params['filters'] || new Filters();
-		this.params.filters.andRange(field, lb, ub);
-
-		return this;
-	}
-
-	this.orRangeFilter = function(field, lb, ub){
-		this.params.filters = this.params['filters'] || new Filters();
-		this.params.filters.orRange(field, lb, ub);
+	this.addRangeFilter = function(field, lb, ub){
+		
+		this.params.ranges[field] = {lb : lb || '*', ub : ub || '*'};
 
 		return this;
 	}
@@ -179,7 +162,7 @@ Unbxd.search = function(secure){
 
 	this.url = function(){
 		var url = (secure ? "https" : "http")
-					+ "://" + UnbxdSiteName + ".search.unbxdapi.com/" + UnbxdApiKey
+					+ "://" + UnbxdSiteName + ".search.unbxdapi.com/" + UnbxdAPIKey
 					+ "/" + this.ruleSet + "?format=json";
 		if(this.ruleSet == 'search' && this['query'] != undefined){
 			url += '&q=' + encodeURIComponent(this.query);
@@ -187,9 +170,31 @@ Unbxd.search = function(secure){
 			url += '&category-id=' + encodeURIComponent(this.categoryId);
 		}
 
-		if(this.params.filters != undefined){
-			url += '&filter=' + encodeURIComponent(this.params.filters.toString());
+		//if(this.params.filters != undefined){
+		//	url += '&filter=' + encodeURIComponent(this.params.filters.toString());
+		//}
+
+		for(var x in this.params.filters){
+			if(this.params.filters.hasOwnProperty(x)){
+				var a = [];
+				for(var y in this.params.filters[x]){
+					a.push(x+':"'+y+'" ');
+				}
+
+				url += '%filter='+a.join(' OR ');
+			}
 		}
+
+		var a = [];
+
+		for(var x in this.params.ranges){
+			if(this.params.ranges.hasOwnProperty(x)){
+				a.push(x + ':[' + this.params.ranges[x].lb + " TO " + this.params.ranges[x].ub + ']');
+			}
+		}
+
+		if(a.length)
+			url += '%filter='+a.join(' OR ');
 
 		if(this.params.sort != undefined){
 			url += '&sort=' + encodeURIComponent(this.params.url.toString());
