@@ -45,44 +45,6 @@ Unbxd.search = function(secure){
 	}
 	this.reset();
 
-	var Filters = function(){
-		this.str = '';
-
-		this.and = function(field, value){
-			this.str += ' AND ';
-			this.str += field + ':"' + value + '"';
-		}
-
-		this.or = function(field, value){
-			this.str += ' OR ';
-			this.str += field + ':"' + value + '"';
-		}
-
-		this.andRange = function(field, lb, ub){
-			lb = lb || "*";
-			ub = ub || "*";
-			this.str += ' AND ';
-			this.str += field + ':[' + lb + " TO " + ub + ']';
-		}
-
-		this.orRange = function(field, lb, ub){
-			lb = lb || "*";
-			ub = ub || "*";
-			this.str += ' OR ';
-			this.str += field + ':[' + lb + " TO " + ub + ']';
-		}
-
-		this.toString = function(){
-			if(this.str.indexOf(' AND ') == 0)
-				this.str = this.str.substr(4);
-
-			if(this.str.indexOf(' OR ') == 0)
-				this.str = this.str.substr(3);
-
-			return "("+this.str + ")";
-		}
-	}
-
 	var Sort = function(){
 		this.fields = {};
 		
@@ -181,7 +143,7 @@ Unbxd.search = function(secure){
 					a.push(x+':"'+y+'" ');
 				}
 
-				url += '%filter='+a.join(' OR ');
+				url += '&filter='+a.join(' OR ');
 			}
 		}
 
@@ -194,7 +156,7 @@ Unbxd.search = function(secure){
 		}
 
 		if(a.length)
-			url += '%filter='+a.join(' OR ');
+			url += '&filter='+a.join(' OR ');
 
 		if(this.params.sort != undefined){
 			url += '&sort=' + encodeURIComponent(this.params.url.toString());
@@ -216,7 +178,7 @@ Unbxd.search = function(secure){
 		$.ajax({
 	        url: url,
 	        dataType: "jsonp",
-	        jsonp: 'json.wrf',	        
+	        jsonp: 'json.wrf',
 	        success: callback
 	    });
 	}
