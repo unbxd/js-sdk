@@ -91,7 +91,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,selectedFacetContainerSelector : "#selected_facets"
 		,clearSelectedFacetsSelector : "#clear_all_selected_facets"
 		,removeSelectedFacetSelector : ".selected-facet-delete"
-		,selectedFacetHolderSelector : ".result-selected-facets"//to hide selected facets if nothing is available
+		,selectedFacetHolderSelector : ""
 		,loaderSelector : ""//".result-loader"
 		,onFacetLoad : function(){}
 		,sanitizeQueryString : function(q){ return q;}
@@ -338,7 +338,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 
 		//sample JSON object for stats
 		{
-			price":
+			price:
 			{
 				min : 90 //complete min value in result set
 				,max: 400 //complete max value in result set
@@ -364,6 +364,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 		...
 	```
 
+<<<<<<< Updated upstream
 
 Note: The HTML served by the server to client should have the minimum requred structure. *Check the below image.*
 
