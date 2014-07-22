@@ -10,7 +10,7 @@ Just include [unbxdSearch.js](//d21gpk1vhmjuf5.cloudfront.net/unbxdSearch.js) in
 ##configuration
 Consider a normal search page with basic layout as shown in the figure below and respective configuration below the image.
 
-![Basic search layout](http://localhost/js-sdk/images/search_layout.png "Basic search layout")
+![Basic search layout](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/search_layout.png "Basic search layout")
 
 ```javascript
 	Handlebars.registerHelper('getIndex', function(index){
@@ -137,7 +137,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 - **pageSize** : The total number of results to be displayed in a single call. The value should be greater than ZERO. *It is suggested that the value to be multiple of number of columns (ex. if 3 columns then 15 or 18 or 21).*
 - **searchResultSetTemp** : Handlebars template for the repetitive result block to display the individual product. This can also be function which take a single argument (a JSON block as shown below).
     
-    ![Basic search layout](http://localhost/js-sdk/images/result_block.png "Basic search layout")
+    ![Basic search layout](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/result_block.png "Basic search layout")
 
 	```javascript
 		//handlebars helper, to get first element from array
@@ -188,7 +188,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 - **isAutoScroll** : Set this to true if you want the new pages to be displayed while user scrolls to the bottom of page.
 - **facetTemp** : Handlebars template for the repetitive facet block to display the individual facet. This can also be function which take a single argument (a JSON block as shown below).
 
-	![Basic search layout](http://localhost/js-sdk/images/facet_block.png "Basic search layout")
+	![Basic search layout](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/facet_block.png "Basic search layout")
 
 	```javascript
 		//configuration
@@ -263,7 +263,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 - **facetOnDeselect** : This is function with single argument as DOM element of type given in **facetElementSelector** and executed when a facet is deselected.
 - **selectedFacetTemp** : Handlebars template for generating HTML to show the currently selected filters. Please check below image and code snippet.
 
-    ![Seleted filters block](http://localhost/js-sdk/images/selected_facet_layout.png "Selected filters block")
+    ![Seleted filters block](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/selected_facet_layout.png "Selected filters block")
 
     ```javascript
         //configuration
