@@ -363,3 +363,62 @@ Consider a normal search page with basic layout as shown in the figure below and
 		}
 		...
 	```
+
+
+Note: The HTML served by the server to client should have the minimum requred structure. *Check the below image.*
+
+![Basic search layout](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/search_template_basic.png "Basic search layout")
+
+```html
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>UNBXD - Search</title>
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<script type="text/javascript" src="jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="handlebars.js"></script>
+	<script type="text/javascript" src="unbxdSearch.js"></script>
+</head>
+<body>
+	<div class="header-container clearfix">
+		<div class="header row clearfix">
+			<div class="header-search lt">
+				<div class="search-input-button-holder clearfix">
+					<form method="GET" action="search.html">
+						<input type="text" class="search-input lt" id="search" value="" unbxdattr="sq" name="q" autocomplete="off"/>
+						<button type="submit" class="search-button lt" id="search_button" unbxdattr="sq_bt"></button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="search-container">
+		<div class="row clearfix">
+			<div class="lt search-facet-column" id="facets_container">
+			</div>
+			<div class="rt search-result-column">
+				<h2 class="result-spell-check" id="did_you_mean">
+				</h2>
+				<h3 class="result-title-count" id="search_title">
+				</h3>
+				<div class="result-selected-facets clearfix" id="selected_facets">
+				</div>
+				<ul class="search-result-list clearfix" id="results_container">
+				</ul>
+				<div class="result-loader" id="ajax_loader">
+				<a href="#"><img src="images/loader.gif">Loading more...</a>
+			</div>
+			</div>
+		</div>
+	</div>
+	<div class="footer">
+		Copyright &copy; 2014 Unbxd
+	</div>
+	<script type="text/javascript">
+	jQuery(function(){
+		//search configuration here
+	});
+	</script>
+</body>
+</html>
+```
