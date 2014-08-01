@@ -711,7 +711,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 			for (var i = 0; i < sortarr.length; i++) {
 				var arr = sortarr[i].split(/\s+(?=\S+$)/);
 				if(arr.length == 2){
-					params.sort.add(arr[0],arr[1]);
+					params.sort[arr[0]] = arr[1] || "desc";
 				}
 			}
 		}

@@ -672,12 +672,11 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 		//lets get sort now
 		if("sort" in obj){
 			var sortarr = obj.sort.split(",");
-			params.sort = this._getNewSort();
 
 			for (var i = 0; i < sortarr.length; i++) {
 				var arr = sortarr[i].split(/\s+(?=\S+$)/);
 				if(arr.length == 2){
-					params.sort.add(arr[0],arr[1]);
+					params.sort[arr[0]] = arr[1] || "desc";
 				}
 			}
 		}
@@ -874,7 +873,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 	}
 	,paintSelectedFacets : function(){
 		var selFacetKeys = Object.keys(this.params.filters);
-		console.log(JSON.stringify(this.params));
+		
 		if(selFacetKeys.length && this.options.selectedFacetTemp && this.options.selectedFacetContainerSelector){
 			if(!this.compiledSelectedFacetTemp)
 				this.compiledSelectedFacetTemp = Handlebars.compile(this.options.selectedFacetTemp);
