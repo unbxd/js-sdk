@@ -300,6 +300,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 - **loaderSelector** : The jQuery selector of the loading GIF image. This will be shown during the fetching process and hidden after the call.
 - **onFacetLoad** : This option takes a function which will be called after rendering the facet block.
 - **sanitizeQueryString** : This option should be a function with single argument as query which modifies and returns a new query against which the search has to be performed.
+	
 	```javascript
 		//configuration
 		...
