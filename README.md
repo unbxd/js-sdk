@@ -80,6 +80,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,facetOnDeselect : function(el){
 		    //jQuery(el).removeClass('selected');
 		}
+		,facetMultiSelect : false
 		,selectedFacetTemp : '{{#each filters}}'
 			+'{{#each this}}'
 				+'<div class="selected-facet clearfix">'
@@ -98,6 +99,8 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,getFacetStats : ""
 		,processFacetStats : function(obj){}
 		,setDefaultFilters : function(){}
+		,onIntialResultLoad : function(){}
+		,onPageLoad : function(){}
     });
 ```
 
@@ -183,9 +186,9 @@ Consider a normal search page with basic layout as shown in the figure below and
 		}
 	```
 - **searchResultContainer** : The jQuery selector of DOM element to append the HTML generated from **searchResultSetTemp** (*#results_container* in the first image). 
-- **isClickNScroll** : Set it to true if you want users to click an element to fetch the next page.
+- **isClickNScroll** : Set it to **true** if you want users to click an element to fetch the next page.
 - **clickNScrollSelector** : The jQuery selector of the DOM element that can be clicked for displaying the next page.(PS. in this case the new results will be appended to the **searchResultContainer**.)
-- **isAutoScroll** : Set this to true if you want the new pages to be displayed while user scrolls to the bottom of page.
+- **isAutoScroll** : Set this to **true** if you want the new pages to be displayed while user scrolls to the bottom of page.
 - **facetTemp** : Handlebars template for the repetitive facet block to display the individual facet. This can also be function which take a single argument (a JSON block as shown below).
 
 	![Basic search layout](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/facet_block.png "Basic search layout")
@@ -261,6 +264,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 - **facetElementSelector** : The parent element of checkbox which has to be returned the next config options (_in the given facetTemp, it can be **label** or **li**_).
 - **facetOnSelect** : This is function with single argument as DOM element of type given in **facetElementSelector** and executed when a facet is selected.
 - **facetOnDeselect** : This is function with single argument as DOM element of type given in **facetElementSelector** and executed when a facet is deselected.
+- **facetMultiSelect** : Set this value to **false**, incase if you dont want to enable multiselect on facets. It has a default value **true**.
 - **selectedFacetTemp** : Handlebars template for generating HTML to show the currently selected filters. Please check below image and code snippet.
 
     ![Seleted filters block](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/selected_facet_layout.png "Selected filters block")
@@ -363,8 +367,8 @@ Consider a normal search page with basic layout as shown in the figure below and
 		}
 		...
 	```
-
-<<<<<<< Updated upstream
+- **onIntialResultLoad** : This option takes a function which will be executed after rendering of first result page.
+- **onPageLoad** : This option takes a function which will be executed after rendering of new result page from second page.
 
 Note: The HTML served by the server to client should have the minimum requred structure. *Check the below image.*
 

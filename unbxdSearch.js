@@ -1,3 +1,4 @@
+//uglifyjs unbxdSearch_AS.js -o unbxdSearch_AS.min.js && gzip -c unbxdSearch_AS.min.js > unbxdSearch_AS.min.js.gz && aws s3 cp unbxdSearch_AS.min.js.gz s3://unbxd/unbxdSearch_AS.js --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --content-encoding gzip --cache-control max-age=3600
 window.Unbxd = window.Unbxd || {};
 
 if (!Function.prototype.bind) {
@@ -74,7 +75,7 @@ Unbxd.setSearch.prototype.defaultOptions = {
 	//,isPagination : false
 	//,clickNScrollElementSelector : '#load-more'
 	,pageSize : 15
-	,facetMultiSelect : false
+	,facetMultiSelect : true
 	,facetContainerSelector : ''
 	,facetCheckBoxSelector : ''
 	,selectedFacetTemp : '{{#each filters}}' 
@@ -93,6 +94,8 @@ Unbxd.setSearch.prototype.defaultOptions = {
 	,removeSelectedFacetSelector : ""
 	,loaderSelector : ""
 	,onFacetLoad : ""
+	,onIntialResultLoad : ""
+	,onPageLoad : ""
 	,sanitizeQueryString : function(q){ return q;}
 	,getFacetStats : ""
 	,processFacetStats : function(obj){}
@@ -123,10 +126,12 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 	,isHistory : !!(window.history && history.pushState)
 	,popped : false //there is an edge case in Mozilla that fires popstate initially
 	,initialURL : ''
-	,isHashChange : !!("onhashchange" in window.document.body)
+	,isHashChange : false
 	,currentHash : ""
 	,hashChangeInterval : null
 	,init : function(){
+		this.isHashChange = !!("onhashchange" in window.document.body);
+
 		this.$input = jQuery(this.options.inputSelector);
 		this.$input.val('');
 		this.input = this.$input[0];
@@ -190,8 +195,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 					.setPageSize(this.options.pageSize);
 
 				if(this.params.query){
-					this._getFacetsFromHistory();
-					this._getResultsFromHistory();
+					this.callResults(this.paintResultSet);
 				}
 			}else if(this.options.type == "browse" && "categoryId" in urlqueryparams && urlqueryparams["categoryId"].trim().length > 0){
 				this.params = urlqueryparams;
@@ -202,8 +206,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 				this.setPage(1)
 					.setPageSize(this.options.pageSize);
 
-				this._getFacetsFromHistory();
-				this._getResultsFromHistory();
+				this.callResults(this.paintResultSet);
 			}
 		}
 	}
@@ -308,7 +311,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 				self[box.is(':checked') ? 'addFilter' : 'removeFilter'](box.attr("unbxdParam_facetName"),box.attr("unbxdParam_facetValue"));
 				
 				self.setPage(1)
-					.callResults(self.paintAfterFacetChange,true);
+					.callResults(self.paintResultSet,true);
 			});
 		}
 
@@ -337,7 +340,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
 				self.removeFilter(name,val)
 					.setPage(1)
-					.callResults(self.paintAfterFacetChange,true);
+					.callResults(self.paintResultSet,true);
 			});
 		}
 
@@ -358,14 +361,8 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 				self.setPage(1);
 
 				if((old_params.query) || (old_params.categoryId)){
-					if((self.options.type == "search" && self.params.query != old_params.query) || (self.options.type == "search" && self.params.categoryId != old_params.categoryId)){
-						self.params = old_params;
-						self._getFacetsFromHistory();
-						self._getResultsFromHistory();
-					}else{
-						self.params = old_params;
-						self._getResultsFromHistory();
-					}
+					self.params = old_params;
+					self.callResults(self.paintResultSet);
 				}
 			});
 		}else if(this.isHashChange){
@@ -380,14 +377,8 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 					self.currentHash = newhash;
 
 					if((old_params.query) || (old_params.categoryId)){
-						if((self.options.type == "search" && self.params.query != old_params.query) || (self.options.type == "search" && self.params.categoryId != old_params.categoryId)){
-							self.params = old_params;
-							self._getFacetsFromHistory();
-							self._getResultsFromHistory();
-						}else{
-							self.params = old_params;
-							self._getResultsFromHistory();
-						}
+						self.params = old_params;
+						self.callResults(self.paintResultSet);
 					}
 				}
 			});
@@ -404,14 +395,16 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 					self.currentHash = newhash;
 
 					if((old_params.query) || (old_params.categoryId)){
-						if((self.options.type == "search" && self.params.query != old_params.query) || (self.options.type == "search" && self.params.categoryId != old_params.categoryId)){
-							self.params = old_params;
-							self._getFacetsFromHistory();
-							self._getResultsFromHistory();
-						}else{
-							self.params = old_params;
-							self._getResultsFromHistory();
-						}
+						// if((self.options.type == "search" && self.params.query != old_params.query) || (self.options.type == "search" && self.params.categoryId != old_params.categoryId)){
+						// 	self.params = old_params;
+						// 	self._getFacetsFromHistory();
+						// 	self._getResultsFromHistory();
+						// }else{
+						// 	self.params = old_params;
+						// 	self._getResultsFromHistory();
+						// }
+						self.params = old_params;
+						self.callResults(self.paintResultSet);
 					}
 				}
 			}, 3000);
@@ -557,6 +550,9 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 		url += '&start=' + (this.params.extra.page <= 1 ? 0  : (this.params.extra.page - 1) * this.params.extra.rows);
 
 		url += this.options.getFacetStats.length > 0 ? "&stats=" + this.options.getFacetStats : "";
+
+		if(this.options.facetMultiSelects)
+			url += '&facet.multiselect=true';
 
 		return {
 			url : host_path + "?" + url
@@ -804,12 +800,21 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 			jQuery(this.options.searchResultContainer).append(this.compiledResultTemp(obj.response));
 		}
 
+		if(!this.currentNumberOfProducts && typeof this.options.onIntialResultLoad == "function") {
+			this.options.onIntialResultLoad();
+		}
+
+		if(this.currentNumberOfProducts && typeof this.options.onPageLoad == "function") {
+			this.options.onPageLoad();
+		}
+
 		this.totalNumberOfProducts = obj.response.numberOfProducts;
 
 		this.currentNumberOfProducts += obj.response.products.length;
 		
 		if(this.options.isClickNScroll)
 			jQuery(this.options.clickNScrollSelector)[(this.currentNumberOfProducts < this.totalNumberOfProducts) ? 'show' : 'hide']();
+
 	}
 	,paintFacets: function(obj){
 		if("error" in obj)
@@ -905,34 +910,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 			
 			if(v.length ==0)
 				continue;
-			// if (!i && !(k in urlParams)) {
-			// 	urlParams[k] = v
-			// }else if (i && !(k in urlParams)) {
-			// 	urlParams[k] = [];
 
-			// 	urlParams[k][i] = v;
-			// }else if (!i && (k in urlParams)){
-			// 	if (typeof urlParams[k] != "object"){
-			// 		var old = urlParams[k];
-
-			// 		urlParams[k] = [];
-
-			// 		Array.prototype.push.call(urlParams[k], old);
-			// 	}
-
-			// 	Array.prototype.push.call(urlParams[k], v);
-			// }else{
-			// 	if (typeof urlParams[k] != "object"){
-			// 		var old = urlParams[k];
-					
-			// 		urlParams[k] = [];
-
-			// 		Array.prototype.push.call(urlParams[k], old);
-			// 	}
-
-			// 	urlParams[k][i] = v;
-			// }
-			
 			if (!(k in urlParams)) {
 				urlParams[k] = v
 			}else{
