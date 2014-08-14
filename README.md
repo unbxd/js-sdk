@@ -391,7 +391,7 @@ Note: The HTML served by the server to client should have the minimum requred st
 			<div class="header-search lt">
 				<div class="search-input-button-holder clearfix">
 					<form method="GET" action="search.html">
-						<input type="text" class="search-input lt" id="search" value="" unbxdattr="sq" name="q" autocomplete="off"/>
+						<input type="text" class="search-input lt" id="search_input" value="" unbxdattr="sq" name="q" autocomplete="off"/>
 						<button type="submit" class="search-button lt" id="search_button" unbxdattr="sq_bt"></button>
 					</form>
 				</div>
