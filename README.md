@@ -4,6 +4,8 @@ unbxdSearch.js library can be used to integrated UNBXD search or browse on clien
 
 Note : _*This library makes use of jQuery selectors and Handlebars templates.*_
 
+_*Please find an example of implementation in **demo** folder.*_
+
 ##Usage
 Just include [unbxdSearch.js](//d21gpk1vhmjuf5.cloudfront.net/unbxdSearch.js) in HTML and include the configuration.
 
@@ -30,27 +32,23 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,searchQueryDisplay : '#search_title'
 		,searchQueryDisplayTemp : 'Search results for {{query}} - {{numberOfProducts}}'
 		,pageSize : 12
-		,searchResultSetTemp : '{{#products}}'
-			+'<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
+		,searchResultSetTemp : '{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
 				+'<div class="result-image-container">'
 					+'<span class="result-image-horizontal-holder">'
 						+'<img src="{{{image_url}}}" alt="{{{title}}}">'
 					+'</span>'
 				+'</div>'
-				+'<hr class="result-image-border">'
+				+'<div class="result-brand">{{{brand}}}</div>'
 				+'<div class="result-title">{{{title}}}</div>'
-				+'<div class="clearfix result-actions">'
-					+'<span class="result-price">USD {{price}}</span>'
-					+'<button class="btn rt unbxd-add-cart" unbxdparam_sku="{{uniqueId}}" unbxdattr="AddToCart">BUY NOW</button>'
+				+'<div class="result-price">'
+					+'${{price}}'
 				+'</div>'
-			+'</a></li>'
-		+'{{/products}}'
+			+'</a></li>{{/products}}'
 		,searchResultContainer : '#results_container'
 		,isClickNScroll: false
 		,clickNScrollSelector : ''
 		,isAutoScroll : true
-		,facetTemp : '<h2>Narrow result set</h2>'
-			+'{{#facets}}<div class="facet-block">'
+		,facetTemp : '{{#facets}}<div class="facet-block">'
 				+'<h3>{{name}}</h3>'
 				+'<div class="facet-values">'
 					+'<ul>'
@@ -80,7 +78,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,facetOnDeselect : function(el){
 		    //jQuery(el).removeClass('selected');
 		}
-		,facetMultiSelect : false
+		,facetMultiSelect : true
 		,selectedFacetTemp : '{{#each filters}}'
 			+'{{#each this}}'
 				+'<div class="selected-facet clearfix">'
@@ -139,8 +137,8 @@ Consider a normal search page with basic layout as shown in the figure below and
 	```
 - **pageSize** : The total number of results to be displayed in a single call. The value should be greater than ZERO. *It is suggested that the value to be multiple of number of columns (ex. if 3 columns then 15 or 18 or 21).*
 - **searchResultSetTemp** : Handlebars template for the repetitive result block to display the individual product. This can also be function which take a single argument (a JSON block as shown below).
-    
-    ![Basic search layout](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/result_block.png "Basic search layout")
+	
+	![Basic search layout](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/result_block.png "Basic search layout")
 
 	```javascript
 		//handlebars helper, to get first element from array
@@ -150,21 +148,19 @@ Consider a normal search page with basic layout as shown in the figure below and
 
 		//configuration
 		...
-		,searchResultSetTemp : '{{#products}}'
-			+'<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
+		,searchResultSetTemp : '{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
 				+'<div class="result-image-container">'
 					+'<span class="result-image-horizontal-holder">'
-						+'<img src="{{{getFirst imageUrl}}}" alt="{{{title}}}">'
+						+'<img src="{{{image_url}}}" alt="{{{title}}}">'
 					+'</span>'
 				+'</div>'
-				+'<hr class="result-image-border">'
+				+'<div class="result-brand">{{{brand}}}</div>'
 				+'<div class="result-title">{{{title}}}</div>'
-				+'<div class="clearfix result-actions">'
-					+'<span class="result-price">USD {{price}}</span>'
-					+'<button class="btn rt unbxd-add-cart" unbxdparam_sku="{{uniqueId}}" unbxdattr="AddToCart">BUY NOW</button>'
+				+'<div class="result-price">'
+					+'${{price}}'
 				+'</div>'
-			+'</a></li>'
-        ,searchResultContainer : '#results_container'
+			+'</a></li>{{/products}}'
+			,searchResultContainer : '#results_container'
 		...
 
 		//JSON used for this template
@@ -196,8 +192,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 	```javascript
 		//configuration
 		...
-		,facetTemp : '<h2>Narrow result set</h2>'
-			+'{{#facets}}<div class="facet-block">'
+		,facetTemp : '{{#facets}}<div class="facet-block">'
 				+'<h3>{{name}}</h3>'
 				+'<div class="facet-values">'
 					+'<ul>'
@@ -267,12 +262,12 @@ Consider a normal search page with basic layout as shown in the figure below and
 - **facetMultiSelect** : Set this value to **false**, incase if you dont want to enable multiselect on facets. It has a default value **true**.
 - **selectedFacetTemp** : Handlebars template for generating HTML to show the currently selected filters. Please check below image and code snippet.
 
-    ![Seleted filters block](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/selected_facet_layout.png "Selected filters block")
+	![Seleted filters block](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/selected_facet_layout.png "Selected filters block")
 
-    ```javascript
-        //configuration
-        ...
-        ,selectedFacetTemp : '{{#each filters}}'
+	```javascript
+		//configuration
+		...
+		,selectedFacetTemp : '{{#each filters}}'
 			+'{{#each this}}'
 				+'<div class="selected-facet clearfix">'
 					+'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
@@ -280,19 +275,19 @@ Consider a normal search page with basic layout as shown in the figure below and
 				+'</div>'
 			+'{{/each}}'
 		+'{{/each}}'
-        ...
-        
-        //JSON used for above template
-        {
-            "filters": {
-                "Category_fq": {
-                    //the name of parent property is duplicated for rendering purpose
-                    "Shirts": "Category_fq",
-                    "Shoes": "Category_fq"
-                }
-            }
-        }
-    ```
+		...
+
+		//JSON used for above template
+		{
+			"filters": {
+				"Category_fq": {
+					//the name of parent property is duplicated for rendering purpose
+					"Shirts": "Category_fq",
+					"Shoes": "Category_fq"
+				}
+			}
+		}
+	```
 - **selectedFacetContainerSelector** : jQuery selector of DOM element to place the generated HTML from **selectedFacetTemp**. (_Please refer to above image._)
 - **clearSelectedFacetsSelector** : jQuery selector of DOM element on click which removes all the selected filters.(_Please refer to above image._)
 - **removeSelectedFacetSelector** : jQuery selector of DOM element to remove respective filter.(_This is useful in removing single filter. Example **selected-facet-delete** from above template. Please refer to above image._)
@@ -388,7 +383,7 @@ Note: The HTML served by the server to client should have the minimum requred st
 <body>
 	<div class="header-container clearfix">
 		<div class="header row clearfix">
-			<div class="header-search lt">
+			<div class="header-search">
 				<div class="search-input-button-holder clearfix">
 					<form method="GET" action="search.html">
 						<input type="text" class="search-input lt" id="search_input" value="" unbxdattr="sq" name="q" autocomplete="off"/>
