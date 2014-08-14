@@ -4,7 +4,7 @@ unbxdSearch.js library can be used to integrated UNBXD search or browse on clien
 
 Note : _*This library makes use of jQuery selectors and Handlebars templates.*_
 
-_*Please find an example of implementation in **demo** folder.*_
+_*Please find an example of implementation in demo folder.*_
 
 ##Usage
 Just include [unbxdSearch.js](//d21gpk1vhmjuf5.cloudfront.net/unbxdSearch.js) in HTML and include the configuration.
