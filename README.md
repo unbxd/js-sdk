@@ -99,6 +99,8 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,setDefaultFilters : function(){}
 		,onIntialResultLoad : function(){}
 		,onPageLoad : function(){}
+		,onNoResult : function(obj){}
+		,fields : ['image_url','title','brand','price','uniqueId']
     });
 ```
 
@@ -365,6 +367,13 @@ Consider a normal search page with basic layout as shown in the figure below and
 	```
 - **onIntialResultLoad** : This option takes a function which will be executed after rendering of first result page.
 - **onPageLoad** : This option takes a function which will be executed after rendering of new result page from second page.
+- **onNoResult** : This option takes a function which will be executed if there are no results available.
+- **fields** : This is an array of all required fields for generating result template. This is helpful to load the results faster. An example implementation is below.
+	```javascript
+		...
+		,fields : ['image_url','title','brand','price','uniqueId']
+		...
+	```
 
 Note: The HTML served by the server to client should have the minimum requred structure. *Check the below image.*
 
