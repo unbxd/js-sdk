@@ -357,7 +357,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 		} 
 	```
 - **setDefaultFilters** : This option is a function which can be used to set default filters and/or sorts. An example implementation is below.
-    ```javascript
+	```javascript
 		...
 		,setDefaultFilters : function(){
 			//to make the results by default sorted by quantity
