@@ -71,9 +71,9 @@ Unbxd.setSearch.prototype.defaultOptions = {
 	,searchResultSetTemp : '' //function or handlebars template, register any helpers if needed
 	,isAutoScroll : false
 	,isClickNScroll : false
-	,clickNScrollSelector : ''
-	//,isPagination : false
-	//,clickNScrollElementSelector : '#load-more'
+	,isPagination : false
+	,setPagination : function(totalNumberOfProducts,pageSize,currentPage, clickCallback){}
+	,clickNScrollElementSelector : '#load-more'
 	,pageSize : 15
 	,facetMultiSelect : true
 	,facetContainerSelector : ''
@@ -102,6 +102,8 @@ Unbxd.setSearch.prototype.defaultOptions = {
 	,setDefaultFilters : function(){}
 	,fields : []
 	,onNoResult : function(obj){}
+	,noEncoding : false
+	,heightDiffToTriggerNextPage : 100
 };
 
 jQuery.extend(Unbxd.setSearch.prototype,{
@@ -229,7 +231,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
 					jQuery(self.options.searchResultContainer).html('');
 
-					self.clearFilters().setPage(1)
+					self.setPage(1)
 						.setPageSize(self.options.pageSize)
 
 					if(self.params.query)
@@ -276,7 +278,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
 		//click on somthing like "Load more results" to fetch next page
 		if(this.options.isClickNScroll){
-			jQuery(this.options.clickNScrollSelector).bind('click',function(e){
+			jQuery(this.options.clickNScrollElementSelector).bind('click',function(e){
 				e.preventDefault();
 
 				self.setPage(self.getPage() + 1);
@@ -290,7 +292,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 		if(this.options.isAutoScroll){
 			jQuery(window).scroll(function() {
 				var wind = jQuery(window),docu = jQuery(document);
-				if((wind.scrollTop()) > (docu.height()- window.innerHeight -100) && self.currentNumberOfProducts < self.totalNumberOfProducts && !self.isLoading){
+				if((wind.scrollTop()) > (docu.height()- window.innerHeight - self.options.heightDiffToTriggerNextPage) && self.currentNumberOfProducts < self.totalNumberOfProducts && !self.isLoading){
 					self.setPage(self.getPage() + 1)
 						.callResults(self.paintProductPage);
 				}
@@ -318,7 +320,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 		}
 
 		if(this.options.clearSelectedFacetsSelector.length > 0){
-			jQuery(this.options.clearSelectedFacetsSelector).bind('click',function(e){
+			jQuery('body').delegate(this.options.clearSelectedFacetsSelector,'click',function(e){
 				e.preventDefault();
 				
 				self.clearFilters().setPage(1)
@@ -357,6 +359,8 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 				if ( initialPop || !e.originalEvent.state) return;
 
 				var old_params = e.originalEvent.state;
+				
+				old_params.query = self.options.type == "search" ? self.options.sanitizeQueryString.call(self, old_params.query) : "";
 
 				self.reset();
 
@@ -372,9 +376,9 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 				var newhash = window.location.hash.substring(1);
 				if(newhash && newhash != self.currentHash){
 					self.reset();
-					var old_params = self._processURL(self.decode(newhash));
+					var old_params = self._processURL(self.options.noEncoding ? newhash : self.decode(newhash));
 
-					old_params.query = self.options.type == "search" ? self.options.sanitizeQueryString(old_params.query) : "";
+					old_params.query = self.options.type == "search" ? self.options.sanitizeQueryString.call(self,old_params.query) : "";
 
 					self.currentHash = newhash;
 
@@ -390,9 +394,9 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
 				if (newhash && newhash != self.currentHash) {
 					self.reset();
-					var old_params = self._processURL(self.decode(newhash));
+					var old_params = self._processURL(self.options.noEncoding ? newhash : self.decode(newhash));
 
-					old_params.query = self.options.type == "search" ? self.options.sanitizeQueryString(old_params.query) : "";
+					old_params.query = self.options.type == "search" ? self.options.sanitizeQueryString.call(self, old_params.query) : "";
 
 					self.currentHash = newhash;
 
@@ -431,7 +435,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 			delete this.params.filters[field][value];
 
 		if(Object.keys(this.params.filters[field]).length == 0)
-			delete delete this.params.filters[field];			
+			delete this.params.filters[field];			
 
 		return this;
 	}
@@ -479,7 +483,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 		return this;
 	}
 	,getHostNPath: function(){
-		return window.location.protocol + "//" + this.options.siteName + ".search.unbxdapi.com/" + this.options.APIKey + "/" + (this.options.type == "browse" ? "browse" : "search" )
+		return "//search.unbxdapi.com/"+ this.options.APIKey + "/" + this.options.siteName + "/"  + (this.options.type == "browse" ? "browse" : "search" )
 	}
 	,url : function(){
 		var host_path = this.getHostNPath();
@@ -549,7 +553,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 			url += '&fl=' + this.options.fields.join(',');
 		}
 
-		if(this.options.facetMultiSelects)
+		if(this.options.facetMultiSelect)
 			url += '&facet.multiselect=true';
 
 		url += '&indent=off';
@@ -584,11 +588,12 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 		,urlobj = self.url();
 
 		if(doPush){
+			var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
 			if(this.isHistory){
-				history.pushState(this.params,null,location.protocol + "//" + location.host + location.pathname + "?" + this.encode( urlobj.query ));
+				history.pushState(this.params,null,location.protocol + "//" + location.host + location.pathname + "?" + finalquery);
 			}else{
-				window.location.hash = this.encode( urlobj.query );
-				this.currentHash = this.encode( urlobj.query );
+				window.location.hash = finalquery;
+				this.currentHash = finalquery;
 			}
 		}
 
@@ -603,6 +608,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 		this.totalNumberOfProducts = 0;
 		this.currentNumberOfProducts = 0;
 		jQuery(this.options.spellCheck).hide();
+		jQuery(this.options.searchQueryDisplay).empty();
 		jQuery(this.options.searchResultContainer).empty();
 		jQuery(this.options.facetContainerSelector).empty();
 
@@ -622,6 +628,8 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 				,rows : 12
 			}
 		};
+
+		return this;
 	}
 	,_processURL: function(url){
 		var obj = typeof url == "string" ? this.getQueryParams(url) : url
@@ -748,12 +756,11 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 			return;
 
 		if(!obj.response.numberOfProducts){
+			this.reset();
+
 			this.options.onNoResult.call(this,obj);
 
-			this.totalNumberOfProducts = 0;
-			this.currentNumberOfProducts = 0;
-
-			return;
+			return this;
 		}
 
 		if(!this.compiledSearchQueryTemp)
@@ -786,7 +793,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 		this.currentNumberOfProducts += obj.response.products.length;
 		
 		if(this.options.isClickNScroll)
-			jQuery(this.options.clickNScrollSelector)[(this.currentNumberOfProducts < this.totalNumberOfProducts) ? 'show' : 'hide']();
+			jQuery(this.options.clickNScrollElementSelector)[(this.currentNumberOfProducts < this.totalNumberOfProducts) ? 'show' : 'hide']();
 
 	}
 	,paintFacets: function(obj){
@@ -809,6 +816,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 				,type : facets[x]['type']
 				,selected : []
 				,unselected : []
+				,unordered : []
 			};
 			
 			for(var i = 0, len = facets[x]['values'].length/2; i < len;i++){
@@ -820,11 +828,14 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 				isSelected = x in self.params.filters && facetVal in self.params.filters[x] && self.params.filters[x][facetVal] == x ? true : false;
 
 				singlefacet[isSelected ? "selected" : "unselected" ].push({value : facetVal , count : facets[x]['values'][2 * i + 1]});
+				singlefacet.unordered.push({value : facetVal , count : facets[x]['values'][2 * i + 1], isSelected : isSelected});
 			}
 
-			if((singlefacet.selected.length + singlefacet.unselected.length) > 0)
+			if((singlefacet.unordered.length) > 0)
 				newfacets.push(singlefacet);
 		}
+
+		console.log(newfacets);
 
 		if(this.getClass(this.options.facetTemp) == 'Function'){
 			this.options.facetTemp.call(this,{facets : newfacets});
@@ -841,7 +852,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 			this.options.onFacetLoad.call(this);
 		}
 
-		if(this.options.getFacetStats.length && typeof this.options.processFacetStats == "function" && "stats" in obj){
+		if(this.options.getFacetStats.length && typeof this.options.processFacetStats == "function" && "stats" in obj && obj.stats[this.options.getFacetStats] != null){
 			
 			obj.stats[this.options.getFacetStats].values = {min : this.options.getFacetStats in this.params.ranges && this.params.ranges[this.options.getFacetStats].lb != "*" ? this.params.ranges[this.options.getFacetStats].lb : obj.stats[this.options.getFacetStats].min
 				,max : this.options.getFacetStats in this.params.ranges && this.params.ranges[this.options.getFacetStats].ub != "*" ? this.params.ranges[this.options.getFacetStats].ub : obj.stats[this.options.getFacetStats].max};
@@ -852,11 +863,13 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 	,paintSelectedFacets : function(){
 		var selFacetKeys = Object.keys(this.params.filters);
 		
-		if(selFacetKeys.length && this.options.selectedFacetTemp && this.options.selectedFacetContainerSelector){
-			if(!this.compiledSelectedFacetTemp)
-				this.compiledSelectedFacetTemp = Handlebars.compile(this.options.selectedFacetTemp);
+		if(selFacetKeys.length){
+			if(this.options.selectedFacetTemp  && this.options.selectedFacetContainerSelector){
+				if(!this.compiledSelectedFacetTemp)
+					this.compiledSelectedFacetTemp = Handlebars.compile(this.options.selectedFacetTemp);
 
-			jQuery(this.options.selectedFacetContainerSelector).html(this.compiledSelectedFacetTemp(this.params));
+				jQuery(this.options.selectedFacetContainerSelector).html(this.compiledSelectedFacetTemp(this.params));
+			}
 			jQuery(this.options.selectedFacetHolderSelector).show();
 		}else{
 			jQuery(this.options.selectedFacetContainerSelector).empty();

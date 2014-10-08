@@ -124,8 +124,7 @@ Unbxd.search = function(secure){
 
 	this.url = function(){
 		var url = (secure ? "https" : "http")
-					+ "://" + UnbxdSiteName + ".search.unbxdapi.com/" + UnbxdAPIKey
-					+ "/" + this.ruleSet + "?format=json";
+					+ "://search.unbxdapi.com/" + UnbxdAPIKey + "/" + UnbxdSiteName + "/" + this.ruleSet + "?format=json";
 		if(this.ruleSet == 'search' && this['query'] != undefined){
 			url += '&q=' + encodeURIComponent(this.query);
 		}else if(this.ruleSet == 'browse' && this['categoryId'] != undefined){
