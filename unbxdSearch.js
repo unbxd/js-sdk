@@ -835,8 +835,6 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 				newfacets.push(singlefacet);
 		}
 
-		console.log(newfacets);
-
 		if(this.getClass(this.options.facetTemp) == 'Function'){
 			this.options.facetTemp.call(this,{facets : newfacets});
 		}else{
