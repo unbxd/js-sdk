@@ -301,7 +301,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 		if(this.options.isAutoScroll){
 			jQuery(window).scroll(function() {
 				var wind = jQuery(window),docu = jQuery(document);
-				if((wind.scrollTop()) > (docu.height() - wind.innerHeight() - self.options.heightDiffToTriggerNextPage) && self.currentNumberOfProducts < self.totalNumberOfProducts && !self.isLoading){
+				if((wind.scrollTop()) > (docu.height() - wind.height() - self.options.heightDiffToTriggerNextPage) && self.currentNumberOfProducts < self.totalNumberOfProducts && !self.isLoading){
 					self.setPage(self.getPage() + 1)
 						.callResults(self.paintProductPage);
 				}
