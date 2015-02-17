@@ -105,6 +105,9 @@ Unbxd.setSearch.prototype.defaultOptions = {
 	,noEncoding : false
 	,heightDiffToTriggerNextPage : 100
 	,customReset : function(){}
+    ,bannerSelector: ""
+    ,bannerTemp: '<a href="{{landingUrl}}"><img src="{{imageUrl}}"/></a>'
+    ,bannerCount: 0
 };
 
 jQuery.extend(Unbxd.setSearch.prototype,{
@@ -734,6 +737,10 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
 		this.currentNumberOfProducts = 0;
 		
+        if (obj.hasOwnProperty('banner')){
+            this.paintBanners(obj);
+        }
+            
 		if(obj.hasOwnProperty('didYouMean')){
 			if(obj.response.numberOfProducts > this.options.pageSize){
 				jQuery(this.options.spellCheck).hide();
@@ -820,6 +827,22 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 			jQuery(this.options.clickNScrollElementSelector)[(this.currentNumberOfProducts < this.totalNumberOfProducts) ? 'show' : 'hide']();
 
 	}
+    ,paintBanners : function(obj){
+        if("error" in obj)
+            return ;
+        if(this.options.bannerCount == 0)
+            return ;
+        var banner = obj.banner
+        var counter = 0
+        this.compiledBannerTemp = Handlebars.compile(this.options.bannerTemp)
+        for(var ban in banner.banners){
+            if (counter >= this.options.bannerCount){
+                break;
+            }
+            this.options.bannerSelector.length && jQuery(this.options.bannerSelector).append(this.compiledBannerTemp({landingUrl:banner.banners[ban].landingUrl, imageUrl :banner.banners[ban].imageUrl}))
+            counter ++;
+        }
+    }
 	,paintFacets: function(obj){
 		if("error" in obj)
 			return;
