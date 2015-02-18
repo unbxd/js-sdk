@@ -739,6 +739,8 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 		
         if (obj.hasOwnProperty('banner')){
             this.paintBanners(obj);
+        }else{
+            this.options.bannerSelector.length && jQuery(this.options.bannerSelector).empty();
         }
             
 		if(obj.hasOwnProperty('didYouMean')){
