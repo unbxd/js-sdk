@@ -172,7 +172,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
             this.callResults(this.paintResultSet);
         }else{
-            var cur_url = this.get_url_substring() ? this.get_url_substring().toLowerCase() : ""
+            var cur_url = window.location.hash.substring(1) || window.location.search.substring(1)
                 ,urlqueryparams = this.getQueryParams(cur_url)
                 ,decodedParams = this.getQueryParams(this.decode(cur_url))
                 ,queryparamcount = Object.keys(urlqueryparams).length
@@ -499,9 +499,6 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 }
 ,getHostNPath: function(){
     return "//search.unbxdapi.com/"+ this.options.APIKey + "/" + this.options.siteName + "/"  + (this.options.type == "browse" ? "browse" : "search" )
-}
-,get_url_substring: function(){
-    return window.location.hash.substring(1) || window.location.search.substring(1);
 }
 ,url : function(){
     var host_path = this.getHostNPath();
@@ -932,7 +929,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
         r = /([^&=]+)=?([^&]*)/g
             ,urlParams = {};
 
-    q = q || this.get_url_substring();
+    q = q || window.location.hash.substring(1) || window.location.search.substring(1);
 
     while (e = r.exec(q)) {
         var e1 = e[1].indexOf("[")
