@@ -772,6 +772,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
          this.paintProductPage(obj);
          facetsAlso && this.paintFacets(obj);
      }
+ }
 ,paintOnlyResultSet : function(obj){
     jQuery(this.options.searchResultContainer).empty();
     this.paintProductPage(obj);
