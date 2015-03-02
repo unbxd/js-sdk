@@ -744,28 +744,34 @@ jQuery.extend(Unbxd.setSearch.prototype,{
     }
 
     if(obj.hasOwnProperty('didYouMean')){
-        if(obj.response.numberOfProducts > this.options.pageSize){
-            jQuery(this.options.spellCheck).hide();
-            jQuery(this.options.searchResultContainer).empty();
-            this.paintProductPage(obj);
-            facetsAlso && this.paintFacets(obj);
-        }else{
-            this.params.query = obj.didYouMean[0].suggestion;
+      if(obj.response.numberOfProducts == 0 ) { //> this.options.pageSize){
+          this.params.query = obj.didYouMean[0].suggestion;
 
-            if(!this.compiledSpellCheckTemp)
-                this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
+             if(!this.compiledSpellCheckTemp)
+                  this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
 
-            jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
+             jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
 
-            facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
-        }
-    }else{
-        jQuery(this.options.spellCheck).hide();
-        jQuery(this.options.searchResultContainer).empty();
-        this.paintProductPage(obj);
-        facetsAlso && this.paintFacets(obj);
-    }
-}
+           facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
+
+         }
+         else{
+
+             this.params.query = obj.searchMetaData.queryParams.q;   //obj.didYouMean[0].suggestion;
+
+             if(!this.compiledSpellCheckTemp)
+                  this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
+
+             jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
+
+             facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
+         }
+     }else{
+         jQuery(this.options.spellCheck).hide();
+         jQuery(this.options.searchResultContainer).empty();
+         this.paintProductPage(obj);
+         facetsAlso && this.paintFacets(obj);
+     }
 ,paintOnlyResultSet : function(obj){
     jQuery(this.options.searchResultContainer).empty();
     this.paintProductPage(obj);
