@@ -7,8 +7,8 @@ if (!Function.prototype.bind) {
             throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
         }
 
-        var aArgs = Array.prototype.slice.call(arguments, 1), 
-            fToBind = this, 
+        var aArgs = Array.prototype.slice.call(arguments, 1),
+            fToBind = this,
             fNOP = function () {},
             fBound = function () {
                 return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
@@ -78,7 +78,7 @@ Unbxd.setSearch.prototype.defaultOptions = {
         ,facetMultiSelect : true
         ,facetContainerSelector : ''
         ,facetCheckBoxSelector : ''
-        ,selectedFacetTemp : '{{#each filters}}' 
+        ,selectedFacetTemp : '{{#each filters}}'
         +'<ol>'
         +'<li>'
         +'<span class="label">{{prepareFacetName @key}}:</span>'
@@ -126,7 +126,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 ,sort : {}
 ,categoryId : ""
     ,extra : {
-        wt : "json"
+        format : "json"
     ,page : 1
     ,rows : 0
     }
@@ -447,7 +447,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
         delete this.params.filters[field][value];
 
     if(Object.keys(this.params.filters[field]).length == 0)
-        delete this.params.filters[field];			
+        delete this.params.filters[field];
 
     return this;
 }
@@ -565,7 +565,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
     url += this.options.getFacetStats.length > 0 ? "&stats=" + this.options.getFacetStats : "";
 
     if(this.options.fields.length){
-        url += '&fl=' + this.options.fields.join(',');
+        url += '&fields=' + this.options.fields.join(',');
     }
 
     if(this.options.facetMultiSelect)
@@ -639,7 +639,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
         ,ranges : {}
         ,categoryId : ""
             ,extra : {
-                wt : "json"
+                format : "json"
                     ,page : 1
                     ,rows : 12
             }
