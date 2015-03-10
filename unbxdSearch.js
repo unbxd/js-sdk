@@ -936,6 +936,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 ,getQueryParams : function (q){
     var e,
         d = function (s) { return decodeURIComponent(s).replace(/\+/g, " ").trim(); },
+        //splits on equals
         r = /([^&=]+)=?([^&]*)/g
             ,urlParams = {};
 
@@ -943,11 +944,18 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
     while (e = r.exec(q)) {
         var e1 = e[1].indexOf("[")
-            ,k = e1 == "-1" ? e[1] : e[1].slice(0, e1)
+            //first group of regex match
+            ,k = e1 == "-1" ? e[1] : e[1].slice(0, e1) 
             ,i = e1 != "-1" ? d(e[1].slice(e1+1, e[1].indexOf("]", e1))) : ""
             ,v = d(e[2]);
 
-        if(v.length ==0)
+        /*
+         continues the loop and does not add any key,value to the urlParams
+         object. check if first group matches to be contain words(\w)
+         fixes an issue for capital case seen from allianceonline where the 
+         queries were writ0035/WRIT0035
+        */
+        if( v.length == 0 || !(/\w+/g.exec(k)) )
             continue;
 
         if (!(k in urlParams)) {
