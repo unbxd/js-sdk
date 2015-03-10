@@ -32,43 +32,43 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,searchQueryDisplay : '#search_title'
 		,searchQueryDisplayTemp : 'Search results for {{query}} - {{numberOfProducts}}'
 		,pageSize : 12
-		,searchResultSetTemp : '{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
-				+'<div class="result-image-container">'
-					+'<span class="result-image-horizontal-holder">'
-						+'<img src="{{{image_url}}}" alt="{{{title}}}">'
-					+'</span>'
-				+'</div>'
-				+'<div class="result-brand">{{{brand}}}</div>'
-				+'<div class="result-title">{{{title}}}</div>'
-				+'<div class="result-price">'
-					+'${{price}}'
-				+'</div>'
-			+'</a></li>{{/products}}'
+		,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
+				,'<div class="result-image-container">'
+					,'<span class="result-image-horizontal-holder">'
+						,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+					,'</span>'
+				,'</div>'
+				,'<div class="result-brand">{{{brand}}}</div>'
+				,'<div class="result-title">{{{title}}}</div>'
+				,'<div class="result-price">'
+					,'${{price}}'
+				,'</div>'
+			,'</a></li>{{/products}}'].join('')
 		,searchResultContainer : '#results_container'
 		,isClickNScroll: false
 		,clickNScrollSelector : ''
 		,isAutoScroll : true
-		,facetTemp : '{{#facets}}<div class="facet-block">'
-				+'<h3>{{name}}</h3>'
-				+'<div class="facet-values">'
-					+'<ul>'
-						+'{{#selected}}'
-						+'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
-							+'<label for="{{../facet_name}}_{{value}}">'
-								+'<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue value}} ({{count}})'
-							+'</label>'
-						+'</li>'
-						+'{{/selected}}'
-						+'{{#unselected}}'
-						+'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
-							+'<label for="{{../facet_name}}_{{value}}">'
-								+'<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue value}} ({{count}})'
-							+'</label>'
-						+'</li>'
-						+'{{/unselected}}'
-					+'</ul>'
-				+'</div>'
-			+'</div>{{/facets}}'
+		,facetTemp : ['{{#facets}}<div class="facet-block">'
+				,'<h3>{{name}}</h3>'
+				,'<div class="facet-values">'
+					,'<ul>'
+						,'{{#selected}}'
+						,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
+							,'<label for="{{../facet_name}}_{{value}}">'
+								,'<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue value}} ({{count}})'
+							,'</label>'
+						,'</li>'
+						,'{{/selected}}'
+						,'{{#unselected}}'
+						,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
+							,'<label for="{{../facet_name}}_{{value}}">'
+								,'<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue value}} ({{count}})'
+							,'</label>'
+						,'</li>'
+						,'{{/unselected}}'
+					,'</ul>'
+				,'</div>'
+			,'</div>{{/facets}}'].join('')
 		,facetContainerSelector : "#facets_container"
 		,facetCheckBoxSelector : "input[type='checkbox']"
 		,facetElementSelector : "label"
@@ -79,14 +79,14 @@ Consider a normal search page with basic layout as shown in the figure below and
 		    //jQuery(el).removeClass('selected');
 		}
 		,facetMultiSelect : true
-		,selectedFacetTemp : '{{#each filters}}'
-			+'{{#each this}}'
-				+'<div class="selected-facet clearfix">'
-					+'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
-					+'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
-				+'</div>'
-			+'{{/each}}'
-		+'{{/each}}'
+		,selectedFacetTemp : ['{{#each filters}}'
+			,'{{#each this}}'
+				,'<div class="selected-facet clearfix">'
+					,'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
+					,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
+				,'</div>'
+			,'{{/each}}'
+		,'{{/each}}'].join('')
 		,selectedFacetContainerSelector : "#selected_facets"
 		,clearSelectedFacetsSelector : "#clear_all_selected_facets"
 		,removeSelectedFacetSelector : ".selected-facet-delete"
@@ -150,18 +150,18 @@ Consider a normal search page with basic layout as shown in the figure below and
 
 		//configuration
 		...
-		,searchResultSetTemp : '{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
-				+'<div class="result-image-container">'
-					+'<span class="result-image-horizontal-holder">'
-						+'<img src="{{{image_url}}}" alt="{{{title}}}">'
-					+'</span>'
-				+'</div>'
-				+'<div class="result-brand">{{{brand}}}</div>'
-				+'<div class="result-title">{{{title}}}</div>'
-				+'<div class="result-price">'
-					+'${{price}}'
-				+'</div>'
-			+'</a></li>{{/products}}'
+		,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
+				,'<div class="result-image-container">'
+					,'<span class="result-image-horizontal-holder">'
+						,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+					,'</span>'
+				,'</div>'
+				,'<div class="result-brand">{{{brand}}}</div>'
+				,'<div class="result-title">{{{title}}}</div>'
+				,'<div class="result-price">'
+					,'${{price}}'
+				,'</div>'
+			,'</a></li>{{/products}}'].join('')
 			,searchResultContainer : '#results_container'
 		...
 
@@ -194,27 +194,27 @@ Consider a normal search page with basic layout as shown in the figure below and
 	```javascript
 		//configuration
 		...
-		,facetTemp : '{{#facets}}<div class="facet-block">'
-				+'<h3>{{name}}</h3>'
-				+'<div class="facet-values">'
-					+'<ul>'
-						+'{{#selected}}'
-						+'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
-							+'<label for="{{../facet_name}}_{{value}}">'
-								+'<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue value}} ({{count}})'
-							+'</label>'
-						+'</li>'
-						+'{{/selected}}'
-						+'{{#unselected}}'
-						+'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
-							+'<label for="{{../facet_name}}_{{value}}">'
-								+'<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue value}} ({{count}})'
-							+'</label>'
-						+'</li>'
-						+'{{/unselected}}'
-					+'</ul>'
-				+'</div>'
-			+'</div>{{/facets}}'
+		,facetTemp : ['{{#facets}}<div class="facet-block">'
+				,'<h3>{{name}}</h3>'
+				,'<div class="facet-values">'
+					,'<ul>'
+						,'{{#selected}}'
+						,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
+							,'<label for="{{../facet_name}}_{{value}}">'
+								,'<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue value}} ({{count}})'
+							,'</label>'
+						,'</li>'
+						,'{{/selected}}'
+						,'{{#unselected}}'
+						,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
+							,'<label for="{{../facet_name}}_{{value}}">'
+								,'<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue value}} ({{count}})'
+							,'</label>'
+						,'</li>'
+						,'{{/unselected}}'
+					,'</ul>'
+				,'</div>'
+			,'</div>{{/facets}}'].join('')
 		...
 
 		//JSON used for generation is
@@ -269,14 +269,14 @@ Consider a normal search page with basic layout as shown in the figure below and
 	```javascript
 		//configuration
 		...
-		,selectedFacetTemp : '{{#each filters}}'
-			+'{{#each this}}'
-				+'<div class="selected-facet clearfix">'
-					+'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
-					+'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
-				+'</div>'
-			+'{{/each}}'
-		+'{{/each}}'
+		,selectedFacetTemp : ['{{#each filters}}'
+			,'{{#each this}}'
+				,'<div class="selected-facet clearfix">'
+					,'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
+					,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
+				,'</div>'
+			,'{{/each}}'
+		,'{{/each}}'].join('')
 		...
 
 		//JSON used for above template

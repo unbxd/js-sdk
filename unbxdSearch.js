@@ -78,17 +78,17 @@ Unbxd.setSearch.prototype.defaultOptions = {
         ,facetMultiSelect : true
         ,facetContainerSelector : ''
         ,facetCheckBoxSelector : ''
-        ,selectedFacetTemp : '{{#each filters}}'
-        +'<ol>'
-        +'<li>'
-        +'<span class="label">{{prepareFacetName @key}}:</span>'
-        +'{{#each this}}'
-        +'<div class="refineSect">{{@key}}<a href="#" class="btn-remove"></a>'
-        +'</div>'
-        +'{{/each}}'
-        +'</li>'
-        + '</ol>'
-        +'{{/each}}'
+        ,selectedFacetTemp : ['{{#each filters}}'
+        ,'<ol>'
+        ,'<li>'
+        ,'<span class="label">{{prepareFacetName @key}}:</span>'
+        ,'{{#each this}}'
+        ,'<div class="refineSect">{{@key}}<a href="#" class="btn-remove"></a>'
+        ,'</div>'
+        ,'{{/each}}'
+        ,'</li>'
+        ,'</ol>'
+        ,'{{/each}}'].join('')
         ,selectedFacetContainerSelector : ""
         ,clearSelectedFacetsSelector : ""
         ,removeSelectedFacetSelector : ""
@@ -172,7 +172,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
             this.callResults(this.paintResultSet);
         }else{
-            var cur_url = window.location.hash.substring(1) || window.location.search.substring(1)
+            var cur_url = this.getUrlSubstring()
                 ,urlqueryparams = this.getQueryParams(cur_url)
                 ,decodedParams = this.getQueryParams(this.decode(cur_url))
                 ,queryparamcount = Object.keys(urlqueryparams).length
@@ -499,6 +499,9 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 }
 ,getHostNPath: function(){
     return "//search.unbxdapi.com/"+ this.options.APIKey + "/" + this.options.siteName + "/"  + (this.options.type == "browse" ? "browse" : "search" )
+}
+,getUrlSubstring: function(){
+    return window.location.hash.substring(1) || window.location.search.substring(1);
 }
 ,url : function(){
     var host_path = this.getHostNPath();
@@ -936,7 +939,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
         r = /([^&=]+)=?([^&]*)/g
             ,urlParams = {};
 
-    q = q || window.location.hash.substring(1) || window.location.search.substring(1);
+    q = q || this.getUrlSubstring();
 
     while (e = r.exec(q)) {
         var e1 = e[1].indexOf("[")
