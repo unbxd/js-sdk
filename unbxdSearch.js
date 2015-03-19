@@ -314,7 +314,11 @@ jQuery.extend(Unbxd.setSearch.prototype,{
     //click on facet checkboxes
     if(this.options.facetContainerSelector.length > 0){
         jQuery(this.options.facetContainerSelector).delegate(self.options.facetCheckBoxSelector,'change',function(e){
-            var box = jQuery(this),el = box.parents(self.options.facetElementSelector);
+            var box = jQuery(this),
+		el = box.parents(self.options.facetElementSelector),
+		facetName = box.attr('unbxdParam_facetName'),
+		facetValue = box.attr('unbxdParam_facetValue'),
+		vals = facetValue.split(' TO ');
 
             if(box.is(':checked') && typeof self.options.facetOnSelect == "function"){
                 self.options.facetOnSelect(el);
@@ -324,10 +328,10 @@ jQuery.extend(Unbxd.setSearch.prototype,{
                 self.options.facetOnDeselect(el);
             }
 
-	    if(box.attr("unbxdParam_facetType") === 'facet_ranges')
-		self[box.is(':checked') ? 'addRangeFilter' : 'removeRangeFilter'](box.attr("unbxdParam_facetName"), box.attr("unbxdParam_facetValue").split(' TO ')[0], box.attr("unbxdParam_facetValue").split(' TO ')[1]);
+	    if(vals.length > 1)
+		self[box.is(':checked') ? 'addRangeFilter' : 'removeRangeFilter'](facetName, vals[0], vals[1]);
 	    else
-		self[box.is(':checked') ? 'addFilter' : 'removeFilter'](box.attr("unbxdParam_facetName"),box.attr("unbxdParam_facetValue"));
+		self[box.is(':checked') ? 'addFilter' : 'removeFilter'](facetName, facetValue);
 
             self.setPage(1)
             .callResults(self.paintResultSet,true);
@@ -910,10 +914,10 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 	    
 	} else {
 	    for(var i = 0, len = facets[x]['values']['counts'].length/2; i < len; i++){
-		facetValStart = facets[x]['values']['counts'][2 * i],
-		facetValEnd = (facets[x]['values']['counts'][2 * i + 2] ? facets[x]['values']['counts'][2 * i + 2] : facets[x]['values'].end.toString());
-
+		facetValStart = parseFloat(facets[x]['values']['counts'][2 * i]).toString();
+		facetValEnd = (parseFloat(facetValStart) + facets[x]['values'].gap).toString();
 		var y = facetValStart + ' TO ' + facetValEnd;
+
 		isSelected = x in self.params.ranges && y in self.params.ranges[x] && self.params.ranges[x][y]['lb'] == facetValStart && self.params.ranges[x][y]['ub'] == facetValEnd ? true : false;
 
 		singlefacet[isSelected ? "selected" : "unselected" ].push({begin: facetValStart, end: facetValEnd, count: facets[x]['values']['counts'][2 * i + 1], value: y});
