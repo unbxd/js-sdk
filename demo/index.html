@@ -49,7 +49,7 @@
         Copyright &copy; 2014 Unbxd
     </div>
     <script type="text/javascript">
-    jQuery(function(){
+    
         //search configuration here
         Handlebars.registerHelper('getIndex', function(index){
             var total = $('#results_container li').length;
@@ -57,8 +57,8 @@
         });
 
         window.searchobj = new Unbxd.setSearch({
-            siteName : 'demosite-u1407617955968'
-            ,APIKey : '64a4a2592a648ac8415e13c561e44991'
+            siteName : 'allianceonline_co_uk-u1423569528226'
+	    ,APIKey : 'f2ada89f21e1345bc660786663fb1a09'
             ,type : 'search'
             ,getCategoryId : ''
             ,inputSelector : '#search_input'
@@ -67,8 +67,9 @@
             ,spellCheckTemp : 'Did you mean : {{suggestion}} ?'
             ,searchQueryDisplay : '#search_title'
             ,searchQueryDisplayTemp : 'Search results for {{query}} - {{numberOfProducts}}'
-            ,pageSize : 12
-            ,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
+        ,pageSize : 12
+	,noEncoding: false
+        ,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
                     ,'<div class="result-image-container">'
                         ,'<span class="result-image-horizontal-holder">'
                             ,'<img src="{{{image_url}}}" alt="{{{title}}}">'
@@ -84,37 +85,60 @@
             ,isClickNScroll: false
             ,clickNScrollSelector : ''
             ,isAutoScroll : true
-            ,facetTemp : ['{{#facets}}<div class="facet-block">'
-                    ,'<div class="facet-title">{{name}}</div>'
-                    ,'<div class="facet-values">'
-                        ,'<ul>'
-                            ,'{{#selected}}'
-                            ,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
-                                ,'<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">'
-                                ,'<label for="{{../facet_name}}_{{value}}">'
-                                    ,'{{prepareFacetValue value}} ({{count}})'
-                                ,'</label>'
-                            ,'</li>'
-                            ,'{{/selected}}'
-                            ,'{{#unselected}}'
-                            ,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
-                                ,'<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">'
-                                ,'<label for="{{../facet_name}}_{{value}}">'
-                                    ,'{{prepareFacetValue value}} ({{count}})'
-                                ,'</label>'
-                            ,'</li>'
-                            ,'{{/unselected}}'
-                        ,'</ul>'
-                    ,'</div>'
-                ,'</div>{{/facets}}'
-                ,'<div class="facet-block">'
-                ,'<div class="facet-title">PRICE</div>'
-                    ,'<div class="facet-values">'
-                        ,'<div id="slider-range-max">'
-                        ,'</div>'
-                        ,'<div id="amount" class="clearfix"><div class="lt"></div><div class="rt"></div></div>'
-                    ,'</div>'
-                ,'</div>'].join('')
+        ,facetTemp : ['{{!--<div class="facet-block">'
+	,'<div class="facet-title">PRICE</div>'
+	,'<div class="facet-values">'
+	  ,'<div id="slider-range-max">'
+	    ,'</div>'
+	    ,'<div id="amount" class="clearfix"><div class="lt"></div><div class="rt"></div></div>'
+	  ,'</div>'
+	,'</div>--}}'
+	,'{{#facets}}'
+	,'<div class="facet-block">'
+        ,'<div class="facet-title">{{name}}</div>'
+        ,'<div class="facet-values">'
+          ,'<ul>'
+            ,'{{#selected}}'
+            ,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
+              ,'<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">'
+              ,'<label for="{{../facet_name}}_{{value}}">'
+                ,'{{prepareFacetValue value}} ({{count}})'
+                ,'</label>'
+              ,'</li>'
+            ,'{{/selected}}'
+            ,'{{#unselected}}'
+            ,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
+              ,'<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">'
+              ,'<label for="{{../facet_name}}_{{value}}">'
+                ,'{{prepareFacetValue value}} ({{count}})'
+                ,'</label>'
+              ,'</li>'
+            ,'{{/unselected}}'
+            ,'</ul>'
+          ,'</div>'
+        ,'</div>{{/facets}}'
+	,'{{#rangefacets}}<div class="facet-block">'
+        ,'<div class="facet-title">{{name}}</div>'
+        ,'<div class="facet-values">'
+          ,'<ul>'
+	    ,'{{#selected}}'
+	    ,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" unbxdParam_facetType="{{../type}}">'
+	      ,'<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" '
+		       ,' unbxdParam_facetType="{{../type}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">'
+	      ,'<label for="{{../facet_name}}_{{value}}">'
+		,'{{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})</label></li>'
+	    ,'{{/selected}}'
+            ,' {{#unselected}}'
+	    ,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" unbxdParam_facetType="{{../type}}">'
+	      ,'<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" '
+		       ,' unbxdParam_facetType="{{../type}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">'
+	      ,'<label for="{{../facet_name}}_{{value}}">'
+		,'{{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})</label></li>'
+	    ,'{{/unselected}}'
+            ,'</ul>'
+          ,'</div>'
+        ,'</div>'
+	,'{{/rangefacets}}'].join('')
             ,facetContainerSelector : "#facets_container"
             ,facetCheckBoxSelector : "input[type='checkbox']"
             ,facetElementSelector : "label"
@@ -138,8 +162,8 @@
             ,loaderSelector : ""//".result-loader"
             ,onFacetLoad : function(){}
             ,sanitizeQueryString : function(q){ return q;}
-            ,loaderSelector : ".result-loader"
-            ,getFacetStats : "price"
+        ,loaderSelector : ".result-loader"
+        /*,getFacetStats : "price"
             ,processFacetStats : function(obj){
                 var divs = $( "#amount div");
 
@@ -165,12 +189,12 @@
                         .callResults(searchobj.paintOnlyResultSet,true);
                     }
                 });
-            }
+            }*/
             ,setDefaultFilters : function(){}
             ,onIntialResultLoad : function(){}
             ,onPageLoad : function(){}
         });
-    });
+    
     </script>
 </body>
 </html>

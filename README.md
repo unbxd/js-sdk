@@ -68,7 +68,28 @@ Consider a normal search page with basic layout as shown in the figure below and
 						,'{{/unselected}}'
 					,'</ul>'
 				,'</div>'
-			,'</div>{{/facets}}'].join('')
+			,'</div>{{/facets}}'
+			,{{#rangefacets}}<div class="facet-block"'
+			,'<h3>{{name}}</h3>'
+				,'<div class="facet-values">'
+					,'<ul>'
+						,'{{#selected}}'
+						,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
+							,'<label for="{{../facet_name}}_{{value}}">'
+								,'<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})'
+							,'</label>'
+						,'</li>'
+						,'{{/selected}}'
+						,'{{#unselected}}'
+						,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
+							,'<label for="{{../facet_name}}_{{value}}">'
+								,'<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})'
+							,'</label>'
+						,'</li>'
+						,'{{/unselected}}'
+					,'</ul>'
+				,'</div>'
+			,'</div>{{/rangefacets}}'].join('')
 		,facetContainerSelector : "#facets_container"
 		,facetCheckBoxSelector : "input[type='checkbox']"
 		,facetElementSelector : "label"
@@ -214,7 +235,28 @@ Consider a normal search page with basic layout as shown in the figure below and
 						,'{{/unselected}}'
 					,'</ul>'
 				,'</div>'
-			,'</div>{{/facets}}'].join('')
+			,'</div>{{/facets}}'
+			,{{#rangefacets}}<div class="facet-block"'
+			,'<h3>{{name}}</h3>'
+				,'<div class="facet-values">'
+					,'<ul>'
+						,'{{#selected}}'
+						,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
+							,'<label for="{{../facet_name}}_{{value}}">'
+								,'<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})'
+							,'</label>'
+						,'</li>'
+						,'{{/selected}}'
+						,'{{#unselected}}'
+						,'<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">'
+							,'<label for="{{../facet_name}}_{{value}}">'
+								,'<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}"> {{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})'
+							,'</label>'
+						,'</li>'
+						,'{{/unselected}}'
+					,'</ul>'
+				,'</div>'
+			,'</div>{{/rangefacets}}'].join('')
 		...
 
 		//JSON used for generation is
@@ -249,7 +291,36 @@ Consider a normal search page with basic layout as shown in the figure below and
 						}
 					]
 				}
-			]
+			],
+			"rangefacets": [//this is an array
+			     {
+					"name": "Price", //to display title for range facet
+					"facet_name": "Price_fq", //actual internal range facet name
+					"type": "facet_ranges",
+					"selected": [
+						  {
+						    "value": "200 TO 300",
+						    "begin": "200",
+						    "end": "300",
+						    "count": 352
+						  }
+					],
+					unselected: [
+						  {
+						    "value": "0 TO 100",
+						    "begin": "0",
+						    "end": "100",
+						    "count": 44
+						  },
+						  {
+						    "value": "100 TO 200",
+						    "begin": "100",
+						    "end": "200",
+						    "count": 74
+						  }
+					]
+			     }
+			 ]
 		}
 	```
 	Note: 

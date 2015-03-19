@@ -260,7 +260,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
                     if(typeof self.options.setDefaultFilters == "function")
                 self.options.setDefaultFilters.call(self);
 
-            self.clearFilters().setPage(1)
+            self.clearFilters(true).setPage(1)
                 .setPageSize(self.options.pageSize)
 
                 if(self.params.query)
@@ -278,7 +278,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
                     jQuery(self.options.searchResultContainer).html('');
 
-                    self.clearFilters().setPage(1)
+                    self.clearFilters(true).setPage(1)
                     .setPageSize(self.options.pageSize)
 
                     if(self.params.query)
@@ -324,7 +324,10 @@ jQuery.extend(Unbxd.setSearch.prototype,{
                 self.options.facetOnDeselect(el);
             }
 
-            self[box.is(':checked') ? 'addFilter' : 'removeFilter'](box.attr("unbxdParam_facetName"),box.attr("unbxdParam_facetValue"));
+	    if(box.attr("unbxdParam_facetType") === 'facet_ranges')
+		self[box.is(':checked') ? 'addRangeFilter' : 'removeRangeFilter'](box.attr("unbxdParam_facetName"), box.attr("unbxdParam_facetValue").split(' TO ')[0], box.attr("unbxdParam_facetValue").split(' TO ')[1]);
+	    else
+		self[box.is(':checked') ? 'addFilter' : 'removeFilter'](box.attr("unbxdParam_facetName"),box.attr("unbxdParam_facetValue"));
 
             self.setPage(1)
             .callResults(self.paintResultSet,true);
@@ -335,7 +338,7 @@ jQuery.extend(Unbxd.setSearch.prototype,{
         jQuery('body').delegate(this.options.clearSelectedFacetsSelector,'click',function(e){
             e.preventDefault();
 
-            self.clearFilters().setPage(1)
+            self.clearFilters(true).setPage(1)
             .callResults(self.paintResultSet,true);
         });
     }
@@ -451,18 +454,28 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
     return this;
 }
-,clearFilters : function(){
+,clearFilters : function(clearRanges){
     this.params.filters = {}
+
+    if(clearRanges){
+	this.clearRangeFiltes();
+    }
     return this;
 }
 ,addRangeFilter : function(field, lb, ub){
-    this.params.ranges[field] = {lb : lb || '*', ub : ub || '*'};
+    if(!(field in this.params.ranges))
+	this.params.ranges[field] = {}; 
+	
+    this.params.ranges[field][lb + ' TO ' + ub] = {lb : lb || '*', ub : ub || '*'};
 
     return this;
 }
-,removeRangeFilter : function(field){
-    if(field in this.params.ranges)
+,removeRangeFilter : function(field, lb, ub){
+    if(!lb && !ub && field in this.params.ranges)
         delete this.params.ranges[field];
+
+    if(lb && ub && field in this.params.ranges && (lb + ' TO ' + ub in this.params.ranges[field]))
+	delete this.params.ranges[field][lb + ' TO ' + ub];
 
     return this;
 }
@@ -527,18 +540,18 @@ jQuery.extend(Unbxd.setSearch.prototype,{
         }
     }
 
-    var a = [];
-
     for(var x in this.params.ranges){
-        if(this.params.ranges.hasOwnProperty(x)){
-            a.push(x + ':[' + this.params.ranges[x].lb + " TO " + this.params.ranges[x].ub + ']');
+	var a = [];
+        for(var y in this.params.ranges[x]){
+            if(this.params.ranges[x].hasOwnProperty(y)){
+		a.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + ']');
+            }
         }
+
+        url += '&filter='+a.join(' OR ');
     }
 
-    if(a.length)
-        url += '&filter='+a.join(' OR ');
-
-    a = [];
+    var a = [];
     for(var field in this.params.sort){
         if (this.params.sort.hasOwnProperty(field)) {
             var dir = this.params.sort[field] || 'desc';
@@ -681,13 +694,16 @@ jQuery.extend(Unbxd.setSearch.prototype,{
                 if(arr.length == 2){
                     arr[1] = arr[1].replace(/\"{2,}/g, '"').replace(/(^")|("$)/g, '').replace(/(^\[)|(\]$)/g, '');
 
-                    if(!(arr[0] in params.filters))
-                        params.filters[arr[0]] = {}
-
                     var vals = arr[1].split(" TO ");
                     if(vals.length > 1){
-                        params.ranges[arr[0]] = {lb : isNaN(parseFloat(vals[0])) ? '*' : parseFloat(vals[0]), ub : isNaN(parseFloat(vals[1])) ? '*' : parseFloat(vals[1])};
-                    }else{
+			if(!(arr[0] in params.ranges))
+                            params.ranges[arr[0]] = {};
+			
+                        params.ranges[arr[0]][arr[1]] = {lb : isNaN(parseFloat(vals[0])) ? '*' : parseFloat(vals[0]), ub : isNaN(parseFloat(vals[1])) ? '*' : parseFloat(vals[1])};
+                    } else {
+			if(!(arr[0] in params.filters))
+                            params.filters[arr[0]] = {};
+
                         params.filters[arr[0]][arr[1]] = arr[0];
                     }
                 }
@@ -857,10 +873,13 @@ jQuery.extend(Unbxd.setSearch.prototype,{
 
     var facets = obj.facets
         ,facetKeys = Object.keys(facets)
-        ,newfacets = []
+    ,textfacets = []
+    ,rangefacets = []
         ,singlefacet = {}
     ,self = this
-        ,facetVal = ""
+    ,facetVal = ""
+    ,facetValStart = ""
+    ,facetValEnd = ""
         ,isSelected = false
         ,selectedOnly = [];
 
@@ -874,29 +893,45 @@ jQuery.extend(Unbxd.setSearch.prototype,{
                 ,unordered : []
         };
 
-        for(var i = 0, len = facets[x]['values'].length/2; i < len;i++){
-            facetVal = facets[x]['values'][2 * i];
+	if(singlefacet.type !== 'facet_ranges'){
+            for(var i = 0, len = facets[x]['values'].length/2; i < len;i++){
+		facetVal = facets[x]['values'][2 * i];
 
-            if(facetVal.trim().length == 0)
-                continue;
+		if(facetVal.trim().length == 0)
+                    continue;
 
-            isSelected = x in self.params.filters && facetVal in self.params.filters[x] && self.params.filters[x][facetVal] == x ? true : false;
+		isSelected = x in self.params.filters && facetVal in self.params.filters[x] && self.params.filters[x][facetVal] == x ? true : false;
 
-            singlefacet[isSelected ? "selected" : "unselected" ].push({value : facetVal , count : facets[x]['values'][2 * i + 1]});
-            singlefacet.unordered.push({value : facetVal , count : facets[x]['values'][2 * i + 1], isSelected : isSelected});
-        }
+		singlefacet[isSelected ? "selected" : "unselected" ].push({value : facetVal , count : facets[x]['values'][2 * i + 1]});
+		singlefacet.unordered.push({value : facetVal , count : facets[x]['values'][2 * i + 1], isSelected : isSelected});
+            }
 
-        if((singlefacet.unordered.length) > 0)
-            newfacets.push(singlefacet);
+	    if((singlefacet.unordered.length) > 0) textfacets.push(singlefacet);
+	    
+	} else {
+	    for(var i = 0, len = facets[x]['values']['counts'].length/2; i < len; i++){
+		facetValStart = facets[x]['values']['counts'][2 * i],
+		facetValEnd = (facets[x]['values']['counts'][2 * i + 2] ? facets[x]['values']['counts'][2 * i + 2] : facets[x]['values'].end.toString());
+
+		var y = facetValStart + ' TO ' + facetValEnd;
+		isSelected = x in self.params.ranges && y in self.params.ranges[x] && self.params.ranges[x][y]['lb'] == facetValStart && self.params.ranges[x][y]['ub'] == facetValEnd ? true : false;
+
+		singlefacet[isSelected ? "selected" : "unselected" ].push({begin: facetValStart, end: facetValEnd, count: facets[x]['values']['counts'][2 * i + 1], value: y});
+		singlefacet.unordered.push({begin: facetValStart, end: facetValEnd, count: facets[x]['values']['counts'][2 * i + 1], value: y, isSelected : isSelected});
+	    }
+
+	    if((singlefacet.unordered.length) > 0) rangefacets.push(singlefacet);
+
+	}
     }
 
     if(this.getClass(this.options.facetTemp) == 'Function'){
-        this.options.facetTemp.call(this,{facets : newfacets});
+        this.options.facetTemp.call(this,{facets: textfacets, rangefacets: rangefacets});
     }else{
         if(!this.compiledFacetTemp && this.options.facetTemp.length)
             this.compiledFacetTemp = Handlebars.compile(this.options.facetTemp);
 
-        this.options.facetContainerSelector.length && jQuery(this.options.facetContainerSelector).html(this.compiledFacetTemp({facets : newfacets}));
+        this.options.facetContainerSelector.length && jQuery(this.options.facetContainerSelector).html(this.compiledFacetTemp({facets: textfacets, rangefacets: rangefacets}));
     }
 
     this.paintSelectedFacets();
@@ -906,9 +941,18 @@ jQuery.extend(Unbxd.setSearch.prototype,{
     }
 
     if(this.options.getFacetStats.length && typeof this.options.processFacetStats == "function" && "stats" in obj && obj.stats[this.options.getFacetStats] != null){
-
-        obj.stats[this.options.getFacetStats].values = {min : this.options.getFacetStats in this.params.ranges && this.params.ranges[this.options.getFacetStats].lb != "*" ? this.params.ranges[this.options.getFacetStats].lb : obj.stats[this.options.getFacetStats].min
-            ,max : this.options.getFacetStats in this.params.ranges && this.params.ranges[this.options.getFacetStats].ub != "*" ? this.params.ranges[this.options.getFacetStats].ub : obj.stats[this.options.getFacetStats].max};
+	obj.stats[this.options.getFacetStats].values = {
+	    min: obj.stats[this.options.getFacetStats].min,
+	    max: obj.stats[this.options.getFacetStats].max
+	};
+	if(this.options.getFacetStats in this.params.ranges){
+	    for (var x in this.params.ranges[this.options.getFacetStats]){
+		obj.stats[this.options.getFacetStats].values = {
+		    min: this.params.ranges[this.options.getFacetStats][x].lb != "*" ? this.params.ranges[this.options.getFacetStats][x].lb : obj.stats[this.options.getFacetStats].min
+		    ,max: this.params.ranges[this.options.getFacetStats][x].ub != "*" ? this.params.ranges[this.options.getFacetStats][x].ub : obj.stats[this.options.getFacetStats].max
+		};
+	    }
+	}
 
         this.options.processFacetStats.call(this,obj.stats);
     }
