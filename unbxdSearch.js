@@ -566,7 +566,7 @@ jQuery.extend(Unbxd.setSearch.prototype, {compiledResultTemp: false,compiledBuck
         q = q || window.location.hash.substring(1) || window.location.search.substring(1);
         while (e = r.exec(q)) {
             var e1 = e[1].indexOf("["), k = e1 == "-1" ? e[1] : e[1].slice(0, e1), i = e1 != "-1" ? d(e[1].slice(e1 + 1, e[1].indexOf("]", e1))) : "", v = d(e[2]);
-            if (v.length == 0)
+            if( v.length == 0 || !(/\w+/g.exec(k)) )
                 continue;
             if (!(k in urlParams)) {
                 urlParams[k] = v
