@@ -1046,6 +1046,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    return t;
 	}
 	,decode: function (e) {
+		//FOR NON ENCODED QUERY DON'T TRY TO DECODE IT
+		//FIXES q=HSWD0015 bug ON allianceonline.co.uk
+		if(e.indexOf("q=") === 0)
+			return e;
 	    var t = "",n, r, i,s, o, u, a,f = 0;
 	    e = e.replace(/[^A-Za-z0-9\+\/\=]/g, "");
 	    while (f < e.length) {
