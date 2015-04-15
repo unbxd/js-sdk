@@ -1116,8 +1116,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 if(!window.jQuery || !window.Handlebars) 
     throw "Please include jQuery & Handlebars libraries before loading unbxdSearch.js";
 
-if(window.jQuery && parseFloat(window.jQuery.fn.jquery) < 1.7) 
-    throw "jQuery version needs to be greater than 1.7. You can pass custom jQuery & Handlebars by calling unbxdSeachInit(jQuery, Handlebars)";
+var arr = jQuery.fn.jquery.split('.');
+if( arr[0] < 1 || (arr[0] == 1 && arr[1] < 7) ) 
+    throw "jQuery version needs to be greater than 1.7 to use unbxdSearch.js. You can pass custom jQuery & Handlebars by calling unbxdSeachInit(jQuery, Handlebars)";
 
 
 unbxdSearchInit(jQuery, Handlebars);
