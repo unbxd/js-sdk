@@ -1,7 +1,7 @@
 {
   "name": "unbxd-autosuggest",
   "license": "",
-  "version": "1.2",
+  "version": "",
   "scripts": {
     "test": "tests/tester.js"
   },
