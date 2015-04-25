@@ -33,12 +33,13 @@ var checkProducts = function( url, products ){
 
 		if( typeof products === "number" && products > 0){
 			console.log("search js sdk still works for ".green + url .green);
-			return;
+			return true;
 		}else{
 			console.log("search js sdk is NOT working for ".red + url .red );
 			mailOptions.subject = mailOptions.subject.replace("URL", url);
 			mailOptions.text = mailOptions.text.replace("URL", url);
 			transporter.sendMail(mailOptions);
+			return false;
 		}
 };
  
