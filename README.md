@@ -1,6 +1,7 @@
 Unbxd JavaScript Search library
 ===============================
 [![Build Status](https://travis-ci.org/unbxd/js-sdk.svg?branch=master)](https://travis-ci.org/unbxd/js-sdk.svg?branch=master)
+
 unbxdSearch.js library can be used to integrated UNBXD search or browse on client side. It supports History API, so users can share the URI. 
 
 Note : _*This library makes use of jQuery selectors and Handlebars templates.*_
