@@ -109,19 +109,27 @@ Consider a normal search page with basic layout as shown in the figure below and
 					,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
 				,'</div>'
 			,'{{/each}}'
+		,'{{/each}}'
+		'{{#each ranges}}'
+			,'{{#each this}}'
+				,'<div class="selected-facet clearfix">'
+					,'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
+					,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
+				,'</div>'
+			,'{{/each}}'
 		,'{{/each}}'].join('')
 		,selectedFacetContainerSelector : "#selected_facets"
 		,clearSelectedFacetsSelector : "#clear_all_selected_facets"
 		,removeSelectedFacetSelector : ".selected-facet-delete"
 		,selectedFacetHolderSelector : ""
 		,loaderSelector : ""//".result-loader"
-		,onFacetLoad : function(){}
+		,onFacetLoad : function(obj){}
 		,sanitizeQueryString : function(q){ return q;}
 		,getFacetStats : ""
 		,processFacetStats : function(obj){}
 		,setDefaultFilters : function(){}
-		,onIntialResultLoad : function(){}
-		,onPageLoad : function(){}
+		,onIntialResultLoad : function(obj){}
+		,onPageLoad : function(obj){}
 		,onNoResult : function(obj){}
 		,fields : ['image_url','title','brand','price','uniqueId']
     });
@@ -349,7 +357,15 @@ Consider a normal search page with basic layout as shown in the figure below and
 					,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
 				,'</div>'
 			,'{{/each}}'
-		,'{{/each}}'].join('')
+		,'{{/each}}'
+		,'{{#each ranges}}'
+			  ,'{{each this}}'
+			  	,'<div class="selected-facet clearfix">'
+					,'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
+					,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
+				,'</div>'
+			,'{{/each}}'
+		'{{/each}}'].join('')
 		...
 
 		//JSON used for above template
@@ -360,7 +376,13 @@ Consider a normal search page with basic layout as shown in the figure below and
 					"Shirts": "Category_fq",
 					"Shoes": "Category_fq"
 				}
-			}
+			},
+			"ranges": {
+				"Price_fq": {
+					"200 TO 300": "Price_fq",
+					"300 TO 400": "Price_fq"
+				}
+			}	
 		}
 	```
 - **selectedFacetContainerSelector** : jQuery selector of DOM element to place the generated HTML from **selectedFacetTemp**. (_Please refer to above image._)
@@ -368,7 +390,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 - **removeSelectedFacetSelector** : jQuery selector of DOM element to remove respective filter.(_This is useful in removing single filter. Example **selected-facet-delete** from above template. Please refer to above image._)
 - **selectedFacetHolderSelector** : jQuery selector of DOM element which 
 - **loaderSelector** : The jQuery selector of the loading GIF image. This will be shown during the fetching process and hidden after the call.
-- **onFacetLoad** : This option takes a function which will be called after rendering the facet block.
+- **onFacetLoad** : This option takes a function which will be called after rendering the facet block, with the search response as its first argument.
 - **sanitizeQueryString** : This option should be a function with single argument as query which modifies and returns a new query against which the search has to be performed.
 	
 	```javascript
@@ -438,8 +460,8 @@ Consider a normal search page with basic layout as shown in the figure below and
 		}
 		...
 	```
-- **onIntialResultLoad** : This option takes a function which will be executed after rendering of first result page.
-- **onPageLoad** : This option takes a function which will be executed after rendering of new result page from second page.
+- **onIntialResultLoad** : This option takes a function which will be executed after rendering of first result page with the search response as its first argument.
+- **onPageLoad** : This option takes a function which will be executed after rendering of new result page from second page with the search response as its first argument.
 - **onNoResult** : This option takes a function which will be executed if there are no results available.
 - **fields** : This is an array of all required fields for generating result template. This is helpful to load the results faster. An example implementation is below.
 	```javascript

@@ -56,7 +56,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     });
 
     Handlebars.registerHelper('prepareFacetValue', function(txt){
-	return txt.trim().length > 0 ? txt : "&nbsp;&nbsp;&nbsp;";
+      return txt.trim().length > 0 ? txt : "&nbsp;&nbsp;&nbsp;";
     });
 
     Unbxd.setSearch.prototype.defaultOptions = {
@@ -350,21 +350,26 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    if(this.options.removeSelectedFacetSelector.length > 0){
 		jQuery(this.options.selectedFacetContainerSelector).delegate(this.options.removeSelectedFacetSelector,'click',function(e){
-		    e.preventDefault();
-		    var $t = jQuery(this)
-		    ,name = $t.attr("unbxdParam_facetName")
-		    ,val = $t.attr("unbxdParam_facetValue")
-		    ,checkbox_sel = self.options.facetCheckBoxSelector + "[unbxdParam_facetName='"+ name +"'][unbxdParam_facetValue='" + val + "']";
+		  e.preventDefault();
+		  var $t = jQuery(this)
+		  ,name = $t.attr("unbxdParam_facetName")
+		  ,val = $t.attr("unbxdParam_facetValue")
+		  ,vals = val.split(' TO ')
+		  ,checkbox_sel = self.options.facetCheckBoxSelector + "[unbxdParam_facetName='"+ name +"'][unbxdParam_facetValue='" + val + "']";
 
-		    jQuery(checkbox_sel).removeAttr("checked");
+		  jQuery(checkbox_sel).removeAttr("checked");
+		  
+		  if(typeof self.options.facetOnDeselect == "function"){
+		    self.options.facetOnDeselect(jQuery(checkbox_sel).parents(self.options.facetElementSelector));
+		  }
 
-		    if(typeof self.options.facetOnDeselect == "function"){
-			self.options.facetOnDeselect(jQuery(checkbox_sel).parents(self.options.facetElementSelector));
-		    }
+		  if(vals.length > 1)
+		    self.removeRangeFilter(name, vals[0], vals[1]);
+		  else
+		    self.removeFilter(name, val);
 
-		    self.removeFilter(name,val)
-			.setPage(1)
-			.callResults(self.paintResultSet,true);
+		  self.setPage(1)
+		    .callResults(self.paintResultSet,true);
 		});
 	    }
 
@@ -476,13 +481,16 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    return this;
 	}
 	,removeRangeFilter : function(field, lb, ub){
-	    if(!lb && !ub && field in this.params.ranges)
-		delete this.params.ranges[field];
+	  if(!lb && !ub && field in this.params.ranges)
+	    delete this.params.ranges[field];
+	  
+	  if(lb && ub && field in this.params.ranges && (lb + ' TO ' + ub in this.params.ranges[field]))
+	    delete this.params.ranges[field][lb + ' TO ' + ub];
 
-	    if(lb && ub && field in this.params.ranges && (lb + ' TO ' + ub in this.params.ranges[field]))
-		delete this.params.ranges[field][lb + ' TO ' + ub];
+	  if(Object.keys(this.params.ranges[field]).length == 0)
+	    delete this.params.ranges[field];
 
-	    return this;
+	  return this;
 	}
 	,clearRangeFiltes : function(){
 	    this.params.ranges = {};
@@ -841,11 +849,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 
 	    if(!this.currentNumberOfProducts && typeof this.options.onIntialResultLoad == "function") {
-		this.options.onIntialResultLoad.call(this);
+	      this.options.onIntialResultLoad.call(this, obj);
 	    }
 
 	    if(this.currentNumberOfProducts && typeof this.options.onPageLoad == "function") {
-		this.options.onPageLoad.call(this);
+	      this.options.onPageLoad.call(this, obj);
 	    }
 
 	    this.totalNumberOfProducts = obj.response.numberOfProducts;
@@ -942,41 +950,63 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    this.paintSelectedFacets();
 
 	    if (typeof this.options.onFacetLoad == "function") {
-		this.options.onFacetLoad.call(this);
+	      this.options.onFacetLoad.call(this, obj);
 	    }
 
-	    if(this.options.getFacetStats.length && typeof this.options.processFacetStats == "function" && "stats" in obj && obj.stats[this.options.getFacetStats] != null){
+	  if(this.options.getFacetStats.length &&
+	     typeof this.options.processFacetStats == "function" &&
+	     "stats" in obj && obj.stats[this.options.getFacetStats] != null){
+	    
+	    obj.stats[this.options.getFacetStats].values = {
+	      min: obj.stats[this.options.getFacetStats].min,
+	      max: obj.stats[this.options.getFacetStats].max
+	    };
+	    if(this.options.getFacetStats in this.params.ranges){
+	      for (var x in this.params.ranges[this.options.getFacetStats]){
 		obj.stats[this.options.getFacetStats].values = {
-		    min: obj.stats[this.options.getFacetStats].min,
-		    max: obj.stats[this.options.getFacetStats].max
+		  min: this.params.ranges[this.options.getFacetStats][x].lb != "*" ?
+		    this.params.ranges[this.options.getFacetStats][x].lb :
+		    obj.stats[this.options.getFacetStats].min
+		  ,max: this.params.ranges[this.options.getFacetStats][x].ub != "*" ?
+		    this.params.ranges[this.options.getFacetStats][x].ub :
+		    obj.stats[this.options.getFacetStats].max
 		};
-		if(this.options.getFacetStats in this.params.ranges){
-		    for (var x in this.params.ranges[this.options.getFacetStats]){
-			obj.stats[this.options.getFacetStats].values = {
-			    min: this.params.ranges[this.options.getFacetStats][x].lb != "*" ? this.params.ranges[this.options.getFacetStats][x].lb : obj.stats[this.options.getFacetStats].min
-			    ,max: this.params.ranges[this.options.getFacetStats][x].ub != "*" ? this.params.ranges[this.options.getFacetStats][x].ub : obj.stats[this.options.getFacetStats].max
-			};
-		    }
-		}
-
-		this.options.processFacetStats.call(this,obj.stats);
+	      }
+	      
 	    }
+
+	    this.options.processFacetStats.call(this,obj.stats);
+	  }
 	}
 	,paintSelectedFacets : function(){
-	    var selFacetKeys = Object.keys(this.params.filters);
+	  var selFacetKeysLength = Math.max(Object.keys(this.params.filters).length,
+					    Object.keys(this.params.ranges).length);
+	  var selectedFacets = {};
+	  
+	  if(selFacetKeysLength){
+	    selectedFacets.filters = this.params.filters;
+	    selectedFacets.ranges = {};
 
-	    if(selFacetKeys.length){
-		if(this.options.selectedFacetTemp  && this.options.selectedFacetContainerSelector){
-		    if(!this.compiledSelectedFacetTemp)
-			this.compiledSelectedFacetTemp = Handlebars.compile(this.options.selectedFacetTemp);
-
-		    jQuery(this.options.selectedFacetContainerSelector).html(this.compiledSelectedFacetTemp(this.params));
-		}
-		jQuery(this.options.selectedFacetHolderSelector).show();
-	    }else{
-		jQuery(this.options.selectedFacetContainerSelector).empty();
-		jQuery(this.options.selectedFacetHolderSelector).hide();
+	    for (var x in this.params.ranges){
+	      if(!selectedFacets.ranges.hasOwnProperty(x))
+		selectedFacets.ranges[x] = {};
+	      
+	      for (var y in this.params.ranges[x]){
+		selectedFacets.ranges[x][y] = x;
+	      }
 	    }
+
+	    if(this.options.selectedFacetTemp  && this.options.selectedFacetContainerSelector){
+	      if(!this.compiledSelectedFacetTemp)
+		this.compiledSelectedFacetTemp = Handlebars.compile(this.options.selectedFacetTemp);
+
+	      jQuery(this.options.selectedFacetContainerSelector).html(this.compiledSelectedFacetTemp(selectedFacets));
+	    }
+	    jQuery(this.options.selectedFacetHolderSelector).show();
+	  }else{
+	    jQuery(this.options.selectedFacetContainerSelector).empty();
+	    jQuery(this.options.selectedFacetHolderSelector).hide();
+	  }
 	}
 	,prepareFacetName : function (txt){
 	    txt = txt.replace("_fq","");

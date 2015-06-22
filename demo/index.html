@@ -85,14 +85,14 @@
             ,isClickNScroll: false
             ,clickNScrollSelector : ''
             ,isAutoScroll : true
-        ,facetTemp : ['{{!--<div class="facet-block">'
+        ,facetTemp : ['<div class="facet-block">'
 	,'<div class="facet-title">PRICE</div>'
 	,'<div class="facet-values">'
 	  ,'<div id="slider-range-max">'
 	    ,'</div>'
 	    ,'<div id="amount" class="clearfix"><div class="lt"></div><div class="rt"></div></div>'
 	  ,'</div>'
-	,'</div>--}}'
+	,'</div>'
 	,'{{#facets}}'
 	,'<div class="facet-block">'
         ,'<div class="facet-title">{{name}}</div>'
@@ -147,23 +147,36 @@
             ,facetOnDeselect : function(el){
             }
             ,facetMultiSelect : true
-            ,selectedFacetTemp : ['{{#each filters}}'
-                ,'{{#each this}}'
-                    ,'<div class="selected-facet clearfix">'
-                        ,'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
-                        ,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
-                    ,'</div>'
-                ,'{{/each}}'
-            ,'{{/each}}'].join('')
+          ,selectedFacetTemp : [
+	    'Selected:'
+	    ,'{{#each filters}}'
+            ,'{{#each this}}'
+            ,'<div class="selected-facet clearfix">'
+            ,'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
+            ,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
+            ,'</div>'
+            ,'{{/each}}'
+            ,'{{/each}}'
+	    ,'{{#each ranges}}'
+	    ,'{{#each this}}'
+	    ,'<div class="selected-facet clearfix">'
+            ,'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
+            ,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
+            ,'</div>'
+	    ,'{{/each}}'
+	    ,'{{/each}}'
+	    ].join('')
             ,selectedFacetContainerSelector : "#selected_facets"
             ,clearSelectedFacetsSelector : "#clear_all_selected_facets"
             ,removeSelectedFacetSelector : ".selected-facet-delete"
             ,selectedFacetHolderSelector : ""
             ,loaderSelector : ""//".result-loader"
-            ,onFacetLoad : function(){}
+          ,onFacetLoad : function(){
+	    console.log('onFacetLoad', arguments, this);
+	  }
             ,sanitizeQueryString : function(q){ return q;}
         ,loaderSelector : ".result-loader"
-        /*,getFacetStats : "price"
+        ,getFacetStats : "price"
             ,processFacetStats : function(obj){
                 var divs = $( "#amount div");
 
@@ -189,10 +202,14 @@
                         .callResults(searchobj.paintOnlyResultSet,true);
                     }
                 });
-            }*/
+            }
             ,setDefaultFilters : function(){}
-            ,onIntialResultLoad : function(){}
-            ,onPageLoad : function(){}
+          ,onIntialResultLoad : function(){
+	    console.log('onIntialResultLoad', arguments, this);
+	  }
+          ,onPageLoad : function(){
+	    console.log('onPageLoad', arguments, this);
+	  }
         });
     
     </script>
