@@ -108,7 +108,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         ,customReset : function(){}
 	,bannerSelector: ""
         ,bannerTemp: '<a href="{{landingUrl}}"><img src="{{imageUrl}}"/></a>'
-        ,bannerCount: 0
+        ,bannerCount: 1
     };
 
     jQuery.extend(Unbxd.setSearch.prototype,{
@@ -762,48 +762,48 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    this._internalPaintResultSet(obj,true);
 	}
 	,_internalPaintResultSet: function(obj, facetsAlso){
-	    if("error" in obj)
-		return false;
+	  if("error" in obj)
+	    return false;
+	  
+	  this.totalNumberOfProducts = 0;
 
-	    this.totalNumberOfProducts = 0;
+	  this.currentNumberOfProducts = 0;
 
-	    this.currentNumberOfProducts = 0;
+	  if (!obj.hasOwnProperty('banner')){
+	    this.options.bannerSelector.length
+	      && jQuery(this.options.bannerSelector).empty();
+	  }else{
+	    this.paintBanners(obj);
+	  }
 
-	    if (obj.hasOwnProperty('banner')){
-		this.paintBanners(obj);
+	  if(obj.hasOwnProperty('didYouMean')){
+	    if(obj.response.numberOfProducts == 0 ) { //> this.options.pageSize){
+	      this.params.query = obj.didYouMean[0].suggestion;
+	      
+	      if(!this.compiledSpellCheckTemp)
+		this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
+	      
+	      jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
+	      
+	      facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
+
 	    }else{
-		this.options.bannerSelector.length && jQuery(this.options.bannerSelector).empty();
+		  
+	      this.params.query = obj.searchMetaData.queryParams.q;   //obj.didYouMean[0].suggestion;
+	      
+	      if(!this.compiledSpellCheckTemp)
+		this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
+
+	      jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
+
+	      facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
 	    }
-
-	    if(obj.hasOwnProperty('didYouMean')){
-		if(obj.response.numberOfProducts == 0 ) { //> this.options.pageSize){
-		    this.params.query = obj.didYouMean[0].suggestion;
-
-		    if(!this.compiledSpellCheckTemp)
-			this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
-
-		    jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
-
-		    facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
-
-		}
-		else{
-
-		    this.params.query = obj.searchMetaData.queryParams.q;   //obj.didYouMean[0].suggestion;
-
-		    if(!this.compiledSpellCheckTemp)
-			this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
-
-		    jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
-
-		    facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
-		}
-	    }else{
-		jQuery(this.options.spellCheck).hide();
-		jQuery(this.options.searchResultContainer).empty();
-		this.paintProductPage(obj);
-		facetsAlso && this.paintFacets(obj);
-	    }
+	  }else{
+	    jQuery(this.options.spellCheck).hide();
+	    jQuery(this.options.searchResultContainer).empty();
+	    this.paintProductPage(obj);
+	    facetsAlso && this.paintFacets(obj);
+	  }
 	}
 	,paintOnlyResultSet : function(obj){
 	    jQuery(this.options.searchResultContainer).empty();
@@ -869,16 +869,26 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	}
 	,paintBanners : function(obj){
-	    if("error" in obj)
-		return ;
-	    if(this.options.bannerCount == 0)
-		return ;
-	    var banner = obj.banner
-            var counter = 0
-            this.compiledBannerTemp = Handlebars.compile(this.options.bannerTemp)
-            for( var i=0;i<banner.banners.length && i < this.options.bannerCount ; i ++){
-		this.options.bannerSelector.length && jQuery(this.options.bannerSelector).append(this.compiledBannerTemp({landingUrl:banner.banners[i].landingUrl, imageUrl :banner.banners[i].imageUrl}))
-            }
+	  if("error" in obj)
+	    return;
+	  if(this.options.bannerCount <= 0)
+	    return;
+	  if(this.options.bannerSelector.length === 0 )
+	    return;
+	  var banner = obj.banner;
+
+	  this.compiledBannerTemp = Handlebars.compile(this.options.bannerTemp);
+
+	  var bannersToDraw = banner.banners.slice(0, this.options.bannerCount)
+	      .reduce(function(prev, curr){
+		return prev.concat(prev, this.compiledBannerTemp({
+		  landingUrl: curr.landingUrl,
+		  imageUrl: curr.imageUrl
+		}))
+	      }.bind(this), []);
+	  
+	  jQuery(this.options.bannerSelector).html(bannersToDraw.join(','));
+	  
 	}
 	,paintFacets: function(obj){
 	    if("error" in obj)
