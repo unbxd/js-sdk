@@ -131,6 +131,8 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,onIntialResultLoad : function(obj){}
 		,onPageLoad : function(obj){}
 		,onNoResult : function(obj){}
+		,bannerSelector: ".banner"
+		,bannerTemp: "<a href='{{landingUrl}}'><img src='{{imageUrl}}'/></a>"
 		,fields : ['image_url','title','brand','price','uniqueId']
     });
 ```
@@ -463,6 +465,8 @@ Consider a normal search page with basic layout as shown in the figure below and
 - **onIntialResultLoad** : This option takes a function which will be executed after rendering of first result page with the search response as its first argument.
 - **onPageLoad** : This option takes a function which will be executed after rendering of new result page from second page with the search response as its first argument.
 - **onNoResult** : This option takes a function which will be executed if there are no results available.
+- **bannerSelector** : The jQuery selector for the container where the banner needs to be displayed.
+- **bannerTemp**: The template to be used when rendering the banner.
 - **fields** : This is an array of all required fields for generating result template. This is helpful to load the results faster. An example implementation is below.
 	```javascript
 		...

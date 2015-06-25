@@ -171,7 +171,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		this.setPage(1)
                     .setPageSize(this.options.pageSize);
 
-		this.callResults(this.paintResultSet);
+	      this.callResults(this.paintResultSet);
             }else{
 		var cur_url = this.getUrlSubstring()
                 ,urlqueryparams = this.getQueryParams(cur_url)
@@ -206,7 +206,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 			.setPageSize(this.options.pageSize);
 
                     if(this.params.query){
-			this.callResults(this.paintResultSet);
+		      this.callResults(this.paintResultSet);
                     }
 		}else if(this.options.type == "browse" && "categoryId" in finalParams && finalParams["categoryId"].trim().length > 0){
                     this.params = finalParams;
@@ -378,40 +378,42 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		self.initialURL = location.href;
 
 		jQuery(window).bind('popstate', function(e) {
-		    var initialPop = self.popped && location.href == self.initialURL;
-		    self.popped = false;
+		  var initialPop = self.popped && location.href == self.initialURL;
+		  self.popped = false;
 
-		    if ( initialPop || !e.originalEvent.state) return;
+		  if ( initialPop || !e.originalEvent.state ) { self.init(); return; }
 
-		    var old_params = e.originalEvent.state;
+		  var old_params = e.originalEvent.state;
 
-		    old_params.query = self.options.type == "search" ? self.options.sanitizeQueryString.call(self, old_params.query) : "";
+		  old_params.query = self.options.type == "search" ? self.options.sanitizeQueryString.call(self, old_params.query) : "";
 
-		    self.reset();
+		  self.reset();
 
-		    self.setPage(1);
+		  self.setPage(1);
 
-		    if((old_params.query) || (old_params.categoryId)){
-			self.params = old_params;
-			self.callResults(self.paintResultSet);
-		    }
+		  if((old_params.query) || (old_params.categoryId)){
+		    self.params = old_params;
+		    self.callResults(self.paintResultSet);
+		  }
 		});
 	    }else if(this.isHashChange){
 		jQuery(window).bind("hashchange",function(e){
-		    var newhash = window.location.hash.substring(1);
-		    if(newhash && newhash != self.currentHash){
-			self.reset();
-			var old_params = self._processURL(self.options.noEncoding ? newhash : self.decode(newhash));
+		  var newhash = window.location.hash.substring(1);
+		  if(newhash && newhash != self.currentHash){
+		    self.reset();
+		    var old_params = self._processURL(self.options.noEncoding ? newhash : self.decode(newhash));
 
-			old_params.query = self.options.type == "search" ? self.options.sanitizeQueryString.call(self,old_params.query) : "";
+		    old_params.query = self.options.type == "search" ? self.options.sanitizeQueryString.call(self,old_params.query) : "";
 
-			self.currentHash = newhash;
+		    self.currentHash = newhash;
 
-			if((old_params.query) || (old_params.categoryId)){
-			    self.params = old_params;
-			    self.callResults(self.paintResultSet);
-			}
+		    if((old_params.query) || (old_params.categoryId)){
+		      self.params = old_params;
+		      self.callResults(self.paintResultSet);
 		    }
+		  } else {
+		    self.init();
+		  }
 		});
 	    }else{
 		self.hashChangeInterval = setInterval(function() {

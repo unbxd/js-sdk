@@ -27,6 +27,8 @@
         </div>
     </div>
     <div class="search-container">
+      <div class="row clearfix banner">
+      </div>
         <div class="row clearfix">
             <div class="lt search-facet-column" id="facets_container">
             </div>
@@ -57,8 +59,8 @@
         });
 
         window.searchobj = new Unbxd.setSearch({
-            siteName : 'allianceonline_co_uk-u1423569528226'
-	    ,APIKey : 'f2ada89f21e1345bc660786663fb1a09'
+            siteName : 'demosite-u1407617955968'
+	    ,APIKey : '64a4a2592a648ac8415e13c561e44991'
             ,type : 'search'
             ,getCategoryId : ''
             ,inputSelector : '#search_input'
@@ -199,7 +201,7 @@
                         .clearRangeFiltes()
                         .addRangeFilter("price",c.values[0],c.values[1])
                         .setPage(1)
-                        .callResults(searchobj.paintOnlyResultSet,true);
+                        .callResults(searchobj.paintResultSet,true);
                     }
                 });
             }
@@ -210,6 +212,7 @@
           ,onPageLoad : function(){
 	    console.log('onPageLoad', arguments, this);
 	  }
+	  ,bannerSelector: '.banner'
         });
     
     </script>
