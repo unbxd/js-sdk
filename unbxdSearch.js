@@ -547,7 +547,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		    var a = [];
 		    for(var y in this.params.filters[x]){
 			if(this.params.filters[x].hasOwnProperty(y)){
-			    a.push((x+':\"'+ encodeURIComponent(y.replace(/(^")|("$)/g, '')) +'\"').replace(/\"{2,}/g, '"'));
+			  a.push((x+':\"'+ encodeURIComponent(y.replace(/\"/g, "\\\"")) +'\"').replace(/\"{2,}/g, '"'));
 			}
 		    }
 
@@ -632,7 +632,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 		modifiedCB(data);
             }
-	    ,urlobj = self.url();
+	  ,urlobj = self.url();
+
+	  console.log("http://search.unbxdapi.com/05e6a99e0d540396f2c9326889037002/medicalsupplydepot_com-u1432899153065/search?q=*&filter=Size_fq:%222%5C%22%20X%202%5C%22%22");
+	  console.log(urlobj.url); 
 
 	    if(doPush){
 		var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
