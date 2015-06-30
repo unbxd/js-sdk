@@ -172,78 +172,86 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,hashChangeInterval : null
 	,ajaxCall : null
 	,init : function(){
-          this.isHashChange = !!("onhashchange" in window.document.body);
+            this.isHashChange = !!("onhashchange" in window.document.body);
 
-          this.$input = jQuery(this.options.inputSelector);
-          this.$input.val('');
-          this.input = this.$input[0];
+            this.$input = jQuery(this.options.inputSelector);
+            this.$input.val('');
+            this.input = this.$input[0];
 
-          this.setEvents();
-	  
-          this.reset();
+            this.setEvents();
 
-          this.params.categoryId = this.options.type == "browse" && typeof this.options.getCategoryId == "function" ? this.options.getCategoryId.call(this) : ""
+            this.reset();
 
-          if(this.options.type == "search" && this.input.value.trim().length){
-	    if(typeof this.options.setDefaultFilters == "function")
-              this.options.setDefaultFilters.call(this);
-	    
-	    this.params.query = this.$input.val().trim();
+            this.params.categoryId = this.options.type == "browse" && typeof this.options.getCategoryId == "function" ? this.options.getCategoryId() : "";
 
-	    jQuery(this.options.searchResultContainer).html('');
+            if(this.params.categoryId.length > 0){
+		if(typeof this.options.setDefaultFilters == "function")
+                    this.options.setDefaultFilters.call(this);
 
-	    this.setPage(1)
-              .setPageSize(this.options.pageSize);
+		this.setPage(1)
+                    .setPageSize(this.options.pageSize);
 
-	    this.callResults(this.paintResultSet);
-          }else{
-	    var cur_url = this.getUrlSubstring()
-            ,urlqueryparams = this.getQueryParams(cur_url)
-            ,decodedParams = this.getQueryParams(this.decode(cur_url))
-            ,queryparamcount = Object.keys(urlqueryparams).length
-            ,decodedParamscount = Object.keys(decodedParams).length
-            ,finalParams = null;
-
-	    if(decodedParamscount > 0){
-              finalParams = this._processURL(decodedParams);
-	    }else{
-              finalParams = this._processURL(urlqueryparams);
-	    }
-
-	    if(this.options.type == "search"){
-              this.params = finalParams;
-	      
-              if(typeof this.options.setDefaultFilters == "function")
-		this.options.setDefaultFilters.call(this);
-
-
-              if(!("query" in this.params) || (this.params.query + "").trim().length == 0)
-		this.params.query = "*";
-	      
-              this.params.query = this.options.sanitizeQueryString.call(this,this.params.query);
-
-              this.$input.val(this.params.query != "*" ? this.params.query : "");
-
-              jQuery(this.options.searchResultContainer).html('');
-
-              this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
-		.setPageSize(this.options.pageSize);
-
-              if(this.params.query){
 		this.callResults(this.paintResultSet);
-              }
-	    }else if(this.options.type == "browse" && "categoryId" in finalParams && finalParams["categoryId"].trim().length > 0){
-              this.params = finalParams;
+            }else if(this.options.type == "search" && this.input.value.trim().length){
+		if(typeof this.options.setDefaultFilters == "function")
+                    this.options.setDefaultFilters.call(this);
 
-              if(typeof this.options.setDefaultFilters == "function")
-		this.options.setDefaultFilters.call(this);
+		this.params.query = this.$input.val().trim();
 
-              this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
-		.setPageSize(this.options.pageSize);
+		jQuery(this.options.searchResultContainer).html('');
 
-              this.callResults(this.paintResultSet);
-	    }
-          }
+		this.setPage(1)
+                    .setPageSize(this.options.pageSize);
+
+	      this.callResults(this.paintResultSet);
+            }else{
+		var cur_url = this.getUrlSubstring()
+                ,urlqueryparams = this.getQueryParams(cur_url)
+                ,decodedParams = this.getQueryParams(this.decode(cur_url))
+                ,queryparamcount = Object.keys(urlqueryparams).length
+                ,decodedParamscount = Object.keys(decodedParams).length
+                ,finalParams = null;
+
+		if(decodedParamscount > 0){
+                    finalParams = this._processURL(decodedParams);
+		}else{
+                    finalParams = this._processURL(urlqueryparams);
+		}
+
+		if(this.options.type == "search"){
+                    this.params = finalParams;
+
+                    if(typeof this.options.setDefaultFilters == "function")
+			this.options.setDefaultFilters.call(this);
+
+
+                    if(!("query" in this.params) || (this.params.query + "").trim().length == 0)
+			this.params.query = "*";
+
+                    this.params.query = this.options.sanitizeQueryString.call(this,this.params.query);
+
+                    this.$input.val(this.params.query != "*" ? this.params.query : "");
+
+                    jQuery(this.options.searchResultContainer).html('');
+
+                    this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
+			.setPageSize(this.options.pageSize);
+
+                    if(this.params.query){
+		      this.callResults(this.paintResultSet);
+                    }
+		}else if(this.options.type == "browse" && "categoryId" in finalParams && finalParams["categoryId"].trim().length > 0){
+                    this.params = finalParams;
+
+                    if(typeof this.options.setDefaultFilters == "function")
+			this.options.setDefaultFilters.call(this);
+
+                    this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
+			.setPageSize(this.options.pageSize);
+
+                    this.callResults(this.paintResultSet);
+		}
+            }
 	}
 	,getClass : function(object){
 	    return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1];
@@ -658,22 +666,25 @@ var unbxdSearchInit = function(jQuery, Handlebars){
             }
 	  ,urlobj = self.url();
 
-	  if(doPush){
-	    var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
-	    if(this.isHistory){
-	      history.pushState(this.params,null,location.protocol + "//" + location.host + location.pathname + "?" + finalquery);
-	    }else{
-	      window.location.hash = finalquery;
-	      this.currentHash = finalquery;
+	  console.log("http://search.unbxdapi.com/05e6a99e0d540396f2c9326889037002/medicalsupplydepot_com-u1432899153065/search?q=*&filter=Size_fq:%222%5C%22%20X%202%5C%22%22");
+	  console.log(urlobj.url); 
+
+	    if(doPush){
+		var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
+		if(this.isHistory){
+		    history.pushState(this.params,null,location.protocol + "//" + location.host + location.pathname + "?" + finalquery);
+		}else{
+		    window.location.hash = finalquery;
+		    this.currentHash = finalquery;
+		}
 	    }
-	  }
-	  
-	  this.ajaxCall = jQuery.ajax({
-	    url: urlobj.url
-	    ,dataType: "jsonp"
-	    ,jsonp: 'json.wrf'
-	    ,success: cb.bind(self)
-	  });
+
+	    this.ajaxCall = jQuery.ajax({
+		url: urlobj.url
+		,dataType: "jsonp"
+		,jsonp: 'json.wrf'
+		,success: cb.bind(self)
+	    });
 	}
 	,reset: function(){
 	    this.totalNumberOfProducts = 0;
