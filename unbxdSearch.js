@@ -564,127 +564,127 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    return window.location.hash.substring(1) || window.location.search.substring(1);
 	}
 	,url : function(){
-	    var host_path = this.getHostNPath();
+	  var host_path = this.getHostNPath();
 
-	    var url ="";
+	  var url ="";
+	  var nonhistoryPath = "";
 
-	    if(this.options.type == "search" && this.params['query'] != undefined){
-		url += '&q=' + encodeURIComponent(this.params.query);
-	    }else if(this.options.type == "browse" && this.params['categoryId'] != undefined){
-		url += '&category-id=' + encodeURIComponent(this.params.categoryId);
-	    }
+	  if(this.options.type == "search" && this.params['query'] != undefined){
+	    url += '&q=' + encodeURIComponent(this.params.query);
+	  }else if(this.options.type == "browse" && this.params['categoryId'] != undefined){
+	    url += '&category-id=' + encodeURIComponent(this.params.categoryId);
+	  }
 
-	    for(var x in this.params.filters){
-		if(this.params.filters.hasOwnProperty(x)){
-		    var a = [];
-		    for(var y in this.params.filters[x]){
-			if(this.params.filters[x].hasOwnProperty(y)){
-			  a.push((x+':\"'+ encodeURIComponent(y.replace(/\"/g, "\\\"")) +'\"').replace(/\"{2,}/g, '"'));
-			}
-		    }
-
-		    url += '&filter='+a.join(' OR ');
+	  for(var x in this.params.filters){
+	    if(this.params.filters.hasOwnProperty(x)){
+	      var a = [];
+	      for(var y in this.params.filters[x]){
+		if(this.params.filters[x].hasOwnProperty(y)){
+		  a.push((x+':\"'+ encodeURIComponent(y.replace(/\"/g, "\\\"")) +'\"').replace(/\"{2,}/g, '"'));
 		}
+	      }
+
+	      url += '&filter='+a.join(' OR ');
 	    }
+	  }
 
-	    for(var x in this.params.ranges){
-		var a = [];
-		for(var y in this.params.ranges[x]){
-		    if(this.params.ranges[x].hasOwnProperty(y)){
-			a.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + ']');
-		    }
-		}
-
-		url += '&filter='+a.join(' OR ');
-	    }
-
+	  for(var x in this.params.ranges){
 	    var a = [];
-	    for(var field in this.params.sort){
-		if (this.params.sort.hasOwnProperty(field)) {
-		    var dir = this.params.sort[field] || 'desc';
-		    a.push(field + " " + dir);
+	    for(var y in this.params.ranges[x]){
+	      if(this.params.ranges[x].hasOwnProperty(y)){
+		a.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + ']');
+	      }
+	    }
+
+	    url += '&filter='+a.join(' OR ');
+	  }
+	  
+	  var a = [];
+	  for(var field in this.params.sort){
+	    if (this.params.sort.hasOwnProperty(field)) {
+	      var dir = this.params.sort[field] || 'desc';
+	      a.push(field + " " + dir);
+	    }
+	  }
+
+	  if(a.length)
+	    url += '&sort='+a.join(',');
+
+
+	  for(var key in this.params.extra){
+	    if (this.params.extra.hasOwnProperty(key) && key != 'page') {
+	      var value = this.params.extra[key];
+	      if(this.getClass(value) == "Array"){
+		value = value.getUnique();
+		for(var i = 0;i < value.length; i++){
+		  url += '&' + key + '=' + encodeURIComponent(value[i]);
 		}
+	      } else if(key === 'wt' || key === 'format') {
+		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
+	      } else
+		url += '&' + key + '=' + encodeURIComponent(value);
 	    }
+	  }
 
-	    if(a.length)
-		url += '&sort='+a.join(',');
+	  url += '&start=' + (this.params.extra.page <= 1 ? 0  : (this.params.extra.page - 1) * this.params.extra.rows);
 
+	  url += this.options.getFacetStats.length > 0 ? "&stats=" + this.options.getFacetStats : "";
 
-	    for(var key in this.params.extra){
-		if (this.params.extra.hasOwnProperty(key) && key != 'page') {
-		    var value = this.params.extra[key];
-		    if(this.getClass(value) == "Array"){
-			value = value.getUnique();
-			for(var i = 0;i < value.length; i++){
-			    url += '&' + key + '=' + encodeURIComponent(value[i]);
-			}
-		    }else
-			url += '&' + key + '=' + encodeURIComponent(value);
-		}
-	    }
+	  if(this.options.fields.length){
+	    nonhistoryPath += '&fields=' + this.options.fields.join(',');
+	  }
 
-	    url += '&start=' + (this.params.extra.page <= 1 ? 0  : (this.params.extra.page - 1) * this.params.extra.rows);
+	  if(this.options.facetMultiSelect)
+	    nonhistoryPath += '&facet.multiselect=true';
+	  
+	  nonhistoryPath += '&indent=off';
 
-	    url += this.options.getFacetStats.length > 0 ? "&stats=" + this.options.getFacetStats : "";
-
-	    if(this.options.fields.length){
-		url += '&fields=' + this.options.fields.join(',');
-	    }
-
-	    if(this.options.facetMultiSelect)
-		url += '&facet.multiselect=true';
-
-	    url += '&indent=off';
-
-	    return {
-		url : host_path + "?" + url
-		,query : url
-		,host : host_path
-	    };
+	  return {
+	    url : host_path + "?" + url + nonhistoryPath
+	    ,query : url
+	    ,host : host_path
+	  };
 	}
 	,callResults : function(callback, doPush){
-	    if(this.isLoading){
-		this.ajaxCall.abort();
-	    }
+	  if(this.isLoading){
+	    this.ajaxCall.abort();
+	  }
+	  
+	  this.isLoading = true;
 
-	    this.isLoading = true;
-
+	  if(this.options.loaderSelector.length > 0)
+	    jQuery(this.options.loaderSelector).show();
+	  
+	  var self = this
+          ,modifiedCB = callback.bind(self)
+          ,cb = function(data){
+	    this.isLoading = false;
 	    if(this.options.loaderSelector.length > 0)
-		jQuery(this.options.loaderSelector).show();
+              jQuery(this.options.loaderSelector).hide();
+	    
+	    if("error" in data)
+              return false;
 
-	    var self = this
-            ,modifiedCB = callback.bind(self)
-            ,cb = function(data){
-		this.isLoading = false;
-		if(this.options.loaderSelector.length > 0)
-                    jQuery(this.options.loaderSelector).hide();
-
-		if("error" in data)
-                    return false;
-
-		modifiedCB(data);
-            }
+	    modifiedCB(data);
+          }
 	  ,urlobj = self.url();
-
-	  console.log("http://search.unbxdapi.com/05e6a99e0d540396f2c9326889037002/medicalsupplydepot_com-u1432899153065/search?q=*&filter=Size_fq:%222%5C%22%20X%202%5C%22%22");
-	  console.log(urlobj.url); 
-
-	    if(doPush){
-		var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
-		if(this.isHistory){
-		    history.pushState(this.params,null,location.protocol + "//" + location.host + location.pathname + "?" + finalquery);
-		}else{
-		    window.location.hash = finalquery;
-		    this.currentHash = finalquery;
-		}
+	  
+	  if(doPush){
+	    var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
+	    if(this.isHistory){
+	      history.pushState(this.params,null,location.protocol + "//" + location.host + location.pathname + "?" + finalquery);
+	    }else{
+	      window.location.hash = finalquery;
+	      this.currentHash = finalquery;
 	    }
+	  }
 
-	    this.ajaxCall = jQuery.ajax({
-		url: urlobj.url
-		,dataType: "jsonp"
-		,jsonp: 'json.wrf'
-		,success: cb.bind(self)
-	    });
+	  this.ajaxCall = jQuery.ajax({
+	    url: urlobj.url
+	    ,dataType: "jsonp"
+	    ,jsonp: 'json.wrf'
+	    ,success: cb.bind(self)
+	  });
 	}
 	,reset: function(){
 	    this.totalNumberOfProducts = 0;
