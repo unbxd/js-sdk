@@ -140,7 +140,49 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         ,customReset : function(){}
 	,bannerSelector: ""
         ,bannerTemp: '<a href="{{landingUrl}}"><img src="{{imageUrl}}"/></a>'
-        ,bannerCount: 1
+      ,bannerCount: 1
+      ,sortContainerSelector: ''
+      ,sortOptions: [{
+	name: 'Relevancy'
+      },{
+	name: 'Price: H-L',
+	field: 'price',
+	order: 'desc'
+      },{
+	name: 'Price: L-H',
+	field: 'price',
+	order: 'asc'
+      }]
+      ,sortContainerTemp: [
+	'<select>',
+	'{{#options}}',
+	'{{#if selected}}',
+	'<option value="{{field}}-{{order}}" selected>{{name}}</option>',
+	'{{else}}',
+	'<option value="{{field}}-{{order}}">{{name}}</option>',
+	'{{/if}}',
+	'{{/options}}',
+	'</select>'
+      ].join('')
+      ,pageSizeContainerSelector: ''
+      ,pageSizeOptions: [{
+	name: '12',
+	value: '12'
+      },{
+	name: '24',
+	value: '24'
+      }]
+      ,pageSizeContainerTemp: [
+	'<select>',
+	'{{#options}}',
+	'{{#if selected}}',
+	'<option value="{{value}}" selected>{{name}}</option>',
+	'{{else}}',
+	'<option value="{{value}}">{{name}}</option>',
+	'{{/if}}',
+	'{{/options}}',
+	'</select>'
+      ].join('')
     };
 
     jQuery.extend(Unbxd.setSearch.prototype,{
@@ -148,9 +190,14 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,compiledSpellCheckTemp : false
 	,compiledSearchQueryTemp: false
 	,compiledFacetTemp : false
-	,compiledSelectedFacetTemp : false
+      ,compiledSelectedFacetTemp : false
+      ,compiledBannerTemp: false
+      ,compiledSortContainerTemp: false
+      ,compiledPageSizeContainerTemp: false
 	,currentNumberOfProducts : 0
-	,totalNumberOfProducts : 0
+      ,totalNumberOfProducts : 0
+      ,productStartIdx: 0
+      ,productEndIdx: 0
 	,isLoading : false
 	,params : {
             query : '*'
@@ -235,7 +282,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                     jQuery(this.options.searchResultContainer).html('');
 
                     this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
-			.setPageSize(this.options.pageSize);
+		    .setPageSize("rows" in finalParams.extra ? finalParams.extra.rows : this.options.pageSize);
 
                     if(this.params.query){
 		      this.callResults(this.paintResultSet);
@@ -247,7 +294,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 			this.options.setDefaultFilters.call(this);
 
                     this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
-			.setPageSize(this.options.pageSize);
+		    .setPageSize("rows" in finalParams.extra ? finalParams.extra.rows :  this.options.pageSize);
 
                     this.callResults(this.paintResultSet);
 		}
@@ -404,6 +451,38 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		    .callResults(self.paintResultSet,true);
 		});
 	    }
+
+	  if(this.options.sortContainerSelector.length > 0){
+	    jQuery(this.options.sortContainerSelector).delegate('select', 'change', function(e){
+	      e.preventDefault();
+	      var $t = jQuery(this),
+		  field = $t.val().split('-')[0],
+		  value = $t.val().split('-')[1];
+
+	      self
+		.resetSort()
+		.setPage(1);
+	      
+	      if(field)
+		self.addSort(field, value);
+	      
+	      self.callResults(self.paintOnlyResultSet, true);
+
+	    });
+	  }
+
+	  if(this.options.pageSizeContainerSelector.length > 0){
+	    jQuery(this.options.pageSizeContainerSelector).delegate('select', 'change', function(e){
+	      e.preventDefault();
+	      var $t = jQuery(this),
+		  pageSize = $t.val();
+
+	      self
+		.setPage(1)
+		.setPageSize(pageSize)
+		.callResults(self.paintOnlyResultSet, true);
+	    });
+	  }
 
 	    if(this.isHistory){
 		self.popped = ('state' in window.history);
@@ -774,8 +853,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 
 	    //lets get page size
-	    if("rows" in obj)
-		params.extra.rows = parseInt(obj.rows);
+	  if("rows" in obj)
+	    params.extra.rows = parseInt(obj.rows);
+	  else
+	    params.extra.rows = this.options.pageSize;
 
 	    //lets get query
 	    if("q" in obj)
@@ -857,24 +938,33 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    this.paintSelectedFacets();
 	}
 	,paintProductPage : function(obj){
-	    if("error" in obj)
-		return;
+	  if("error" in obj)
+	    return;
 
-	    if(!obj.response.numberOfProducts){
-		this.reset();
+	  if(!obj.response.numberOfProducts){
+	    this.reset();
 
-		this.options.onNoResult.call(this,obj);
+	    this.options.onNoResult.call(this,obj);
 
-		return this;
-	    }
+	    return this;
+	  }
 
-	    if(!this.compiledSearchQueryTemp)
-		this.compiledSearchQueryTemp = Handlebars.compile(this.options.searchQueryDisplayTemp);
+	  if(!this.compiledSearchQueryTemp)
+	    this.compiledSearchQueryTemp = Handlebars.compile(this.options.searchQueryDisplayTemp);
+
+	  this.productStartIdx = (!this.options.isAutoScroll && this.options.isPagination) ? obj.response.start + 1 : 1;
+	  this.productEndIdx = (this.getPage() * this.getPageSize() <= obj.response.numberOfProducts) ?
+	    this.getPage() * this.getPageSize() : obj.response.numberOfProducts;
 
 	    jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
-		query : obj.searchMetaData.queryParams.q
-		,numberOfProducts : obj.response.numberOfProducts
+	      query : obj.searchMetaData.queryParams.q
+	      ,numberOfProducts : obj.response.numberOfProducts
+	      ,start: this.productStartIdx
+	      ,end: this.productEndIdx
 	    })).show();
+
+	  this.paintSort(obj);
+	  this.paintPageSize(obj);
 
 	    if(this.getClass(this.options.searchResultSetTemp) == 'Function'){
 		this.options.searchResultSetTemp.call(this,obj);
@@ -905,6 +995,42 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		jQuery(this.options.clickNScrollElementSelector)[(this.currentNumberOfProducts < this.totalNumberOfProducts) ? 'show' : 'hide']();
 
 	}
+      ,paintSort: function(obj) {
+	if("error" in obj)
+	  return;
+	if(this.options.sortContainerSelector.length <= 0)
+	  return;
+
+	if(!this.compiledSortContainerTemp)
+	  this.compiledSortContainerTemp = Handlebars.compile(this.options.sortContainerTemp);
+
+	var sortOptions = this.options.sortOptions.map(function(opt){
+	  opt['selected'] = (opt.hasOwnProperty('field') && opt.field in this.params.sort && this.params.sort[opt.field] === opt.order) ? true : false;
+	  return opt;
+	}.bind(this));
+
+	jQuery(this.options.sortContainerSelector).html(this.compiledSortContainerTemp({
+	  options: sortOptions
+	}));
+      }
+      ,paintPageSize: function(obj) {
+	if("error" in obj)
+	  return;
+	if(this.options.pageSizeContainerSelector.length <= 0)
+	  return;
+
+	if(!this.compiledPageSizeContainerTemp)
+	  this.compiledPageSizeContainerTemp = Handlebars.compile(this.options.pageSizeContainerTemp);
+
+	var pageSizeOptions = this.options.pageSizeOptions.map(function(opt){
+	  opt['selected'] = (this.getPageSize() == opt.value) ? true : false;
+	  return opt;
+	}.bind(this));
+
+	jQuery(this.options.pageSizeContainerSelector).html(this.compiledPageSizeContainerTemp({
+	  options: pageSizeOptions
+	}));
+      }
 	,paintBanners : function(obj){
 	  if("error" in obj)
 	    return;
@@ -914,7 +1040,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    return;
 	  var banner = obj.banner;
 
-	  this.compiledBannerTemp = Handlebars.compile(this.options.bannerTemp);
+	  if(!this.compiledBannerTemp)
+	    this.compiledBannerTemp = Handlebars.compile(this.options.bannerTemp);
 
 	  var bannersToDraw = banner.banners.slice(0, this.options.bannerCount)
 	      .reduce(function(prev, curr){

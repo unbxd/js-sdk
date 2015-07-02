@@ -37,6 +37,10 @@
                 </h2>
                 <h3 class="result-title-count" id="search_title">
                 </h3>
+		<div class="result-page-size-options">
+		</div>
+		<div class="result-sort-options">
+		</div>
                 <div class="result-selected-facets clearfix" id="selected_facets">
                 </div>
                 <ul class="search-result-list clearfix" id="results_container">
@@ -68,9 +72,9 @@
             ,spellCheck : '#did_you_mean'
             ,spellCheckTemp : 'Did you mean : {{suggestion}} ?'
             ,searchQueryDisplay : '#search_title'
-            ,searchQueryDisplayTemp : 'Search results for {{query}} - {{numberOfProducts}}'
-        ,pageSize : 12
-	,noEncoding: false
+            ,searchQueryDisplayTemp : 'Showing results for {{query}} - {{start}}-{{end}} of {{numberOfProducts}} Results'
+        ,pageSize : 24
+	,noEncoding: true
         ,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
                     ,'<div class="result-image-container">'
                         ,'<span class="result-image-horizontal-holder">'
@@ -213,6 +217,8 @@
 	    console.log('onPageLoad', arguments, this);
 	  }
 	  ,bannerSelector: '.banner'
+	  ,sortContainerSelector: '.result-sort-options'
+	  ,pageSizeContainerSelector: '.result-page-size-options'
         });
     
     </script>
