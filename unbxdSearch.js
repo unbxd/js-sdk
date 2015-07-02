@@ -791,7 +791,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    //lets get pageNo
 	    if("start" in obj)
-		params.extra.page = (parseInt(obj.start) / parseInt(params.extra.rows)) + 1;
+	      params.extra.page = parseInt(obj.start, 10) + 1;
 
 	    return params;
 	}
