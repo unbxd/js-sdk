@@ -105,7 +105,31 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         ,isAutoScroll : false
         ,isClickNScroll : false
         ,isPagination : false
-        ,setPagination : function(totalNumberOfProducts,pageSize,currentPage){}
+      ,setPagination : function(totalNumberOfProducts,pageSize,currentPage){}
+      ,paginationContainerSelector: ''
+      ,paginationTemp:[
+	'{{#if hasFirst}}',
+	'<span class="unbxd_first"> &laquo; </span>',
+	'{{/if}}',
+	'{{#if hasPrev}}',
+	'<span class="unbxd_prev"> &lt; </span>',
+	'{{/if}}',
+	'{{#pages}}',
+	'{{#if current}}',
+	'<span class="unbxd_page highlight"> {{page}} </span>',
+	'{{else}}',
+	'<span class="unbxd_page"> {{page}} </span>',
+	'{{/if}}',
+	'{{/pages}}',
+	'<span class="unbxd_pageof"> of </span>',
+	'<span class="unbxd_totalPages">{{totalPages}}</span>',
+	'{{#if hasNext}}',
+	'<span class="unbxd_next"> &gt; </span>',
+	'{{/if}}',
+	'{{#if hasLast}}',
+	'<span class="unbxd_last">&raquo;</span>',
+	'{{/if}}'
+      ].join('')
 	,clickNScrollElementSelector : '#load-more'
         ,pageSize : 15
         ,facetMultiSelect : true
@@ -194,10 +218,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       ,compiledBannerTemp: false
       ,compiledSortContainerTemp: false
       ,compiledPageSizeContainerTemp: false
-	,currentNumberOfProducts : 0
+      ,compiledPaginationTemp: false
+      ,currentNumberOfProducts : 0
       ,totalNumberOfProducts : 0
       ,productStartIdx: 0
       ,productEndIdx: 0
+      ,totalPages: 0
 	,isLoading : false
 	,params : {
             query : '*'
@@ -481,6 +507,33 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		.setPage(1)
 		.setPageSize(pageSize)
 		.callResults(self.paintOnlyResultSet, true);
+	    });
+	  }
+
+	  if(this.options.paginationContainerSelector.length > 0){
+	    jQuery(this.options.paginationContainerSelector).delegate('[class*=unbxd_]', 'click', function(e) {
+	      e.preventDefault();
+	      var $t = jQuery(this),
+		  classAction = '';
+
+	      if(!$t.hasClass('highlight') || !$t.hasClass('unbxd_pageof')){
+		classAction = $t.attr('class').split('_')[1];
+		if(classAction === 'page' && !isNaN( parseInt($t.text(), 10) ) ){
+		  self.setPage(parseInt($t.text(), 10));
+		} else if(classAction === 'prev'){
+		  self.setPage(self.getPage() - 1);
+		} else if(classAction === 'first'){
+		  self.setPage(1);
+		} else if(classAction === 'totalPages'){
+		  self.setPage(self.totalPages);
+		} else if(classAction === 'next'){
+		  self.setPage(self.getPage() + 1);
+		} else if(classAction === 'last'){
+		  self.setPage(self.totalPages);
+		}
+		self.callResults(self.paintOnlyResultSet, true);
+	      }
+	      
 	    });
 	  }
 
@@ -880,7 +933,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    //lets get pageNo
 	    if("start" in obj)
-	      params.extra.page = parseInt(obj.start, 10) + 1;
+	      params.extra.page = (parseInt(obj.start) / parseInt(params.extra.rows)) + 1;
 
 	    return params;
 	}
@@ -963,6 +1016,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.productStartIdx = (this.isUsingPagination()) ? obj.response.start + 1 : 1;
 	  this.productEndIdx = (this.getPage() * this.getPageSize() <= obj.response.numberOfProducts) ?
 	    this.getPage() * this.getPageSize() : obj.response.numberOfProducts;
+	  this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
 
 	    jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
 	      query : obj.searchMetaData.queryParams.q
@@ -973,6 +1027,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	  this.paintSort(obj);
 	  this.paintPageSize(obj);
+	  this.paintPagination(obj);
 
 	    if(this.getClass(this.options.searchResultSetTemp) == 'Function'){
 		this.options.searchResultSetTemp.call(this,obj);
@@ -1039,6 +1094,49 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	jQuery(this.options.pageSizeContainerSelector).html(this.compiledPageSizeContainerTemp({
 	  options: pageSizeOptions
+	}));
+      }
+      ,paintPagination: function(obj) {
+	if("error" in obj)
+	  return;
+	if(this.options.paginationContainerSelector.length <= 0)
+	  return;
+	if(!this.isUsingPagination())
+	  return;
+
+	if(!this.compiledPaginationTemp)
+	  this.compiledPaginationTemp = Handlebars.compile(this.options.paginationTemp);
+
+	var seq = [{
+	  page: this.getPage() - 2,
+	  current: false
+	},{
+	  page: this.getPage() - 1,
+	  current: false
+	},{
+	  page: this.getPage(),
+	  current: true
+	},{
+	  page: this.getPage() + 1,
+	  current: false
+	},{
+	  page: this.getPage() + 2,
+	  current: false
+	}];
+
+	var pagesToShow = seq.filter(function(obj){
+	  return obj.page > 0 && obj.page <= this.totalPages;
+	}.bind(this))
+
+	
+	  
+	jQuery(this.options.paginationContainerSelector).html(this.compiledPaginationTemp({
+	  hasFirst: this.getPage() > 1 ? true : false,
+	  hasPrev: this.getPage() > 1 ? true : false,
+	  pages: pagesToShow,
+	  totalPages: this.totalPages,
+	  hasNext: this.getPage() < this.totalPages ? true : false,
+	  hasLast: this.getPage() < this.totalPages ? true : false
 	}));
       }
 	,paintBanners : function(obj){
