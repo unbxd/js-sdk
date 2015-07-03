@@ -636,6 +636,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    return this;
 	}
+      ,isUsingPagination: function(){
+	return !this.options.isAutoScroll && this.options.isPagination;
+      }
 	,getHostNPath: function(){
 	    return "//search.unbxdapi.com/"+ this.options.APIKey + "/" + this.options.siteName + "/"  + (this.options.type == "browse" ? "browse" : "search" )
 	}
@@ -700,14 +703,19 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		}
 	      } else if(key === 'wt' || key === 'format') {
 		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
+	      } else if(!this.isUsingPagination() && key === 'rows'){
+		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
 	      } else
 		url += '&' + key + '=' + encodeURIComponent(value);
 	    }
 	  }
 
-	  url += '&start=' + (this.params.extra.page <= 1 ? 0  : (this.params.extra.page - 1) * this.params.extra.rows);
+	  if(this.isUsingPagination())
+	    url += '&start=' + (this.params.extra.page <= 1 ? 0  : (this.params.extra.page - 1) * this.params.extra.rows);
+	  else
+	    nonhistoryPath += '&start=' + (this.params.extra.page <= 1 ? 0  : (this.params.extra.page - 1) * this.params.extra.rows);
 
-	  url += this.options.getFacetStats.length > 0 ? "&stats=" + this.options.getFacetStats : "";
+	  nonhistoryPath += this.options.getFacetStats.length > 0 ? "&stats=" + this.options.getFacetStats : "";
 
 	  if(this.options.fields.length){
 	    nonhistoryPath += '&fields=' + this.options.fields.join(',');
@@ -952,7 +960,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if(!this.compiledSearchQueryTemp)
 	    this.compiledSearchQueryTemp = Handlebars.compile(this.options.searchQueryDisplayTemp);
 
-	  this.productStartIdx = (!this.options.isAutoScroll && this.options.isPagination) ? obj.response.start + 1 : 1;
+	  this.productStartIdx = (this.isUsingPagination()) ? obj.response.start + 1 : 1;
 	  this.productEndIdx = (this.getPage() * this.getPageSize() <= obj.response.numberOfProducts) ?
 	    this.getPage() * this.getPageSize() : obj.response.numberOfProducts;
 
@@ -1017,6 +1025,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	if("error" in obj)
 	  return;
 	if(this.options.pageSizeContainerSelector.length <= 0)
+	  return;
+	if(!this.isUsingPagination())
 	  return;
 
 	if(!this.compiledPageSizeContainerTemp)
