@@ -1,27 +1,152 @@
 //uglifyjs unbxdSearch.js -o unbxdSearch.min.js && gzip -c unbxdSearch.min.js > unbxdSearch.min.js.gz && aws s3 cp unbxdSearch.min.js.gz s3://unbxd/unbxdSearch.js --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --content-encoding gzip --cache-control max-age=3600
 var unbxdSearchInit = function(jQuery, Handlebars){    
-    window.Unbxd = window.Unbxd || {};
+  window.Unbxd = window.Unbxd || {};
 
-    if (!Function.prototype.bind) {
-	Function.prototype.bind = function (oThis) {
-            if (typeof this !== "function") {
-		throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-            }
+  if (!Function.prototype.bind) {
+    Function.prototype.bind = function (oThis) {
+      if (typeof this !== "function") {
+	throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+      }
 
-            var aArgs = Array.prototype.slice.call(arguments, 1),
-		fToBind = this,
-		fNOP = function () {},
-		fBound = function () {
-                    return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
-		};
+      var aArgs = Array.prototype.slice.call(arguments, 1),
+	  fToBind = this,
+	  fNOP = function () {},
+	  fBound = function () {
+            return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
+	  };
 
-            fNOP.prototype = this.prototype;
-            fBound.prototype = new fNOP();
+      fNOP.prototype = this.prototype;
+      fBound.prototype = new fNOP();
 
-            return fBound;
-	};
-    }
+      return fBound;
+    };
+  }
 
+  // Production steps of ECMA-262, Edition 5, 15.4.4.19
+  // Reference: http://es5.github.io/#x15.4.4.19
+  if (!Array.prototype.map) {
+
+    Array.prototype.map = function(callback, thisArg) {
+
+      var T, A, k;
+
+      if (this == null) {
+	throw new TypeError(' this is null or not defined');
+      }
+
+      // 1. Let O be the result of calling ToObject passing the |this|
+      //    value as the argument.
+      var O = Object(this);
+
+      // 2. Let lenValue be the result of calling the Get internal
+      //    method of O with the argument "length".
+      // 3. Let len be ToUint32(lenValue).
+      var len = O.length >>> 0;
+
+      // 4. If IsCallable(callback) is false, throw a TypeError exception.
+      // See: http://es5.github.com/#x9.11
+      if (typeof callback !== 'function') {
+	throw new TypeError(callback + ' is not a function');
+      }
+
+      // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.
+      if (arguments.length > 1) {
+	T = thisArg;
+      }
+
+      // 6. Let A be a new array created as if by the expression new Array(len)
+      //    where Array is the standard built-in constructor with that name and
+      //    len is the value of len.
+      A = new Array(len);
+
+      // 7. Let k be 0
+      k = 0;
+
+      // 8. Repeat, while k < len
+      while (k < len) {
+
+	var kValue, mappedValue;
+
+	// a. Let Pk be ToString(k).
+	//   This is implicit for LHS operands of the in operator
+	// b. Let kPresent be the result of calling the HasProperty internal
+	//    method of O with argument Pk.
+	//   This step can be combined with c
+	// c. If kPresent is true, then
+	if (k in O) {
+
+	  // i. Let kValue be the result of calling the Get internal
+	  //    method of O with argument Pk.
+	  kValue = O[k];
+
+	  // ii. Let mappedValue be the result of calling the Call internal
+	  //     method of callback with T as the this value and argument
+	  //     list containing kValue, k, and O.
+	  mappedValue = callback.call(T, kValue, k, O);
+
+	  // iii. Call the DefineOwnProperty internal method of A with arguments
+	  // Pk, Property Descriptor
+	  // { Value: mappedValue,
+	  //   Writable: true,
+	  //   Enumerable: true,
+	  //   Configurable: true },
+	  // and false.
+
+	  // In browsers that support Object.defineProperty, use the following:
+	  // Object.defineProperty(A, k, {
+	  //   value: mappedValue,
+	  //   writable: true,
+	  //   enumerable: true,
+	  //   configurable: true
+	  // });
+
+	  // For best browser support, use the following:
+	  A[k] = mappedValue;
+	}
+	// d. Increase k by 1.
+	k++;
+      }
+
+      // 9. return A
+      return A;
+    };
+  }
+  
+  if (!Array.prototype.filter) {
+    Array.prototype.filter = function(fun/*, thisArg*/) {
+      'use strict';
+
+      if (this === void 0 || this === null) {
+	throw new TypeError();
+      }
+
+      var t = Object(this);
+      var len = t.length >>> 0;
+      if (typeof fun !== 'function') {
+	throw new TypeError();
+      }
+
+      var res = [];
+      var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
+      for (var i = 0; i < len; i++) {
+	if (i in t) {
+	  var val = t[i];
+
+	  // NOTE: Technically this should Object.defineProperty at
+	  //       the next index, as push can be affected by
+	  //       properties on Object.prototype and Array.prototype.
+	  //       But that method's new, and collisions should be
+	  //       rare, so use the more-compatible alternative.
+	  if (fun.call(thisArg, val, i, t)) {
+	    res.push(val);
+	  }
+	}
+      }
+
+      return res;
+    };
+  }
+  
   // Production steps of ECMA-262, Edition 5, 15.4.4.21
   // Reference: http://es5.github.io/#x15.4.4.21
   if (!Array.prototype.reduce) {
@@ -109,29 +234,28 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       ,paginationContainerSelector: ''
       ,paginationTemp:[
 	'{{#if hasFirst}}',
-	'<span class="unbxd_first"> &laquo; </span>',
+	'<span class="unbxd_first" unbxdaction="first"> &laquo; </span>',
 	'{{/if}}',
 	'{{#if hasPrev}}',
-	'<span class="unbxd_prev"> &lt; </span>',
+	'<span class="unbxd_prev" unbxdaction="prev"> &lt; </span>',
 	'{{/if}}',
 	'{{#pages}}',
 	'{{#if current}}',
 	'<span class="unbxd_page highlight"> {{page}} </span>',
 	'{{else}}',
-	'<span class="unbxd_page"> {{page}} </span>',
+	'<span class="unbxd_page" unbxdaction="{{page}}"> {{page}} </span>',
 	'{{/if}}',
 	'{{/pages}}',
 	'<span class="unbxd_pageof"> of </span>',
-	'<span class="unbxd_totalPages">{{totalPages}}</span>',
+	'<span class="unbxd_totalPages" unbxdaction="{{totalPages}}">{{totalPages}}</span>',
 	'{{#if hasNext}}',
-	'<span class="unbxd_next"> &gt; </span>',
+	'<span class="unbxd_next" unbxdaction="next"> &gt; </span>',
 	'{{/if}}',
 	'{{#if hasLast}}',
-	'<span class="unbxd_last">&raquo;</span>',
+	'<span class="unbxd_last" unbxdaction="last">&raquo;</span>',
 	'{{/if}}'
       ].join('')
 	,clickNScrollElementSelector : '#load-more'
-        ,pageSize : 15
         ,facetMultiSelect : true
         ,facetContainerSelector : ''
         ,facetCheckBoxSelector : ''
@@ -181,13 +305,14 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	'<select>',
 	'{{#options}}',
 	'{{#if selected}}',
-	'<option value="{{field}}-{{order}}" selected>{{name}}</option>',
+	'<option value="{{field}}-{{order}}" unbxdsortField="{{field}}" unbxdsortValue="{{order}}" selected>{{name}}</option>',
 	'{{else}}',
-	'<option value="{{field}}-{{order}}">{{name}}</option>',
+	'<option value="{{field}}-{{order}}" unbxdsortField="{{field}}" unbxdsortValue="{{order}}">{{name}}</option>',
 	'{{/if}}',
 	'{{/options}}',
 	'</select>'
       ].join('')
+      ,pageSize : 12
       ,pageSizeContainerSelector: ''
       ,pageSizeOptions: [{
 	name: '12',
@@ -200,9 +325,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	'<select>',
 	'{{#options}}',
 	'{{#if selected}}',
-	'<option value="{{value}}" selected>{{name}}</option>',
+	'<option value="{{value}}" selected unbxdpageSize="{{value}}">{{name}}</option>',
 	'{{else}}',
-	'<option value="{{value}}">{{name}}</option>',
+	'<option value="{{value}}" unbxdpageSize="{{value}}">{{name}}</option>',
 	'{{/if}}',
 	'{{/options}}',
 	'</select>'
@@ -278,18 +403,21 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	      this.callResults(this.paintResultSet);
             }else{
-		var cur_url = this.getUrlSubstring()
-                ,urlqueryparams = this.getQueryParams(cur_url)
-                ,decodedParams = this.getQueryParams(this.decode(cur_url))
-                ,queryparamcount = Object.keys(urlqueryparams).length
-                ,decodedParamscount = Object.keys(decodedParams).length
-                ,finalParams = null;
+	      var cur_url = this.getUrlSubstring()
+              ,urlqueryparams = this.getQueryParams(cur_url)
+	      // add test to check if the url is encoded,
+	      // decode the query parameters only if url is encoded
+	      // fixes SKU searches like writ0035/WRIT0035 & HSWD0015
+              ,decodedParams = !(/[^A-Za-z0-9\+\/\=]/g.test(cur_url)) ? this.getQueryParams(this.decode(cur_url)) : {}
+              ,queryparamcount = Object.keys(urlqueryparams).length
+              ,decodedParamscount = Object.keys(decodedParams).length
+              ,finalParams = null;
 
-		if(decodedParamscount > 0){
-                    finalParams = this._processURL(decodedParams);
-		}else{
-                    finalParams = this._processURL(urlqueryparams);
-		}
+	      if(decodedParamscount > 0){
+                finalParams = this._processURL(decodedParams);
+	      }else{
+                finalParams = this._processURL(urlqueryparams);
+	      }
 
 		if(this.options.type == "search"){
                     this.params = finalParams;
@@ -479,57 +607,60 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 
 	  if(this.options.sortContainerSelector.length > 0){
-	    jQuery(this.options.sortContainerSelector).delegate('select', 'change', function(e){
+	    jQuery(this.options.sortContainerSelector).delegate('*', 'change', function(e){
 	      e.preventDefault();
 	      var $t = jQuery(this),
-		  field = $t.val().split('-')[0],
-		  value = $t.val().split('-')[1];
+		  $selected = $t.find(':selected'),
+		  field = $selected && $selected.attr('unbxdsortfield'),
+		  value = $selected && $selected.attr('unbxdsortvalue');
 
-	      self
-		.resetSort()
-		.setPage(1);
+	      if($selected){
+		self
+		  .resetSort()
+		  .setPage(1);
 	      
-	      if(field)
-		self.addSort(field, value);
+		if(field && value)
+		  self.addSort(field, value);
 	      
-	      self.callResults(self.paintOnlyResultSet, true);
+		self.callResults(self.paintOnlyResultSet, true);
+	      }
 
 	    });
 	  }
 
 	  if(this.options.pageSizeContainerSelector.length > 0){
-	    jQuery(this.options.pageSizeContainerSelector).delegate('select', 'change', function(e){
+	    jQuery(this.options.pageSizeContainerSelector).delegate('*', 'change', function(e){
 	      e.preventDefault();
 	      var $t = jQuery(this),
-		  pageSize = $t.val();
+		  $selected = $t.find(':selected'),
+		  pageSize = $selected && $selected.attr('unbxdpagesize');
 
-	      self
-		.setPage(1)
-		.setPageSize(pageSize)
-		.callResults(self.paintOnlyResultSet, true);
+	      if($selected && pageSize){
+		self
+		  .setPage(1)
+		  .setPageSize(pageSize)
+		  .callResults(self.paintOnlyResultSet, true);
+	      }
 	    });
 	  }
 
 	  if(this.options.paginationContainerSelector.length > 0){
-	    jQuery(this.options.paginationContainerSelector).delegate('[class*=unbxd_]', 'click', function(e) {
+	    jQuery(this.options.paginationContainerSelector).delegate('*', 'click', function(e) {
 	      e.preventDefault();
 	      var $t = jQuery(this),
-		  classAction = '';
+		  keys = {
+		    first: 1,
+		    prev: self.getPage() - 1,
+		    next: self.getPage() + 1,
+		    last: self.totalPages
+		  },
+		  action = $t.attr('unbxdaction') || '';
 
-	      if(!$t.hasClass('highlight') || !$t.hasClass('unbxd_pageof')){
-		classAction = $t.attr('class').split('_')[1];
-		if(classAction === 'page' && !isNaN( parseInt($t.text(), 10) ) ){
-		  self.setPage(parseInt($t.text(), 10));
-		} else if(classAction === 'prev'){
-		  self.setPage(self.getPage() - 1);
-		} else if(classAction === 'first'){
-		  self.setPage(1);
-		} else if(classAction === 'totalPages'){
-		  self.setPage(self.totalPages);
-		} else if(classAction === 'next'){
-		  self.setPage(self.getPage() + 1);
-		} else if(classAction === 'last'){
-		  self.setPage(self.totalPages);
+	      if(action){
+		if(keys[action]){
+		  self.setPage(keys[action]);
+		} else if(!isNaN(parseInt(action, 10))){
+		  self.setPage(parseInt(action, 10));
 		}
 		self.callResults(self.paintOnlyResultSet, true);
 	      }
@@ -1163,8 +1294,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  
 	}
 	,paintFacets: function(obj){
-	    if("error" in obj)
-		return;
+	  if("error" in obj)
+	    return;
+
+	  if(!obj.response.numberOfProducts)
+	    return this;
 
 	    var facets = obj.facets
             ,facetKeys = Object.keys(facets)
@@ -1295,8 +1429,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    return txt.replace("_"," ");
 	}
 	,getQueryParams : function (q){
-	    var e,
-		d = function (s) { return decodeURIComponent(s).replace(/\+/g, " ").trim(); },
+	    var e, //replace + character before decoding the URL
+		d = function (s) { return decodeURIComponent(s.replace(/\+/g, " ")).trim(); },
 		//splits on equals
 		r = /([^&=]+)=?([^&]*)/g
             ,urlParams = {};
@@ -1310,13 +1444,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		,i = e1 != "-1" ? d(e[1].slice(e1+1, e[1].indexOf("]", e1))) : ""
 		,v = d(e[2]);
 
-		/*
-		  continues the loop and does not add any key,value to the urlParams
-		  object. check if first group matches to be contain words(\w)
-		  fixes an issue for capital case seen from allianceonline where the 
-		  queries were writ0035/WRIT0035
-		*/
-		if( v.length == 0 || !(/\w+/g.exec(k)) )
+		if( v.length == 0 )
 		    continue;
 
 		if (!(k in urlParams)) {
@@ -1333,7 +1461,6 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		    Array.prototype.push.call(urlParams[k], v);
 		}
 	    }
-
 	    return urlParams;
 	}
 	,_keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -1357,11 +1484,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 	    return t;
 	}
-	,decode: function (e) {
-		//FOR NON ENCODED QUERY DON'T TRY TO DECODE IT
-		//FIXES q=HSWD0015 bug ON allianceonline.co.uk
-		if(e.indexOf("q=") === 0)
-			return e;
+      ,decode: function (e) {
 	    var t = "",n, r, i,s, o, u, a,f = 0;
 	    e = e.replace(/[^A-Za-z0-9\+\/\=]/g, "");
 	    while (f < e.length) {
@@ -1380,7 +1503,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		    t = t + String.fromCharCode(i);
 		}
 	    }
-	    t = this._utf8_decode(t);
+	  t = this._utf8_decode(t);
+
 	    return t;
 	}
 	,_utf8_encode: function (e) {

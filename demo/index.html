@@ -41,6 +41,8 @@
 		</div>
 		<div class="result-sort-options">
 		</div>
+		<div class="result-pagination">
+		</div>
                 <div class="result-selected-facets clearfix" id="selected_facets">
                 </div>
                 <ul class="search-result-list clearfix" id="results_container">
@@ -62,9 +64,13 @@
             return total + index + 1;
         });
 
-        window.searchobj = new Unbxd.setSearch({
-            siteName : 'demosite-u1407617955968'
-	    ,APIKey : '64a4a2592a648ac8415e13c561e44991'
+    window.searchobj = new Unbxd.setSearch({
+//      siteName: 'allianceonline_co_uk-u1423569528226',
+//      APIKey: 'f2ada89f21e1345bc660786663fb1a09'
+//      siteName: 'demosite-u1407617955968',
+//      APIKey: '64a4a2592a648ac8415e13c561e44991'
+            siteName : '2modern_com-u1435315921404' 
+	    ,APIKey : '2880cec60e264bc9b342a379666d4439'  
             ,type : 'search'
             ,getCategoryId : ''
             ,inputSelector : '#search_input'
@@ -90,7 +96,9 @@
             ,searchResultContainer : '#results_container'
             ,isClickNScroll: false
             ,clickNScrollSelector : ''
-            ,isAutoScroll : true
+          ,isAutoScroll : false
+	  ,isPagination: true
+	  ,paginationContainerSelector: '.result-pagination'
         ,facetTemp : ['<div class="facet-block">'
 	,'<div class="facet-title">PRICE</div>'
 	,'<div class="facet-values">'
@@ -209,7 +217,8 @@
                     }
                 });
             }
-            ,setDefaultFilters : function(){}
+          ,setDefaultFilters : function(){
+	  }
           ,onIntialResultLoad : function(){
 	    console.log('onIntialResultLoad', arguments, this);
 	  }
