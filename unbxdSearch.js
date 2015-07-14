@@ -1355,7 +1355,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		}))
 	      }.bind(this), []);
 	  
-	  jQuery(this.options.bannerSelector).html(bannersToDraw.join(','));
+	  jQuery(this.options.bannerSelector).html(bannersToDraw.join(''));
 	  
 	}
 	,paintFacets: function(obj){
