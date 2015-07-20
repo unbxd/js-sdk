@@ -285,7 +285,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	inputSelector : '#search_query'
         ,searchButtonSelector : '#search_button'
         ,type : "search"
-        ,getCategoryId: ""
+      ,getCategoryId: ""
+      ,initPageLoad: true
         ,spellCheck : '' //
         ,spellCheckTemp : '<h3>Did you mean : {{suggestion}}</h3>'
         ,searchQueryDisplay : ''
@@ -427,6 +428,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		,rows : 0
 	    }
 	}
+      ,defaultParams: {
+      }
 	,isHistory : !!(window.history && history.pushState)
 	,popped : false //there is an edge case in Mozilla that fires popstate initially
 	,initialURL : ''
@@ -449,22 +452,23 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
             if(this.params.categoryId.length > 0){
 		if(typeof this.options.setDefaultFilters == "function")
-                    this.options.setDefaultFilters.call(this);
+		  this.setDefaultParams(this.params);
 
 		this.setPage(1)
                     .setPageSize(this.options.pageSize);
 
 		this.callResults(this.paintResultSet);
             }else if(this.options.type == "search" && this.input.value.trim().length){
-		if(typeof this.options.setDefaultFilters == "function")
-                    this.options.setDefaultFilters.call(this);
+	      if(typeof this.options.setDefaultFilters == "function")
+                this.setDefaultParams(this.params);
 
-		this.params.query = this.$input.val().trim();
+	      this.params.query = this.$input.val().trim();
 
+	      if(this.options.initPageLoad)
 		jQuery(this.options.searchResultContainer).html('');
 
-		this.setPage(1)
-                    .setPageSize(this.options.pageSize);
+	      this.setPage(1)
+                .setPageSize(this.options.pageSize);
 
 	      this.callResults(this.paintResultSet);
             }else{
@@ -484,11 +488,17 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                 finalParams = this._processURL(urlqueryparams);
 	      }
 
+	      if(!this.options.initPageLoad
+		 && finalParams.extra.hasOwnProperty('page')
+		 && finalParams.extra.page > 1)
+		finalParams.extra.page = finalParams.extra.page - 1;
+
+
 		if(this.options.type == "search"){
                     this.params = finalParams;
 
                     if(typeof this.options.setDefaultFilters == "function")
-			this.options.setDefaultFilters.call(this);
+		      this.setDefaultParams(this.params);
 
 
                     if(!("query" in this.params) || (this.params.query + "").trim().length == 0)
@@ -498,7 +508,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
                     this.$input.val(this.params.query != "*" ? this.params.query : "");
 
-                    jQuery(this.options.searchResultContainer).html('');
+		  if(this.options.initPageLoad)
+		    jQuery(this.options.searchResultContainer).html('');
 
                     this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
 		    .setPageSize("rows" in finalParams.extra ? finalParams.extra.rows : this.options.pageSize);
@@ -510,7 +521,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                     this.params = finalParams;
 
                     if(typeof this.options.setDefaultFilters == "function")
-			this.options.setDefaultFilters.call(this);
+		      this.setDefaultParams(this.params);
 
                     this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
 		    .setPageSize("rows" in finalParams.extra ? finalParams.extra.rows :  this.options.pageSize);
@@ -534,10 +545,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 			self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
 
+		      if(self.options.initPageLoad)
 			jQuery(self.options.searchResultContainer).html('');
 
 			if(typeof self.options.setDefaultFilters == "function")
-			    self.options.setDefaultFilters.call(self);
+			  self.setDefaultParams(self.params);
 
 			self.setPage(1)
 			    .setPageSize(self.options.pageSize)
@@ -554,10 +566,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 			    self.params.query = self.options.sanitizeQueryString.call(self, this.value );
 
+			  if(self.options.initPageLoad)
 			    jQuery(self.options.searchResultContainer).html('');
 
 			    if(typeof self.options.setDefaultFilters == "function")
-				self.options.setDefaultFilters.call(self);
+			      self.setDefaultParams(self.params);
 
 			    self.clearFilters(true).setPage(1)
 				.setPageSize(self.options.pageSize)
@@ -575,6 +588,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 			    self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
 
+			  if(self.options.initPageLoad)
 			    jQuery(self.options.searchResultContainer).html('');
 
 			    self.clearFilters(true).setPage(1)
@@ -909,30 +923,54 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  for(var x in this.params.filters){
 	    if(this.params.filters.hasOwnProperty(x)){
 	      var a = [];
+	      var b = [];
 	      for(var y in this.params.filters[x]){
-		if(this.params.filters[x].hasOwnProperty(y)){
+		if(this.defaultParams.hasOwnProperty('filters')
+		   && this.defaultParams.filters.hasOwnProperty(x)
+		   && this.defaultParams.filters[x].hasOwnProperty(y)
+		   && this.params.filters[x].hasOwnProperty(y)){
+		  b.push((x+':\"'+ encodeURIComponent(y.replace(/\"/g, "\\\"")) +'\"').replace(/\"{2,}/g, '"'));
+		} else if(this.params.filters[x].hasOwnProperty(y)){
 		  a.push((x+':\"'+ encodeURIComponent(y.replace(/\"/g, "\\\"")) +'\"').replace(/\"{2,}/g, '"'));
 		}
 	      }
 
-	      url += '&filter='+a.join(' OR ');
+	      if(a.length > 0)
+		url += '&filter='+a.join(' OR ') + b.join(' OR ');
+	      else if(b.length > 0)
+		nonhistoryPath += '&filter='+b.join(' OR ');
 	    }
 	  }
 
 	  for(var x in this.params.ranges){
 	    var a = [];
+	    var b = [];
 	    for(var y in this.params.ranges[x]){
-	      if(this.params.ranges[x].hasOwnProperty(y)){
+	      if(this.defaultParams.hasOwnProperty('ranges')
+		 && this.defaultParams.ranges.hasOwnProperty(x)
+		 && this.defaultParams.ranges[x].hasOwnProperty(y)
+		 && this.params.ranges[x].hasOwnProperty(y)){
+		b.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + ']');
+	      }else if(this.params.ranges[x].hasOwnProperty(y)){
 		a.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + ']');
 	      }
 	    }
 
-	    url += '&filter='+a.join(' OR ');
+	    if(a.length > 0)
+	      url += '&filter='+a.join(' OR ') + b.join(' OR ');
+	    else if(b.length > 0)
+	      nonhistoryPath += '&filter='+b.join(' OR ');
 	  }
 	  
 	  var a = [];
+	  var b = [];
 	  for(var field in this.params.sort){
-	    if (this.params.sort.hasOwnProperty(field)) {
+	    if(this.defaultParams.hasOwnProperty('sort')
+		 && this.defaultParams.sort.hasOwnProperty(field)
+		 && this.params.sort.hasOwnProperty(field)){
+	      var dir = this.params.sort[field] || 'desc';
+	      b.push(field + " " + dir);
+	    } else if (this.params.sort.hasOwnProperty(field)) {
 	      var dir = this.params.sort[field] || 'desc';
 	      a.push(field + " " + dir);
 	    }
@@ -940,6 +978,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	  if(a.length)
 	    url += '&sort='+a.join(',');
+
+	  if(b.length)
+	    nonhistoryPath += '&sort='+b.join(',');
 
 
 	  for(var key in this.params.extra){
@@ -953,6 +994,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	      } else if(key === 'wt' || key === 'format') {
 		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
 	      } else if(!this.isUsingPagination() && key === 'rows'){
+		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
+	      } else if(this.defaultParams.hasOwnProperty('extra') && this.defaultParams.extra.hasOwnProperty(key)){
 		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
 	      } else
 		url += '&' + key + '=' + encodeURIComponent(value);
@@ -1023,12 +1066,14 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  });
 	}
 	,reset: function(){
-	    this.totalNumberOfProducts = 0;
-	    this.currentNumberOfProducts = 0;
-	    jQuery(this.options.spellCheck).hide();
-	    jQuery(this.options.searchQueryDisplay).empty();
+	  this.totalNumberOfProducts = 0;
+	  this.currentNumberOfProducts = 0;
+	  jQuery(this.options.spellCheck).hide();
+	  jQuery(this.options.searchQueryDisplay).empty();
+	  if(this.options.initPageLoad)
 	    jQuery(this.options.searchResultContainer).empty();
-	    jQuery(this.options.facetContainerSelector).empty();
+	  
+	  jQuery(this.options.facetContainerSelector).empty();
 
 	    this.options.selectedFacetHolderSelector && jQuery(this.options.selectedFacetHolderSelector).hide();
 
@@ -1052,6 +1097,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    return this;
 	}
+      ,setDefaultParams: function(params){
+	this.options.setDefaultFilters.call(this);
+	
+	if(Object.keys(this.defaultParams).length === 0)
+	  this.defaultParams = jQuery.extend(true, {}, this.params);
+      }
 	,_processURL: function(url){
 	    var obj = typeof url == "string" ? this.getQueryParams(url) : url
             ,params = {
@@ -1153,6 +1204,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	  if(obj.hasOwnProperty('didYouMean')){
 	    if(obj.response.numberOfProducts == 0 ) { //> this.options.pageSize){
+	      if(this.params.extra.page > 1)
+		this.params.extra.page = this.params.extra.page - 1;
+
 	      this.params.query = obj.didYouMean[0].suggestion;
 	      
 	      if(!this.compiledSpellCheckTemp)
@@ -1175,24 +1229,28 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 	  }else{
 	    jQuery(this.options.spellCheck).hide();
-	    jQuery(this.options.searchResultContainer).empty();
+	    if(this.options.initPageLoad)
+	      jQuery(this.options.searchResultContainer).empty();
 	    this.paintProductPage(obj);
 	    facetsAlso && this.paintFacets(obj);
 	  }
 	}
 	,paintOnlyResultSet : function(obj){
+	  if(this.options.initPageLoad)
 	    jQuery(this.options.searchResultContainer).empty();
-	    this.paintProductPage(obj);
+	  this.paintProductPage(obj);
 	}
 	,paintAfterSpellCheck : function(obj){
+	  if(this.options.initPageLoad)
 	    jQuery(this.options.searchResultContainer).empty();
-	    this.paintProductPage(obj);
-	    this.paintFacets(obj);
+	  this.paintProductPage(obj);
+	  this.paintFacets(obj);
 	}
 	,paintAfterFacetChange : function(obj){
+	  if(this.options.initPageLoad)
 	    jQuery(this.options.searchResultContainer).empty();
-	    this.paintProductPage(obj);
-	    this.paintSelectedFacets();
+	  this.paintProductPage(obj);
+	  this.paintSelectedFacets();
 	}
 	,paintProductPage : function(obj){
 	  if("error" in obj)
@@ -1343,17 +1401,20 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if(this.options.bannerSelector.length === 0 )
 	    return;
 	  var banner = obj.banner;
+	  var bannersToDraw = [];
 
 	  if(!this.compiledBannerTemp)
 	    this.compiledBannerTemp = Handlebars.compile(this.options.bannerTemp);
 
-	  var bannersToDraw = banner.banners.slice(0, this.options.bannerCount)
-	      .reduce(function(prev, curr){
-		return prev.concat(prev, this.compiledBannerTemp({
+	  bannersToDraw = banner.banners.slice(0, this.options.bannerCount)
+	    .reduce(function(prev, curr){
+	      return prev.concat(this.compiledBannerTemp(
+		{
 		  landingUrl: curr.landingUrl,
 		  imageUrl: curr.imageUrl
-		}))
-	      }.bind(this), []);
+		}
+	      ));
+	    }.bind(this), []);
 	  
 	  jQuery(this.options.bannerSelector).html(bannersToDraw.join(''));
 	  
@@ -1430,6 +1491,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    this.paintSelectedFacets();
 
+	  if (!this.options.initPageLoad && this.params.extra.page > 1){
+	    this.params.extra.page =  this.params.extra.page - 1;
+	  }
+	  this.options.initPageLoad = true;
+	  
 	    if (typeof this.options.onFacetLoad == "function") {
 	      this.options.onFacetLoad.call(this, obj);
 	    }
