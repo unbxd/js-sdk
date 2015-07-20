@@ -286,7 +286,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         ,searchButtonSelector : '#search_button'
         ,type : "search"
       ,getCategoryId: ""
-      ,initPageLoad: true
+      ,deferInitRender: []
         ,spellCheck : '' //
         ,spellCheckTemp : '<h3>Did you mean : {{suggestion}}</h3>'
         ,searchQueryDisplay : ''
@@ -464,7 +464,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	      this.params.query = this.$input.val().trim();
 
-	      if(this.options.initPageLoad)
+	      if(this.options.deferInitRender.indexOf('search') === -1)
 		jQuery(this.options.searchResultContainer).html('');
 
 	      this.setPage(1)
@@ -488,10 +488,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                 finalParams = this._processURL(urlqueryparams);
 	      }
 
-	      if(!this.options.initPageLoad
+	      if(this.options.deferInitRender.indexOf('search') > -1 
 		 && finalParams.extra.hasOwnProperty('page')
-		 && finalParams.extra.page > 1)
-		finalParams.extra.page = finalParams.extra.page - 1;
+		 && finalParams.extra.page >= 1)
+		finalParams.extra.page = finalParams.extra.page + 1;
 
 
 		if(this.options.type == "search"){
@@ -508,7 +508,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
                     this.$input.val(this.params.query != "*" ? this.params.query : "");
 
-		  if(this.options.initPageLoad)
+		  if(this.options.deferInitRender.indexOf('search') === -1)
 		    jQuery(this.options.searchResultContainer).html('');
 
                     this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
@@ -545,7 +545,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 			self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
 
-		      if(self.options.initPageLoad)
+		      if(self.options.deferInitRender.indexOf('search') === -1)
 			jQuery(self.options.searchResultContainer).html('');
 
 			if(typeof self.options.setDefaultFilters == "function")
@@ -566,7 +566,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 			    self.params.query = self.options.sanitizeQueryString.call(self, this.value );
 
-			  if(self.options.initPageLoad)
+			  if(self.options.deferInitRender.indexOf('search') === -1)
 			    jQuery(self.options.searchResultContainer).html('');
 
 			    if(typeof self.options.setDefaultFilters == "function")
@@ -588,7 +588,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 			    self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
 
-			  if(self.options.initPageLoad)
+			  if(self.options.deferInitRender.indexOf('search') === -1)
 			    jQuery(self.options.searchResultContainer).html('');
 
 			    self.clearFilters(true).setPage(1)
@@ -1070,7 +1070,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.currentNumberOfProducts = 0;
 	  jQuery(this.options.spellCheck).hide();
 	  jQuery(this.options.searchQueryDisplay).empty();
-	  if(this.options.initPageLoad)
+	  if(this.options.deferInitRender.indexOf('search') === -1)
 	    jQuery(this.options.searchResultContainer).empty();
 	  
 	  jQuery(this.options.facetContainerSelector).empty();
@@ -1229,25 +1229,25 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 	  }else{
 	    jQuery(this.options.spellCheck).hide();
-	    if(this.options.initPageLoad)
+	    if(this.options.deferInitRender.indexOf('search') === -1)
 	      jQuery(this.options.searchResultContainer).empty();
 	    this.paintProductPage(obj);
 	    facetsAlso && this.paintFacets(obj);
 	  }
 	}
 	,paintOnlyResultSet : function(obj){
-	  if(this.options.initPageLoad)
+	  if(this.options.deferInitRender.indexOf('search') === -1)
 	    jQuery(this.options.searchResultContainer).empty();
 	  this.paintProductPage(obj);
 	}
 	,paintAfterSpellCheck : function(obj){
-	  if(this.options.initPageLoad)
+	  if(this.options.deferInitRender.indexOf('search') === -1)
 	    jQuery(this.options.searchResultContainer).empty();
 	  this.paintProductPage(obj);
 	  this.paintFacets(obj);
 	}
 	,paintAfterFacetChange : function(obj){
-	  if(this.options.initPageLoad)
+	  if(this.options.deferInitRender.indexOf('search') === -1)
 	    jQuery(this.options.searchResultContainer).empty();
 	  this.paintProductPage(obj);
 	  this.paintSelectedFacets();
@@ -1491,10 +1491,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    this.paintSelectedFacets();
 
-	  if (!this.options.initPageLoad && this.params.extra.page > 1){
+	  if (this.options.deferInitRender.indexOf('search') > -1 && this.params.extra.page > 1){
 	    this.params.extra.page =  this.params.extra.page - 1;
 	  }
-	  this.options.initPageLoad = true;
+	  this.options.deferInitRender = [];
 	  
 	    if (typeof this.options.onFacetLoad == "function") {
 	      this.options.onFacetLoad.call(this, obj);
