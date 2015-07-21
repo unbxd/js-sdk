@@ -1,27 +1,283 @@
 //uglifyjs unbxdSearch.js -o unbxdSearch.min.js && gzip -c unbxdSearch.min.js > unbxdSearch.min.js.gz && aws s3 cp unbxdSearch.min.js.gz s3://unbxd/unbxdSearch.js --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --content-encoding gzip --cache-control max-age=3600
 var unbxdSearchInit = function(jQuery, Handlebars){    
-    window.Unbxd = window.Unbxd || {};
+  window.Unbxd = window.Unbxd || {};
 
-    if (!Function.prototype.bind) {
-	Function.prototype.bind = function (oThis) {
-            if (typeof this !== "function") {
-		throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-            }
+  // Production steps of ECMA-262, Edition 5, 15.4.4.14
+  // Reference: http://es5.github.io/#x15.4.4.14
+  if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function(searchElement, fromIndex) {
 
-            var aArgs = Array.prototype.slice.call(arguments, 1),
-		fToBind = this,
-		fNOP = function () {},
-		fBound = function () {
-                    return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
-		};
+      var k;
 
-            fNOP.prototype = this.prototype;
-            fBound.prototype = new fNOP();
+      // 1. Let O be the result of calling ToObject passing
+      //    the this value as the argument.
+      if (this == null) {
+	throw new TypeError('"this" is null or not defined');
+      }
 
-            return fBound;
-	};
+      var O = Object(this);
+
+      // 2. Let lenValue be the result of calling the Get
+      //    internal method of O with the argument "length".
+      // 3. Let len be ToUint32(lenValue).
+      var len = O.length >>> 0;
+
+      // 4. If len is 0, return -1.
+      if (len === 0) {
+	return -1;
+      }
+
+      // 5. If argument fromIndex was passed let n be
+      //    ToInteger(fromIndex); else let n be 0.
+      var n = +fromIndex || 0;
+
+      if (Math.abs(n) === Infinity) {
+	n = 0;
+      }
+
+      // 6. If n >= len, return -1.
+      if (n >= len) {
+	return -1;
+      }
+
+      // 7. If n >= 0, then Let k be n.
+      // 8. Else, n<0, Let k be len - abs(n).
+      //    If k is less than 0, then let k be 0.
+      k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+
+      // 9. Repeat, while k < len
+      while (k < len) {
+	// a. Let Pk be ToString(k).
+	//   This is implicit for LHS operands of the in operator
+	// b. Let kPresent be the result of calling the
+	//    HasProperty internal method of O with argument Pk.
+	//   This step can be combined with c
+	// c. If kPresent is true, then
+	//    i.  Let elementK be the result of calling the Get
+	//        internal method of O with the argument ToString(k).
+	//   ii.  Let same be the result of applying the
+	//        Strict Equality Comparison Algorithm to
+	//        searchElement and elementK.
+	//  iii.  If same is true, return k.
+	if (k in O && O[k] === searchElement) {
+	  return k;
+	}
+	k++;
+      }
+      return -1;
+    };
+  }
+  
+  /**
+   * Shim for "fixing" IE's lack of support (IE < 9) for applying slice
+   * on host objects like NamedNodeMap, NodeList, and HTMLCollection
+   * (technically, since host objects have been implementation-dependent,
+   * at least before ES6, IE hasn't needed to work this way).
+   * Also works on strings, fixes IE < 9 to allow an explicit undefined
+   * for the 2nd argument (as in Firefox), and prevents errors when
+   * called on other DOM objects.
+   */
+  (function () {
+    'use strict';
+    var _slice = Array.prototype.slice;
+    
+    try {
+      // Can't be used with DOM elements in IE < 9
+      _slice.call(document.documentElement);
+    } catch (e) { // Fails in IE < 9
+      // This will work for genuine arrays, array-like objects,
+      // NamedNodeMap (attributes, entities, notations),
+      // NodeList (e.g., getElementsByTagName), HTMLCollection (e.g., childNodes),
+      // and will not fail on other DOM objects (as do DOM elements in IE < 9)
+      Array.prototype.slice = function(begin, end) {
+	// IE < 9 gets unhappy with an undefined end argument
+	end = (typeof end !== 'undefined') ? end : this.length;
+
+	// For native Array objects, we use the native slice function
+	if (Object.prototype.toString.call(this) === '[object Array]'){
+	  return _slice.call(this, begin, end);
+	}
+
+	// For array like object we handle it ourselves.
+	var i, cloned = [],
+	    size, len = this.length;
+
+	// Handle negative value for "begin"
+	var start = begin || 0;
+	start = (start >= 0) ? start : Math.max(0, len + start);
+
+	// Handle negative value for "end"
+	var upTo = (typeof end == 'number') ? Math.min(end, len) : len;
+	if (end < 0) {
+	  upTo = len + end;
+	}
+
+	// Actual expected size of the slice
+	size = upTo - start;
+
+	if (size > 0) {
+	  cloned = new Array(size);
+	  if (this.charAt) {
+	    for (i = 0; i < size; i++) {
+	      cloned[i] = this.charAt(start + i);
+	    }
+	  } else {
+	    for (i = 0; i < size; i++) {
+	      cloned[i] = this[start + i];
+	    }
+	  }
+	}
+
+	return cloned;
+      };
     }
+  }());
 
+  if (!Function.prototype.bind) {
+    Function.prototype.bind = function (oThis) {
+      if (typeof this !== "function") {
+	throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+      }
+
+      var aArgs = Array.prototype.slice.call(arguments, 1),
+	  fToBind = this,
+	  fNOP = function () {},
+	  fBound = function () {
+            return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
+	  };
+
+      fNOP.prototype = this.prototype;
+      fBound.prototype = new fNOP();
+
+      return fBound;
+    };
+  }
+
+  // Production steps of ECMA-262, Edition 5, 15.4.4.19
+  // Reference: http://es5.github.io/#x15.4.4.19
+  if (!Array.prototype.map) {
+
+    Array.prototype.map = function(callback, thisArg) {
+
+      var T, A, k;
+
+      if (this == null) {
+	throw new TypeError(' this is null or not defined');
+      }
+
+      // 1. Let O be the result of calling ToObject passing the |this|
+      //    value as the argument.
+      var O = Object(this);
+
+      // 2. Let lenValue be the result of calling the Get internal
+      //    method of O with the argument "length".
+      // 3. Let len be ToUint32(lenValue).
+      var len = O.length >>> 0;
+
+      // 4. If IsCallable(callback) is false, throw a TypeError exception.
+      // See: http://es5.github.com/#x9.11
+      if (typeof callback !== 'function') {
+	throw new TypeError(callback + ' is not a function');
+      }
+
+      // 5. If thisArg was supplied, let T be thisArg; else let T be undefined.
+      if (arguments.length > 1) {
+	T = thisArg;
+      }
+
+      // 6. Let A be a new array created as if by the expression new Array(len)
+      //    where Array is the standard built-in constructor with that name and
+      //    len is the value of len.
+      A = new Array(len);
+
+      // 7. Let k be 0
+      k = 0;
+
+      // 8. Repeat, while k < len
+      while (k < len) {
+
+	var kValue, mappedValue;
+
+	// a. Let Pk be ToString(k).
+	//   This is implicit for LHS operands of the in operator
+	// b. Let kPresent be the result of calling the HasProperty internal
+	//    method of O with argument Pk.
+	//   This step can be combined with c
+	// c. If kPresent is true, then
+	if (k in O) {
+
+	  // i. Let kValue be the result of calling the Get internal
+	  //    method of O with argument Pk.
+	  kValue = O[k];
+
+	  // ii. Let mappedValue be the result of calling the Call internal
+	  //     method of callback with T as the this value and argument
+	  //     list containing kValue, k, and O.
+	  mappedValue = callback.call(T, kValue, k, O);
+
+	  // iii. Call the DefineOwnProperty internal method of A with arguments
+	  // Pk, Property Descriptor
+	  // { Value: mappedValue,
+	  //   Writable: true,
+	  //   Enumerable: true,
+	  //   Configurable: true },
+	  // and false.
+
+	  // In browsers that support Object.defineProperty, use the following:
+	  // Object.defineProperty(A, k, {
+	  //   value: mappedValue,
+	  //   writable: true,
+	  //   enumerable: true,
+	  //   configurable: true
+	  // });
+
+	  // For best browser support, use the following:
+	  A[k] = mappedValue;
+	}
+	// d. Increase k by 1.
+	k++;
+      }
+
+      // 9. return A
+      return A;
+    };
+  }
+  
+  if (!Array.prototype.filter) {
+    Array.prototype.filter = function(fun/*, thisArg*/) {
+      'use strict';
+
+      if (this === void 0 || this === null) {
+	throw new TypeError();
+      }
+
+      var t = Object(this);
+      var len = t.length >>> 0;
+      if (typeof fun !== 'function') {
+	throw new TypeError();
+      }
+
+      var res = [];
+      var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
+      for (var i = 0; i < len; i++) {
+	if (i in t) {
+	  var val = t[i];
+
+	  // NOTE: Technically this should Object.defineProperty at
+	  //       the next index, as push can be affected by
+	  //       properties on Object.prototype and Array.prototype.
+	  //       But that method's new, and collisions should be
+	  //       rare, so use the more-compatible alternative.
+	  if (fun.call(thisArg, val, i, t)) {
+	    res.push(val);
+	  }
+	}
+      }
+
+      return res;
+    };
+  }
+  
   // Production steps of ECMA-262, Edition 5, 15.4.4.21
   // Reference: http://es5.github.io/#x15.4.4.21
   if (!Array.prototype.reduce) {
@@ -95,7 +351,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	inputSelector : '#search_query'
         ,searchButtonSelector : '#search_button'
         ,type : "search"
-        ,getCategoryId: ""
+      ,getCategoryId: ""
+      ,deferInitRender: []
         ,spellCheck : '' //
         ,spellCheckTemp : '<h3>Did you mean : {{suggestion}}</h3>'
         ,searchQueryDisplay : ''
@@ -105,9 +362,32 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         ,isAutoScroll : false
         ,isClickNScroll : false
         ,isPagination : false
-        ,setPagination : function(totalNumberOfProducts,pageSize,currentPage){}
+      ,setPagination : function(totalNumberOfProducts,pageSize,currentPage){}
+      ,paginationContainerSelector: ''
+      ,paginationTemp:[
+	'{{#if hasFirst}}',
+	'<span class="unbxd_first" unbxdaction="first"> &laquo; </span>',
+	'{{/if}}',
+	'{{#if hasPrev}}',
+	'<span class="unbxd_prev" unbxdaction="prev"> &lt; </span>',
+	'{{/if}}',
+	'{{#pages}}',
+	'{{#if current}}',
+	'<span class="unbxd_page highlight"> {{page}} </span>',
+	'{{else}}',
+	'<span class="unbxd_page" unbxdaction="{{page}}"> {{page}} </span>',
+	'{{/if}}',
+	'{{/pages}}',
+	'<span class="unbxd_pageof"> of </span>',
+	'<span class="unbxd_totalPages" unbxdaction="{{totalPages}}">{{totalPages}}</span>',
+	'{{#if hasNext}}',
+	'<span class="unbxd_next" unbxdaction="next"> &gt; </span>',
+	'{{/if}}',
+	'{{#if hasLast}}',
+	'<span class="unbxd_last" unbxdaction="last">&raquo;</span>',
+	'{{/if}}'
+      ].join('')
 	,clickNScrollElementSelector : '#load-more'
-        ,pageSize : 15
         ,facetMultiSelect : true
         ,facetContainerSelector : ''
         ,facetCheckBoxSelector : ''
@@ -140,7 +420,50 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         ,customReset : function(){}
 	,bannerSelector: ""
         ,bannerTemp: '<a href="{{landingUrl}}"><img src="{{imageUrl}}"/></a>'
-        ,bannerCount: 1
+      ,bannerCount: 1
+      ,sortContainerSelector: ''
+      ,sortOptions: [{
+	name: 'Relevancy'
+      },{
+	name: 'Price: H-L',
+	field: 'price',
+	order: 'desc'
+      },{
+	name: 'Price: L-H',
+	field: 'price',
+	order: 'asc'
+      }]
+      ,sortContainerTemp: [
+	'<select>',
+	'{{#options}}',
+	'{{#if selected}}',
+	'<option value="{{field}}-{{order}}" unbxdsortField="{{field}}" unbxdsortValue="{{order}}" selected>{{name}}</option>',
+	'{{else}}',
+	'<option value="{{field}}-{{order}}" unbxdsortField="{{field}}" unbxdsortValue="{{order}}">{{name}}</option>',
+	'{{/if}}',
+	'{{/options}}',
+	'</select>'
+      ].join('')
+      ,pageSize : 12
+      ,pageSizeContainerSelector: ''
+      ,pageSizeOptions: [{
+	name: '12',
+	value: '12'
+      },{
+	name: '24',
+	value: '24'
+      }]
+      ,pageSizeContainerTemp: [
+	'<select>',
+	'{{#options}}',
+	'{{#if selected}}',
+	'<option value="{{value}}" selected unbxdpageSize="{{value}}">{{name}}</option>',
+	'{{else}}',
+	'<option value="{{value}}" unbxdpageSize="{{value}}">{{name}}</option>',
+	'{{/if}}',
+	'{{/options}}',
+	'</select>'
+      ].join('')
     };
 
     jQuery.extend(Unbxd.setSearch.prototype,{
@@ -148,9 +471,16 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,compiledSpellCheckTemp : false
 	,compiledSearchQueryTemp: false
 	,compiledFacetTemp : false
-	,compiledSelectedFacetTemp : false
-	,currentNumberOfProducts : 0
-	,totalNumberOfProducts : 0
+      ,compiledSelectedFacetTemp : false
+      ,compiledBannerTemp: false
+      ,compiledSortContainerTemp: false
+      ,compiledPageSizeContainerTemp: false
+      ,compiledPaginationTemp: false
+      ,currentNumberOfProducts : 0
+      ,totalNumberOfProducts : 0
+      ,productStartIdx: 0
+      ,productEndIdx: 0
+      ,totalPages: 0
 	,isLoading : false
 	,params : {
             query : '*'
@@ -164,6 +494,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		,rows : 0
 	    }
 	}
+      ,defaultParams: {
+      }
 	,isHistory : !!(window.history && history.pushState)
 	,popped : false //there is an edge case in Mozilla that fires popstate initially
 	,initialURL : ''
@@ -186,43 +518,53 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
             if(this.params.categoryId.length > 0){
 		if(typeof this.options.setDefaultFilters == "function")
-                    this.options.setDefaultFilters.call(this);
+		  this.setDefaultParams(this.params);
 
 		this.setPage(1)
                     .setPageSize(this.options.pageSize);
 
 		this.callResults(this.paintResultSet);
             }else if(this.options.type == "search" && this.input.value.trim().length){
-		if(typeof this.options.setDefaultFilters == "function")
-                    this.options.setDefaultFilters.call(this);
+	      if(typeof this.options.setDefaultFilters == "function")
+                this.setDefaultParams(this.params);
 
-		this.params.query = this.$input.val().trim();
+	      this.params.query = this.$input.val().trim();
 
+	      if(this.options.deferInitRender.indexOf('search') === -1)
 		jQuery(this.options.searchResultContainer).html('');
 
-		this.setPage(1)
-                    .setPageSize(this.options.pageSize);
+	      this.setPage(1)
+                .setPageSize(this.options.pageSize);
 
 	      this.callResults(this.paintResultSet);
             }else{
-		var cur_url = this.getUrlSubstring()
-                ,urlqueryparams = this.getQueryParams(cur_url)
-                ,decodedParams = this.getQueryParams(this.decode(cur_url))
-                ,queryparamcount = Object.keys(urlqueryparams).length
-                ,decodedParamscount = Object.keys(decodedParams).length
-                ,finalParams = null;
+	      var cur_url = this.getUrlSubstring()
+              ,urlqueryparams = this.getQueryParams(cur_url)
+	      // add test to check if the url is encoded,
+	      // decode the query parameters only if url is encoded
+	      // fixes SKU searches like writ0035/WRIT0035 & HSWD0015
+              ,decodedParams = !(/[^A-Za-z0-9\+\/\=]/g.test(cur_url)) ? this.getQueryParams(this.decode(cur_url)) : {}
+              ,queryparamcount = Object.keys(urlqueryparams).length
+              ,decodedParamscount = Object.keys(decodedParams).length
+              ,finalParams = null;
 
-		if(decodedParamscount > 0){
-                    finalParams = this._processURL(decodedParams);
-		}else{
-                    finalParams = this._processURL(urlqueryparams);
-		}
+	      if(decodedParamscount > 0){
+                finalParams = this._processURL(decodedParams);
+	      }else{
+                finalParams = this._processURL(urlqueryparams);
+	      }
+
+	      if(this.options.deferInitRender.indexOf('search') > -1 
+		 && finalParams.extra.hasOwnProperty('page')
+		 && finalParams.extra.page >= 1)
+		finalParams.extra.page = finalParams.extra.page + 1;
+
 
 		if(this.options.type == "search"){
                     this.params = finalParams;
 
                     if(typeof this.options.setDefaultFilters == "function")
-			this.options.setDefaultFilters.call(this);
+		      this.setDefaultParams(this.params);
 
 
                     if(!("query" in this.params) || (this.params.query + "").trim().length == 0)
@@ -232,10 +574,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
                     this.$input.val(this.params.query != "*" ? this.params.query : "");
 
-                    jQuery(this.options.searchResultContainer).html('');
+		  if(this.options.deferInitRender.indexOf('search') === -1)
+		    jQuery(this.options.searchResultContainer).html('');
 
                     this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
-			.setPageSize(this.options.pageSize);
+		    .setPageSize("rows" in finalParams.extra ? finalParams.extra.rows : this.options.pageSize);
 
                     if(this.params.query){
 		      this.callResults(this.paintResultSet);
@@ -244,10 +587,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                     this.params = finalParams;
 
                     if(typeof this.options.setDefaultFilters == "function")
-			this.options.setDefaultFilters.call(this);
+		      this.setDefaultParams(this.params);
 
                     this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
-			.setPageSize(this.options.pageSize);
+		    .setPageSize("rows" in finalParams.extra ? finalParams.extra.rows :  this.options.pageSize);
 
                     this.callResults(this.paintResultSet);
 		}
@@ -268,10 +611,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 			self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
 
+		      if(self.options.deferInitRender.indexOf('search') === -1)
 			jQuery(self.options.searchResultContainer).html('');
 
 			if(typeof self.options.setDefaultFilters == "function")
-			    self.options.setDefaultFilters.call(self);
+			  self.setDefaultParams(self.params);
 
 			self.setPage(1)
 			    .setPageSize(self.options.pageSize)
@@ -288,10 +632,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 			    self.params.query = self.options.sanitizeQueryString.call(self, this.value );
 
+			  if(self.options.deferInitRender.indexOf('search') === -1)
 			    jQuery(self.options.searchResultContainer).html('');
 
 			    if(typeof self.options.setDefaultFilters == "function")
-				self.options.setDefaultFilters.call(self);
+			      self.setDefaultParams(self.params);
 
 			    self.clearFilters(true).setPage(1)
 				.setPageSize(self.options.pageSize)
@@ -309,6 +654,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 			    self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
 
+			  if(self.options.deferInitRender.indexOf('search') === -1)
 			    jQuery(self.options.searchResultContainer).html('');
 
 			    self.clearFilters(true).setPage(1)
@@ -404,6 +750,68 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		    .callResults(self.paintResultSet,true);
 		});
 	    }
+
+	  if(this.options.sortContainerSelector.length > 0){
+	    jQuery(this.options.sortContainerSelector).delegate('*', 'change', function(e){
+	      e.preventDefault();
+	      var $t = jQuery(this),
+		  $selected = $t.find(':selected'),
+		  field = $selected && $selected.attr('unbxdsortfield'),
+		  value = $selected && $selected.attr('unbxdsortvalue');
+
+	      if($selected){
+		self
+		  .resetSort()
+		  .setPage(1);
+	      
+		if(field && value)
+		  self.addSort(field, value);
+	      
+		self.callResults(self.paintOnlyResultSet, true);
+	      }
+
+	    });
+	  }
+
+	  if(this.options.pageSizeContainerSelector.length > 0){
+	    jQuery(this.options.pageSizeContainerSelector).delegate('*', 'change', function(e){
+	      e.preventDefault();
+	      var $t = jQuery(this),
+		  $selected = $t.find(':selected'),
+		  pageSize = $selected && $selected.attr('unbxdpagesize');
+
+	      if($selected && pageSize){
+		self
+		  .setPage(1)
+		  .setPageSize(pageSize)
+		  .callResults(self.paintOnlyResultSet, true);
+	      }
+	    });
+	  }
+
+	  if(this.options.paginationContainerSelector.length > 0){
+	    jQuery(this.options.paginationContainerSelector).delegate('*', 'click', function(e) {
+	      e.preventDefault();
+	      var $t = jQuery(this),
+		  keys = {
+		    first: 1,
+		    prev: self.getPage() - 1,
+		    next: self.getPage() + 1,
+		    last: self.totalPages
+		  },
+		  action = $t.attr('unbxdaction') || '';
+
+	      if(action){
+		if(keys[action]){
+		  self.setPage(keys[action]);
+		} else if(!isNaN(parseInt(action, 10))){
+		  self.setPage(parseInt(action, 10));
+		}
+		self.callResults(self.paintOnlyResultSet, true);
+	      }
+	      
+	    });
+	  }
 
 	    if(this.isHistory){
 		self.popped = ('state' in window.history);
@@ -557,6 +965,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    return this;
 	}
+      ,isUsingPagination: function(){
+	return !this.options.isAutoScroll && this.options.isPagination;
+      }
 	,getHostNPath: function(){
 	    return "//search.unbxdapi.com/"+ this.options.APIKey + "/" + this.options.siteName + "/"  + (this.options.type == "browse" ? "browse" : "search" )
 	}
@@ -564,135 +975,172 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    return window.location.hash.substring(1) || window.location.search.substring(1);
 	}
 	,url : function(){
-	    var host_path = this.getHostNPath();
+	  var host_path = this.getHostNPath();
 
-	    var url ="";
+	  var url ="";
+	  var nonhistoryPath = "";
 
-	    if(this.options.type == "search" && this.params['query'] != undefined){
-		url += '&q=' + encodeURIComponent(this.params.query);
-	    }else if(this.options.type == "browse" && this.params['categoryId'] != undefined){
-		url += '&category-id=' + encodeURIComponent(this.params.categoryId);
-	    }
+	  if(this.options.type == "search" && this.params['query'] != undefined){
+	  	var escapedQuery = this.params.query.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, "\\$&");
+	    url += '&q=' + encodeURIComponent(escapedQuery);
+	  }else if(this.options.type == "browse" && this.params['categoryId'] != undefined){
+	    url += '&category-id=' + encodeURIComponent(this.params.categoryId);
+	  }
 
-	    for(var x in this.params.filters){
-		if(this.params.filters.hasOwnProperty(x)){
-		    var a = [];
-		    for(var y in this.params.filters[x]){
-			if(this.params.filters[x].hasOwnProperty(y)){
-			  a.push((x+':\"'+ encodeURIComponent(y.replace(/\"/g, "\\\"")) +'\"').replace(/\"{2,}/g, '"'));
-			}
-		    }
-
-		    url += '&filter='+a.join(' OR ');
+	  for(var x in this.params.filters){
+	    if(this.params.filters.hasOwnProperty(x)){
+	      var a = [];
+	      var b = [];
+	      for(var y in this.params.filters[x]){
+		if(this.defaultParams.hasOwnProperty('filters')
+		   && this.defaultParams.filters.hasOwnProperty(x)
+		   && this.defaultParams.filters[x].hasOwnProperty(y)
+		   && this.params.filters[x].hasOwnProperty(y)){
+		  b.push((x+':\"'+ encodeURIComponent(y.replace(/\"/g, "\\\"")) +'\"').replace(/\"{2,}/g, '"'));
+		} else if(this.params.filters[x].hasOwnProperty(y)){
+		  a.push((x+':\"'+ encodeURIComponent(y.replace(/\"/g, "\\\"")) +'\"').replace(/\"{2,}/g, '"'));
 		}
+	      }
+
+	      if(a.length > 0)
+		url += '&filter='+a.join(' OR ') + b.join(' OR ');
+	      else if(b.length > 0)
+		nonhistoryPath += '&filter='+b.join(' OR ');
 	    }
+	  }
 
-	    for(var x in this.params.ranges){
-		var a = [];
-		for(var y in this.params.ranges[x]){
-		    if(this.params.ranges[x].hasOwnProperty(y)){
-			a.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + ']');
-		    }
-		}
-
-		url += '&filter='+a.join(' OR ');
-	    }
-
+	  for(var x in this.params.ranges){
 	    var a = [];
-	    for(var field in this.params.sort){
-		if (this.params.sort.hasOwnProperty(field)) {
-		    var dir = this.params.sort[field] || 'desc';
-		    a.push(field + " " + dir);
-		}
+	    var b = [];
+	    for(var y in this.params.ranges[x]){
+	      if(this.defaultParams.hasOwnProperty('ranges')
+		 && this.defaultParams.ranges.hasOwnProperty(x)
+		 && this.defaultParams.ranges[x].hasOwnProperty(y)
+		 && this.params.ranges[x].hasOwnProperty(y)){
+		b.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + ']');
+	      }else if(this.params.ranges[x].hasOwnProperty(y)){
+		a.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + ']');
+	      }
 	    }
 
-	    if(a.length)
-		url += '&sort='+a.join(',');
-
-
-	    for(var key in this.params.extra){
-		if (this.params.extra.hasOwnProperty(key) && key != 'page') {
-		    var value = this.params.extra[key];
-		    if(this.getClass(value) == "Array"){
-			value = value.getUnique();
-			for(var i = 0;i < value.length; i++){
-			    url += '&' + key + '=' + encodeURIComponent(value[i]);
-			}
-		    }else
-			url += '&' + key + '=' + encodeURIComponent(value);
-		}
+	    if(a.length > 0)
+	      url += '&filter='+a.join(' OR ') + b.join(' OR ');
+	    else if(b.length > 0)
+	      nonhistoryPath += '&filter='+b.join(' OR ');
+	  }
+	  
+	  var a = [];
+	  var b = [];
+	  for(var field in this.params.sort){
+	    if(this.defaultParams.hasOwnProperty('sort')
+		 && this.defaultParams.sort.hasOwnProperty(field)
+		 && this.params.sort.hasOwnProperty(field)){
+	      var dir = this.params.sort[field] || 'desc';
+	      b.push(field + " " + dir);
+	    } else if (this.params.sort.hasOwnProperty(field)) {
+	      var dir = this.params.sort[field] || 'desc';
+	      a.push(field + " " + dir);
 	    }
+	  }
 
+	  if(a.length)
+	    url += '&sort='+a.join(',');
+
+	  if(b.length)
+	    nonhistoryPath += '&sort='+b.join(',');
+
+
+	  for(var key in this.params.extra){
+	    if (this.params.extra.hasOwnProperty(key) && key != 'page') {
+	      var value = this.params.extra[key];
+	      if(this.getClass(value) == "Array"){
+		value = value.getUnique();
+		for(var i = 0;i < value.length; i++){
+		  url += '&' + key + '=' + encodeURIComponent(value[i]);
+		}
+	      } else if(key === 'wt' || key === 'format') {
+		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
+	      } else if(!this.isUsingPagination() && key === 'rows'){
+		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
+	      } else if(this.defaultParams.hasOwnProperty('extra') && this.defaultParams.extra.hasOwnProperty(key)){
+		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
+	      } else
+		url += '&' + key + '=' + encodeURIComponent(value);
+	    }
+	  }
+
+	  if(this.isUsingPagination())
 	    url += '&start=' + (this.params.extra.page <= 1 ? 0  : (this.params.extra.page - 1) * this.params.extra.rows);
+	  else
+	    nonhistoryPath += '&start=' + (this.params.extra.page <= 1 ? 0  : (this.params.extra.page - 1) * this.params.extra.rows);
 
-	    url += this.options.getFacetStats.length > 0 ? "&stats=" + this.options.getFacetStats : "";
+	  nonhistoryPath += this.options.getFacetStats.length > 0 ? "&stats=" + this.options.getFacetStats : "";
 
-	    if(this.options.fields.length){
-		url += '&fields=' + this.options.fields.join(',');
-	    }
+	  if(this.options.fields.length){
+	    nonhistoryPath += '&fields=' + this.options.fields.join(',');
+	  }
 
-	    if(this.options.facetMultiSelect)
-		url += '&facet.multiselect=true';
+	  if(this.options.facetMultiSelect)
+	    nonhistoryPath += '&facet.multiselect=true';
+	  
+	  nonhistoryPath += '&indent=off';
 
-	    url += '&indent=off';
-
-	    return {
-		url : host_path + "?" + url
-		,query : url
-		,host : host_path
-	    };
+	  return {
+	    url : host_path + "?" + url + nonhistoryPath
+	    ,query : url
+	    ,host : host_path
+	  };
 	}
 	,callResults : function(callback, doPush){
-	    if(this.isLoading){
-		this.ajaxCall.abort();
-	    }
+	  if(this.isLoading){
+	    this.ajaxCall.abort();
+	  }
+	  
+	  this.isLoading = true;
 
-	    this.isLoading = true;
-
+	  if(this.options.loaderSelector.length > 0)
+	    jQuery(this.options.loaderSelector).show();
+	  
+	  var self = this
+          ,modifiedCB = callback.bind(self)
+          ,cb = function(data){
+	    this.isLoading = false;
 	    if(this.options.loaderSelector.length > 0)
-		jQuery(this.options.loaderSelector).show();
+              jQuery(this.options.loaderSelector).hide();
+	    
+	    if("error" in data)
+              return false;
 
-	    var self = this
-            ,modifiedCB = callback.bind(self)
-            ,cb = function(data){
-		this.isLoading = false;
-		if(this.options.loaderSelector.length > 0)
-                    jQuery(this.options.loaderSelector).hide();
-
-		if("error" in data)
-                    return false;
-
-		modifiedCB(data);
-            }
+	    modifiedCB(data);
+          }
 	  ,urlobj = self.url();
-
-	  console.log("http://search.unbxdapi.com/05e6a99e0d540396f2c9326889037002/medicalsupplydepot_com-u1432899153065/search?q=*&filter=Size_fq:%222%5C%22%20X%202%5C%22%22");
-	  console.log(urlobj.url); 
-
-	    if(doPush){
-		var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
-		if(this.isHistory){
-		    history.pushState(this.params,null,location.protocol + "//" + location.host + location.pathname + "?" + finalquery);
-		}else{
-		    window.location.hash = finalquery;
-		    this.currentHash = finalquery;
-		}
+	  
+	  if(doPush){
+	    var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
+	    if(this.isHistory){
+	      history.pushState(this.params,null,location.protocol + "//" + location.host + location.pathname + "?" + finalquery);
+	    }else{
+	      window.location.hash = finalquery;
+	      this.currentHash = finalquery;
 	    }
+	  }
 
-	    this.ajaxCall = jQuery.ajax({
-		url: urlobj.url
-		,dataType: "jsonp"
-		,jsonp: 'json.wrf'
-		,success: cb.bind(self)
-	    });
+	  this.ajaxCall = jQuery.ajax({
+	    url: urlobj.url
+	    ,dataType: "jsonp"
+	    ,jsonp: 'json.wrf'
+	    ,success: cb.bind(self)
+	  });
 	}
 	,reset: function(){
-	    this.totalNumberOfProducts = 0;
-	    this.currentNumberOfProducts = 0;
-	    jQuery(this.options.spellCheck).hide();
-	    jQuery(this.options.searchQueryDisplay).empty();
+	  this.totalNumberOfProducts = 0;
+	  this.currentNumberOfProducts = 0;
+	  jQuery(this.options.spellCheck).hide();
+	  jQuery(this.options.searchQueryDisplay).empty();
+	  if(this.options.deferInitRender.indexOf('search') === -1)
 	    jQuery(this.options.searchResultContainer).empty();
-	    jQuery(this.options.facetContainerSelector).empty();
+	  
+	  jQuery(this.options.facetContainerSelector).empty();
 
 	    this.options.selectedFacetHolderSelector && jQuery(this.options.selectedFacetHolderSelector).hide();
 
@@ -716,6 +1164,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    return this;
 	}
+      ,setDefaultParams: function(params){
+	this.options.setDefaultFilters.call(this);
+	
+	if(Object.keys(this.defaultParams).length === 0)
+	  this.defaultParams = jQuery.extend(true, {}, this.params);
+      }
 	,_processURL: function(url){
 	    var obj = typeof url == "string" ? this.getQueryParams(url) : url
             ,params = {
@@ -774,8 +1228,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 
 	    //lets get page size
-	    if("rows" in obj)
-		params.extra.rows = parseInt(obj.rows);
+	  if("rows" in obj)
+	    params.extra.rows = parseInt(obj.rows);
+	  else
+	    params.extra.rows = this.options.pageSize;
 
 	    //lets get query
 	    if("q" in obj)
@@ -791,7 +1247,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    //lets get pageNo
 	    if("start" in obj)
-		params.extra.page = (parseInt(obj.start) / parseInt(params.extra.rows)) + 1;
+	      params.extra.page = (parseInt(obj.start) / parseInt(params.extra.rows)) + 1;
 
 	    return params;
 	}
@@ -815,6 +1271,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	  if(obj.hasOwnProperty('didYouMean')){
 	    if(obj.response.numberOfProducts == 0 ) { //> this.options.pageSize){
+	      if(this.params.extra.page > 1)
+		this.params.extra.page = this.params.extra.page - 1;
+
 	      this.params.query = obj.didYouMean[0].suggestion;
 	      
 	      if(!this.compiledSpellCheckTemp)
@@ -837,44 +1296,59 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 	  }else{
 	    jQuery(this.options.spellCheck).hide();
-	    jQuery(this.options.searchResultContainer).empty();
+	    if(this.options.deferInitRender.indexOf('search') === -1)
+	      jQuery(this.options.searchResultContainer).empty();
 	    this.paintProductPage(obj);
 	    facetsAlso && this.paintFacets(obj);
 	  }
 	}
 	,paintOnlyResultSet : function(obj){
+	  if(this.options.deferInitRender.indexOf('search') === -1)
 	    jQuery(this.options.searchResultContainer).empty();
-	    this.paintProductPage(obj);
+	  this.paintProductPage(obj);
 	}
 	,paintAfterSpellCheck : function(obj){
+	  if(this.options.deferInitRender.indexOf('search') === -1)
 	    jQuery(this.options.searchResultContainer).empty();
-	    this.paintProductPage(obj);
-	    this.paintFacets(obj);
+	  this.paintProductPage(obj);
+	  this.paintFacets(obj);
 	}
 	,paintAfterFacetChange : function(obj){
+	  if(this.options.deferInitRender.indexOf('search') === -1)
 	    jQuery(this.options.searchResultContainer).empty();
-	    this.paintProductPage(obj);
-	    this.paintSelectedFacets();
+	  this.paintProductPage(obj);
+	  this.paintSelectedFacets();
 	}
 	,paintProductPage : function(obj){
-	    if("error" in obj)
-		return;
+	  if("error" in obj)
+	    return;
 
-	    if(!obj.response.numberOfProducts){
-		this.reset();
+	  if(!obj.response.numberOfProducts){
+	    this.reset();
 
-		this.options.onNoResult.call(this,obj);
+	    this.options.onNoResult.call(this,obj);
 
-		return this;
-	    }
+	    return this;
+	  }
 
-	    if(!this.compiledSearchQueryTemp)
-		this.compiledSearchQueryTemp = Handlebars.compile(this.options.searchQueryDisplayTemp);
+	  if(!this.compiledSearchQueryTemp)
+	    this.compiledSearchQueryTemp = Handlebars.compile(this.options.searchQueryDisplayTemp);
+
+	  this.productStartIdx = (this.isUsingPagination()) ? obj.response.start + 1 : 1;
+	  this.productEndIdx = (this.getPage() * this.getPageSize() <= obj.response.numberOfProducts) ?
+	    this.getPage() * this.getPageSize() : obj.response.numberOfProducts;
+	  this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
 
 	    jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
-		query : obj.searchMetaData.queryParams.q
-		,numberOfProducts : obj.response.numberOfProducts
+	      query : obj.searchMetaData.queryParams.q
+	      ,numberOfProducts : obj.response.numberOfProducts
+	      ,start: this.productStartIdx
+	      ,end: this.productEndIdx
 	    })).show();
+
+	  this.paintSort(obj);
+	  this.paintPageSize(obj);
+	  this.paintPagination(obj);
 
 	    if(this.getClass(this.options.searchResultSetTemp) == 'Function'){
 		this.options.searchResultSetTemp.call(this,obj);
@@ -905,6 +1379,87 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		jQuery(this.options.clickNScrollElementSelector)[(this.currentNumberOfProducts < this.totalNumberOfProducts) ? 'show' : 'hide']();
 
 	}
+      ,paintSort: function(obj) {
+	if("error" in obj)
+	  return;
+	if(this.options.sortContainerSelector.length <= 0)
+	  return;
+
+	if(!this.compiledSortContainerTemp)
+	  this.compiledSortContainerTemp = Handlebars.compile(this.options.sortContainerTemp);
+
+	var sortOptions = this.options.sortOptions.map(function(opt){
+	  opt['selected'] = (opt.hasOwnProperty('field') && opt.field in this.params.sort && this.params.sort[opt.field] === opt.order) ? true : false;
+	  return opt;
+	}.bind(this));
+
+	jQuery(this.options.sortContainerSelector).html(this.compiledSortContainerTemp({
+	  options: sortOptions
+	}));
+      }
+      ,paintPageSize: function(obj) {
+	if("error" in obj)
+	  return;
+	if(this.options.pageSizeContainerSelector.length <= 0)
+	  return;
+	if(!this.isUsingPagination())
+	  return;
+
+	if(!this.compiledPageSizeContainerTemp)
+	  this.compiledPageSizeContainerTemp = Handlebars.compile(this.options.pageSizeContainerTemp);
+
+	var pageSizeOptions = this.options.pageSizeOptions.map(function(opt){
+	  opt['selected'] = (this.getPageSize() == opt.value) ? true : false;
+	  return opt;
+	}.bind(this));
+
+	jQuery(this.options.pageSizeContainerSelector).html(this.compiledPageSizeContainerTemp({
+	  options: pageSizeOptions
+	}));
+      }
+      ,paintPagination: function(obj) {
+	if("error" in obj)
+	  return;
+	if(this.options.paginationContainerSelector.length <= 0)
+	  return;
+	if(!this.isUsingPagination())
+	  return;
+
+	if(!this.compiledPaginationTemp)
+	  this.compiledPaginationTemp = Handlebars.compile(this.options.paginationTemp);
+
+	var seq = [{
+	  page: this.getPage() - 2,
+	  current: false
+	},{
+	  page: this.getPage() - 1,
+	  current: false
+	},{
+	  page: this.getPage(),
+	  current: true
+	},{
+	  page: this.getPage() + 1,
+	  current: false
+	},{
+	  page: this.getPage() + 2,
+	  current: false
+	}];
+
+	var pagesToShow = seq.filter(function(obj){
+	  return obj.page > 0 && obj.page <= this.totalPages;
+	}.bind(this))
+
+	
+	  
+	jQuery(this.options.paginationContainerSelector).html(this.compiledPaginationTemp({
+	  hasFirst: this.getPage() > 1 ? true : false,
+	  hasPrev: this.getPage() > 1 ? true : false,
+	  pages: pagesToShow,
+	  totalPages: this.totalPages,
+	  hasNext: this.getPage() < this.totalPages ? true : false,
+	  hasLast: this.getPage() < this.totalPages ? true : false
+	}));
+      }
 	,paintBanners : function(obj){
 	  if("error" in obj)
 	    return;
@@ -913,23 +1468,30 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if(this.options.bannerSelector.length === 0 )
 	    return;
 	  var banner = obj.banner;
+	  var bannersToDraw = [];
 
-	  this.compiledBannerTemp = Handlebars.compile(this.options.bannerTemp);
+	  if(!this.compiledBannerTemp)
+	    this.compiledBannerTemp = Handlebars.compile(this.options.bannerTemp);
 
-	  var bannersToDraw = banner.banners.slice(0, this.options.bannerCount)
-	      .reduce(function(prev, curr){
-		return prev.concat(prev, this.compiledBannerTemp({
+	  bannersToDraw = banner.banners.slice(0, this.options.bannerCount)
+	    .reduce(function(prev, curr){
+	      return prev.concat(this.compiledBannerTemp(
+		{
 		  landingUrl: curr.landingUrl,
 		  imageUrl: curr.imageUrl
-		}))
-	      }.bind(this), []);
+		}
+	      ));
+	    }.bind(this), []);
 	  
-	  jQuery(this.options.bannerSelector).html(bannersToDraw.join(','));
+	  jQuery(this.options.bannerSelector).html(bannersToDraw.join(''));
 	  
 	}
 	,paintFacets: function(obj){
-	    if("error" in obj)
-		return;
+	  if("error" in obj)
+	    return;
+
+	  if(!obj.response.numberOfProducts)
+	    return this;
 
 	    var facets = obj.facets
             ,facetKeys = Object.keys(facets)
@@ -996,6 +1558,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    this.paintSelectedFacets();
 
+	  if (this.options.deferInitRender.indexOf('search') > -1 && this.params.extra.page > 1){
+	    this.params.extra.page =  this.params.extra.page - 1;
+	  }
+	  this.options.deferInitRender = [];
+	  
 	    if (typeof this.options.onFacetLoad == "function") {
 	      this.options.onFacetLoad.call(this, obj);
 	    }
@@ -1060,8 +1627,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    return txt.replace("_"," ");
 	}
 	,getQueryParams : function (q){
-	    var e,
-		d = function (s) { return decodeURIComponent(s).replace(/\+/g, " ").trim(); },
+	    var e, //replace + character before decoding the URL
+		d = function (s) { return decodeURIComponent(s.replace(/\+/g, " ")).trim(); },
 		//splits on equals
 		r = /([^&=]+)=?([^&]*)/g
             ,urlParams = {};
@@ -1075,13 +1642,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		,i = e1 != "-1" ? d(e[1].slice(e1+1, e[1].indexOf("]", e1))) : ""
 		,v = d(e[2]);
 
-		/*
-		  continues the loop and does not add any key,value to the urlParams
-		  object. check if first group matches to be contain words(\w)
-		  fixes an issue for capital case seen from allianceonline where the 
-		  queries were writ0035/WRIT0035
-		*/
-		if( v.length == 0 || !(/\w+/g.exec(k)) )
+		if( v.length == 0 )
 		    continue;
 
 		if (!(k in urlParams)) {
@@ -1098,7 +1659,6 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		    Array.prototype.push.call(urlParams[k], v);
 		}
 	    }
-
 	    return urlParams;
 	}
 	,_keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -1122,11 +1682,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 	    return t;
 	}
-	,decode: function (e) {
-		//FOR NON ENCODED QUERY DON'T TRY TO DECODE IT
-		//FIXES q=HSWD0015 bug ON allianceonline.co.uk
-		if(e.indexOf("q=") === 0)
-			return e;
+      ,decode: function (e) {
 	    var t = "",n, r, i,s, o, u, a,f = 0;
 	    e = e.replace(/[^A-Za-z0-9\+\/\=]/g, "");
 	    while (f < e.length) {
@@ -1145,7 +1701,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		    t = t + String.fromCharCode(i);
 		}
 	    }
-	    t = this._utf8_decode(t);
+	  t = this._utf8_decode(t);
+
 	    return t;
 	}
 	,_utf8_encode: function (e) {
