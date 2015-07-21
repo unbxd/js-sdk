@@ -981,7 +981,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  var nonhistoryPath = "";
 
 	  if(this.options.type == "search" && this.params['query'] != undefined){
-	    url += '&q=' + encodeURIComponent(this.params.query);
+	    var escapedQuery = this.params.query.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, "\\$&");
+	    url += '&q=' + encodeURIComponent(escapedQuery);
 	  }else if(this.options.type == "browse" && this.params['categoryId'] != undefined){
 	    url += '&category-id=' + encodeURIComponent(this.params.categoryId);
 	  }
