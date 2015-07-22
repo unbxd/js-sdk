@@ -1340,7 +1340,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
 
 	    jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
-	      query : obj.searchMetaData.queryParams.q
+	      var parsedQuery = obj.searchMetaData.queryParams.q.replace(/\\/g,"");
+	      query : parsedQuery
 	      ,numberOfProducts : obj.response.numberOfProducts
 	      ,start: this.productStartIdx
 	      ,end: this.productEndIdx
