@@ -981,8 +981,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  var nonhistoryPath = "";
 
 	  if(this.options.type == "search" && this.params['query'] != undefined){
-	    var escapedQuery = this.params.query.replace(/[\-\[\]\/\{\}\(\)\+\?\.\\\^\$\|]/g, "\\$&");
-	    url += '&q=' + encodeURIComponent(escapedQuery);
+	    url += '&q=' + encodeURIComponent(this.params.query);
 	  }else if(this.options.type == "browse" && this.params['categoryId'] != undefined){
 	    url += '&category-id=' + encodeURIComponent(this.params.categoryId);
 	  }
@@ -1340,7 +1339,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
 
 	    jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
-	      query : obj.searchMetaData.queryParams.q.replace(/\\/g,"")
+	      query : obj.searchMetaData.queryParams.q
 	      ,numberOfProducts : obj.response.numberOfProducts
 	      ,start: this.productStartIdx
 	      ,end: this.productEndIdx
