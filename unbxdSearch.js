@@ -1557,10 +1557,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    this.paintSelectedFacets();
 
-	  if (this.options.deferInitRender.indexOf('search') > -1 && this.params.extra.page > 1){
-	    this.params.extra.page =  this.params.extra.page - 1;
+	  if (this.options.deferInitRender.indexOf('search') > -1){
+	    this.options.deferInitRender = [];
 	  }
-	  this.options.deferInitRender = [];
 	  
 	    if (typeof this.options.onFacetLoad == "function") {
 	      this.options.onFacetLoad.call(this, obj);
