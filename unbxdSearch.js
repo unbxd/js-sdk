@@ -413,6 +413,13 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,getFacetStats : ""
         ,processFacetStats : function(obj){}
 	,setDefaultFilters : function(){}
+	//BS start
+	,enableBuckets: false
+    ,noOfBuckets: 5
+    ,bucketSize: 5
+    ,bucketField: ""
+    ,bucketResultSetTemp: ""
+    //BS end
 	,fields : []
         ,onNoResult : function(obj){}
 	,noEncoding : false
@@ -670,6 +677,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    //click on somthing like "Load more results" to fetch next page
 	    if(this.options.isClickNScroll){
 		jQuery(this.options.clickNScrollElementSelector).bind('click',function(e){
+			//BS start
+			if (self.enableBuckets)
+                    return false;
+            //BS end    
 		    e.preventDefault();
 
 		    self.setPage(self.getPage() + 1);
@@ -682,6 +693,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    //to load results on scrolling down
 	    if(this.options.isAutoScroll){
 		jQuery(window).scroll(function() {
+			//BS start
+			if (self.enableBuckets)
+                    return false;
+            //BS end    
 		    var wind = jQuery(window),docu = jQuery(document);
 		    if((wind.scrollTop()) > (docu.height() - wind.height() - self.options.heightDiffToTriggerNextPage) && self.currentNumberOfProducts < self.totalNumberOfProducts && !self.isLoading){
 			self.setPage(self.getPage() + 1)
@@ -1079,6 +1094,16 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    nonhistoryPath += '&fields=' + this.options.fields.join(',');
 	  }
 
+	  //BS start
+
+	  if (this.options.enableBuckets) {
+            url += "&bucket.field=" + this.options.bucketField;
+            url += "&rows=" + this.options.noOfBuckets;
+            url += "&bucket.limit=" + this.options.bucketSize
+        }
+
+	  //BS end
+
 	  if(this.options.facetMultiSelect)
 	    nonhistoryPath += '&facet.multiselect=true';
 	  
@@ -1269,7 +1294,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  }
 
 	  if(obj.hasOwnProperty('didYouMean')){
-	    if(obj.response.numberOfProducts == 0 ) { //> this.options.pageSize){
+	    // if(obj.response.numberOfProducts == 0 ) { //> this.options.pageSize){
+		if (obj.buckets && obj.buckets.totalProducts == 0 || obj.response && obj.response.numberOfProducts == 0) {
 	      if(this.params.extra.page > 1)
 		this.params.extra.page = this.params.extra.page - 1;
 
@@ -1322,34 +1348,53 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if("error" in obj)
 	    return;
 
-	  if(!obj.response.numberOfProducts){
-	    this.reset();
+	  // if(!obj.response.numberOfProducts){
+	  //   this.reset();
 
-	    this.options.onNoResult.call(this,obj);
+	  //   this.options.onNoResult.call(this,obj);
 
-	    return this;
-	  }
+	  //   return this;
+	  // }
+
+	  //BS start
+	  	
+	   if (obj.buckets && obj.buckets.totalProducts == 0 || obj.response && obj.response.numberOfProducts == 0) {
+            this.reset();
+            this.options.onNoResult.call(this, obj);
+            return this
+        }
+      //BS end  
+
 
 	  if(!this.compiledSearchQueryTemp)
 	    this.compiledSearchQueryTemp = Handlebars.compile(this.options.searchQueryDisplayTemp);
 
+		if(!obj.buckets){
 	  this.productStartIdx = (this.isUsingPagination()) ? obj.response.start + 1 : 1;
 	  this.productEndIdx = (this.getPage() * this.getPageSize() <= obj.response.numberOfProducts) ?
 	    this.getPage() * this.getPageSize() : obj.response.numberOfProducts;
 	  this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
-
+	}
+	  
 	    jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
 	      query : obj.searchMetaData.queryParams.q
-	      ,numberOfProducts : obj.response.numberOfProducts
+	      // ,numberOfProducts : obj.response.numberOfProducts
+	      //BS start
+	      ,numberOfProducts: this.options.enableBuckets ? obj.buckets.totalProducts : obj.response.numberOfProducts
+	      //BS end
 	      ,start: this.productStartIdx
 	      ,end: this.productEndIdx
 	    })).show();
+
+	  
 
 	  this.paintSort(obj);
 	  this.paintPageSize(obj);
 	  this.paintPagination(obj);
 
-	    if(this.getClass(this.options.searchResultSetTemp) == 'Function'){
+
+
+	    /*if(this.getClass(this.options.searchResultSetTemp) == 'Function'){
 		this.options.searchResultSetTemp.call(this,obj);
 	    }else{
 		if(!this.compiledResultTemp)
@@ -1376,7 +1421,59 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    if(this.options.isClickNScroll)
 		jQuery(this.options.clickNScrollElementSelector)[(this.currentNumberOfProducts < this.totalNumberOfProducts) ? 'show' : 'hide']();
+		
+		*/
 
+
+		//BS start
+
+        if (this.options.enableBuckets) {
+            var processed = [];
+            for (var x in obj.buckets) {
+                if (obj.buckets.hasOwnProperty(x)) {
+                    if (x === "totalProducts" || x === "numberOfBuckets") continue;
+                    processed.push({
+                        name: x,
+                        numberOfProducts: obj.buckets[x].numberOfProducts,
+                        products: obj.buckets[x].products.slice()
+                    })
+                }
+            }
+            if (this.getClass(this.options.bucketResultSetTemp) == "Function") {
+                this.options.bucketResultSetTemp({
+                    buckets: processed
+                })
+            } else {
+                if (!this.compiledBucketResultTemp) this.compiledBucketResultTemp = Handlebars.compile(this.options.bucketResultSetTemp);
+                jQuery(this.options.searchResultContainer).append(this.compiledBucketResultTemp({
+                    buckets: processed,
+                    query: obj.searchMetaData.queryParams.q,
+                    numberOfProducts: this.options.enableBuckets ? obj.buckets.totalProducts : obj.response.numberOfProducts
+                }))
+            }
+            if (typeof this.options.onIntialResultLoad == "function") {
+                this.options.onIntialResultLoad.call(this)
+            }
+        } else {
+            if (this.getClass(this.options.searchResultSetTemp) == "Function") {
+                this.options.searchResultSetTemp(obj)
+            } else {
+                if (!this.compiledResultTemp) this.compiledResultTemp = Handlebars.compile(this.options.searchResultSetTemp);
+                jQuery(this.options.searchResultContainer).append(this.compiledResultTemp(obj.response))
+            }
+            if (!this.currentNumberOfProducts && typeof this.options.onIntialResultLoad == "function") {
+                this.options.onIntialResultLoad.call(this)
+            }
+            if (this.currentNumberOfProducts && typeof this.options.onPageLoad == "function") {
+                this.options.onPageLoad.call(this)
+            }
+            this.totalNumberOfProducts = obj.response.numberOfProducts;
+            this.currentNumberOfProducts += obj.response.products.length;
+            if (this.options.isClickNScroll) jQuery(this.options.clickNScrollSelector)[this.currentNumberOfProducts < this.totalNumberOfProducts ? "show" : "hide"]()
+        }
+
+      //BS end
+      
 	}
       ,paintSort: function(obj) {
 	if("error" in obj)
@@ -1489,7 +1586,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if("error" in obj)
 	    return;
 
-	  if(!obj.response.numberOfProducts)
+	  if(!obj.buckets && !obj.response.numberOfProducts)
 	    return this;
 
 	    var facets = obj.facets
@@ -1557,9 +1654,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    this.paintSelectedFacets();
 
-	  if (this.options.deferInitRender.indexOf('search') > -1){
-	    this.options.deferInitRender = [];
+	  if (this.options.deferInitRender.indexOf('search') > -1 && this.params.extra.page > 1){
+	    this.params.extra.page =  this.params.extra.page - 1;
 	  }
+	  this.options.deferInitRender = [];
 	  
 	    if (typeof this.options.onFacetLoad == "function") {
 	      this.options.onFacetLoad.call(this, obj);
