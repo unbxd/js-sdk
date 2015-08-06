@@ -433,6 +433,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	field: 'price',
 	order: 'asc'
       }]
+      ,sortContainerType: 'select' /* value can be select or click */
       ,sortContainerTemp: [
 	'<select>',
 	'{{#options}}',
@@ -453,6 +454,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	name: '24',
 	value: '24'
       }]
+      ,pageSizeContainerType: 'select' /* value can be select or click */
       ,pageSizeContainerTemp: [
 	'<select>',
 	'{{#options}}',
@@ -600,7 +602,42 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1];
 	}
 	,setEvents : function(){
-	    var self = this;
+	  var self = this;
+
+	  var changeSort = function(e){
+	    e.preventDefault();
+	    var $t = jQuery(this),
+		$selected = (e.type === 'select') ? $t.find(':selected') :
+		(e.currentTarget === e.target) ? $t : undefined,
+		field = $selected && $selected.attr('unbxdsortfield'),
+		value = $selected && $selected.attr('unbxdsortvalue');
+	    
+	    if($selected){
+	      self
+		.resetSort()
+		.setPage(1);
+	      
+	      if(field && value)
+		self.addSort(field, value);
+	      
+	      self.callResults(self.paintOnlyResultSet, true);
+	    }
+	  };
+
+	  var changePageSize = function(e){
+	    e.preventDefault();
+	    var $t = jQuery(this),
+		$selected = (e.type === 'select') ? $t.find(':selected') :
+		(e.currentTarget === e.target) ? $t : undefined,
+		pageSize = $selected && $selected.attr('unbxdpagesize');
+
+	    if($selected && pageSize){
+	      self
+		.setPage(1)
+		.setPageSize(pageSize)
+		.callResults(self.paintOnlyResultSet, true);
+	    }
+	  };
 
 	    if(this.options.type == "search"){
 		if("form" in this.input && this.input.form){
@@ -752,40 +789,29 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 
 	  if(this.options.sortContainerSelector.length > 0){
-	    jQuery(this.options.sortContainerSelector).delegate('*', 'change', function(e){
-	      e.preventDefault();
-	      var $t = jQuery(this),
-		  $selected = $t.find(':selected'),
-		  field = $selected && $selected.attr('unbxdsortfield'),
-		  value = $selected && $selected.attr('unbxdsortvalue');
-
-	      if($selected){
-		self
-		  .resetSort()
-		  .setPage(1);
-	      
-		if(field && value)
-		  self.addSort(field, value);
-	      
-		self.callResults(self.paintOnlyResultSet, true);
-	      }
-
-	    });
+	    if(this.options.sortContainerType === 'select'){
+	      jQuery(this.options.sortContainerSelector).on({
+		change: changeSort
+	      }, '*');
+	    } else if(this.options.sortContainerType === 'click'){
+	      jQuery(this.options.sortContainerSelector).on({
+		click: changeSort
+	      }, '*');
+	    }
 	  }
 
 	  if(this.options.pageSizeContainerSelector.length > 0){
+	    if(this.options.pageSizeContainerType === 'select'){
+	      jQuery(this.options.pageSizeContainerSelector).on({
+		change: changePageSize
+	      }, '*');
+	    } else if(this.options.pageSizeContainerType === 'click'){
+	      jQuery(this.options.pageSizeContainerSelector).on({
+		click: changePageSize
+	      }, '*');
+	    }
 	    jQuery(this.options.pageSizeContainerSelector).delegate('*', 'change', function(e){
-	      e.preventDefault();
-	      var $t = jQuery(this),
-		  $selected = $t.find(':selected'),
-		  pageSize = $selected && $selected.attr('unbxdpagesize');
 
-	      if($selected && pageSize){
-		self
-		  .setPage(1)
-		  .setPageSize(pageSize)
-		  .callResults(self.paintOnlyResultSet, true);
-	      }
 	    });
 	  }
 
@@ -1059,8 +1085,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		}
 	      } else if(key === 'wt' || key === 'format') {
 		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
-	      } else if(!this.isUsingPagination() && key === 'rows'){
-		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
+	      } else if(this.isUsingPagination() && key === 'rows'){
+		url += '&' + key + '=' + encodeURIComponent(value);
 	      } else if(this.defaultParams.hasOwnProperty('extra') && this.defaultParams.extra.hasOwnProperty(key)){
 		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
 	      } else
