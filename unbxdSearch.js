@@ -1414,11 +1414,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.compiledSortContainerTemp = Handlebars.compile(this.options.sortContainerTemp);
 
 	var sortOptions = this.options.sortOptions.map(function(opt){
-	  if(Object.keys(this.params.sort).length > 0){
-	    opt['selected'] = (opt.hasOwnProperty('field') && opt.field in this.params.sort && this.params.sort[opt.field] === opt.order) ? true : false;
-	  } else {
-	    opt['selected'] = opt['selected'] || false;
-	  }
+	  opt['selected'] = (opt.hasOwnProperty('field') && opt.field in this.params.sort && this.params.sort[opt.field] === opt.order) ?
+	    true : (!opt.hasOwnProperty('field') && Object.keys(this.params.sort).length === 0) ? true: false;
 	  return opt;
 	}.bind(this));
 
