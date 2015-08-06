@@ -1393,7 +1393,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                     processed.push({
                         name: x,
                         numberOfProducts: obj.buckets[x].numberOfProducts,
-                        products: obj.buckets[x].products.slice()
+                        products: obj.buckets[x].products
                     })
                 }
             }
