@@ -607,7 +607,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  var changeSort = function(e){
 	    e.preventDefault();
 	    var $t = jQuery(this),
-		$selected = (e.type === 'select') ? $t.find(':selected') :
+		$selected = (e.type === 'change') ? $t.find(':selected') :
 		(e.currentTarget === e.target) ? $t : undefined,
 		field = $selected && $selected.attr('unbxdsortfield'),
 		value = $selected && $selected.attr('unbxdsortvalue');
@@ -627,7 +627,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  var changePageSize = function(e){
 	    e.preventDefault();
 	    var $t = jQuery(this),
-		$selected = (e.type === 'select') ? $t.find(':selected') :
+		$selected = (e.type === 'change') ? $t.find(':selected') :
 		(e.currentTarget === e.target) ? $t : undefined,
 		pageSize = $selected && $selected.attr('unbxdpagesize');
 
