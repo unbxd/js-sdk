@@ -1345,25 +1345,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,paintProductPage : function(obj){
 	  if("error" in obj)
 	    return;
-
-	  // if(!obj.response.numberOfProducts){
-	  //   this.reset();
-
-	  //   this.options.onNoResult.call(this,obj);
-
-	  //   return this;
-	  // }
-
-	  
-	  	
 	   if (obj.buckets && obj.buckets.totalProducts == 0 || obj.response && obj.response.numberOfProducts == 0) {
             this.reset();
             this.options.onNoResult.call(this, obj);
             return this
         }
         
-
-
 	  if(!this.compiledSearchQueryTemp)
 	    this.compiledSearchQueryTemp = Handlebars.compile(this.options.searchQueryDisplayTemp);
 
@@ -1429,8 +1416,6 @@ var unbxdSearchInit = function(jQuery, Handlebars){
             this.currentNumberOfProducts += obj.response.products.length;
             if (this.options.isClickNScroll) jQuery(this.options.clickNScrollSelector)[this.currentNumberOfProducts < this.totalNumberOfProducts ? "show" : "hide"]()
         }
-
-      
       
 	}
       ,paintSort: function(obj) {
