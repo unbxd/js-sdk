@@ -796,7 +796,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    } else if(this.options.sortContainerType === 'click'){
 	      jQuery(this.options.sortContainerSelector).on({
 		click: changeSort
-	      }, '*');
+	      }, '[unbxdsortfield]');
 	    }
 	  }
 
@@ -808,7 +808,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    } else if(this.options.pageSizeContainerType === 'click'){
 	      jQuery(this.options.pageSizeContainerSelector).on({
 		click: changePageSize
-	      }, '*');
+	      }, '[unbxdpagesize]');
 	    }
 	    jQuery(this.options.pageSizeContainerSelector).delegate('*', 'change', function(e){
 
@@ -1414,7 +1414,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.compiledSortContainerTemp = Handlebars.compile(this.options.sortContainerTemp);
 
 	var sortOptions = this.options.sortOptions.map(function(opt){
-	  opt['selected'] = (opt.hasOwnProperty('field') && opt.field in this.params.sort && this.params.sort[opt.field] === opt.order) ? true : false;
+	  if(Object.keys(this.params.sort).length > 0){
+	    opt['selected'] = (opt.hasOwnProperty('field') && opt.field in this.params.sort && this.params.sort[opt.field] === opt.order) ? true : false;
+	  } else {
+	    opt['selected'] = opt['selected'] || false;
+	  }
 	  return opt;
 	}.bind(this));
 
