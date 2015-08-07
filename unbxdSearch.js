@@ -556,7 +556,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                 finalParams = this._processURL(urlqueryparams);
 	      }
 
-	      if(this.options.deferInitRender.indexOf('search') > -1 
+	      if(this.options.deferInitRender.indexOf('search') > -1
+		 && !this.isUsingPagination()
 		 && finalParams.extra.hasOwnProperty('page')
 		 && finalParams.extra.page >= 1)
 		finalParams.extra.page = finalParams.extra.page + 1;
@@ -1345,6 +1346,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.paintSelectedFacets();
 	}
 	,paintProductPage : function(obj){
+	  var start = 1;
 	  if("error" in obj)
 	    return;
 
@@ -1364,16 +1366,21 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    this.getPage() * this.getPageSize() : obj.response.numberOfProducts;
 	  this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
 
-	    jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
-	      query : obj.searchMetaData.queryParams.q
-	      ,numberOfProducts : obj.response.numberOfProducts
-	      ,start: this.productStartIdx
-	      ,end: this.productEndIdx
-	    })).show();
+	  jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
+	    query : obj.searchMetaData.queryParams.q
+	    ,numberOfProducts : obj.response.numberOfProducts
+	    ,start: this.productStartIdx
+	    ,end: this.productEndIdx
+	  })).show();
 
 	  this.paintSort(obj);
 	  this.paintPageSize(obj);
 	  this.paintPagination(obj);
+	  obj.response.products = obj.response.products.map(function(product){
+	    product['unbxdprank'] = obj.response.start + start;
+	    start += 1;
+	    return product;
+	  });
 
 	    if(this.getClass(this.options.searchResultSetTemp) == 'Function'){
 		this.options.searchResultSetTemp.call(this,obj);
@@ -1381,7 +1388,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		if(!this.compiledResultTemp)
 		    this.compiledResultTemp = Handlebars.compile(this.options.searchResultSetTemp);
 
+	      if(this.options.deferInitRender.indexOf('search') === -1 || !this.isUsingPagination()){
 		jQuery(this.options.searchResultContainer).append(this.compiledResultTemp(obj.response));
+	      }
 	    }
 
 	    if(!this.currentNumberOfProducts && typeof this.options.onIntialResultLoad == "function") {
