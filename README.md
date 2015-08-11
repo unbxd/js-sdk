@@ -619,19 +619,19 @@ Consider a normal search page with basic layout as shown in the figure below and
 	}
   ```
 - **fields** : This is an array of all required fields for generating result template. This is helpful to load the results faster. An example implementation is below
-	```javascript
-		...
-		,fields : ['image_url','title','brand','price','uniqueId']
-		...
-	```
+```javascript
+	...
+	,fields : ['image_url','title','brand','price','uniqueId']
+	...
+```
 - **deferInitRender** : This is an array of library features that need to be disabled on initial load.
-  ```javascript
+```javascript
 	...
 	,deferInitRender: ['search']
 	...
 	// The above config means the search results wont be rendered by the SDK on the first page.
 	// The other pages though, will be rendered by the SDK.
-  ```
+```
 
 Note: The HTML served by the server to client should have the minimum requred structure. *Check the below image.*
 
