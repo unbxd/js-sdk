@@ -17,11 +17,6 @@ Consider a normal search page with basic layout as shown in the figure below and
 ![Basic search layout](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/search_layout.png "Basic search layout")
 
 ```javascript
-	Handlebars.registerHelper('getIndex', function(index){
-		var total = $('#results_container li').length;
-		return total + index + 1;
-	});
-	
 	window.searchobj = new Unbxd.setSearch({
 		siteName : 'demo-u1393483043451'
 		,APIKey : 'ae30782589df23780a9d98502388555f'
@@ -32,9 +27,9 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,spellCheck : '#did_you_mean'
 		,spellCheckTemp : 'Did you mean : {{suggestion}} ?'
 		,searchQueryDisplay : '#search_title'
-		,searchQueryDisplayTemp : 'Search results for {{query}} - {{numberOfProducts}}'
+		,searchQueryDisplayTemp : 'Showing results for {{query}} - {{start}}-{{end}} of {{numberOfProducts}} Results'
 		,pageSize : 12
-		,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
+		,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
 				,'<div class="result-image-container">'
 					,'<span class="result-image-horizontal-holder">'
 						,'<img src="{{{image_url}}}" alt="{{{title}}}">'
@@ -161,13 +156,15 @@ Consider a normal search page with basic layout as shown in the figure below and
 	```javascript
 		...
 		,searchQueryDisplay : '#search_title'
-		,searchQueryDisplayTemp : 'Search results for {{query}} - {{numberOfProducts}}'
+		,searchQueryDisplayTemp : 'Search results for {{query}} - Showing {{start}}-{{end}} of {{numberOfProducts}} Results'
 		...
 
 		//JSON used for this template
 		{
 			query : "something"
 			,numberOfProducts : 1234
+			,start: 1
+			,end: 24
 		}
 	```
 - **pageSize** : The total number of results to be displayed in a single call. The value should be greater than ZERO. *It is suggested that the value to be multiple of number of columns (ex. if 3 columns then 15 or 18 or 21).*
@@ -183,7 +180,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 
 		//configuration
 		...
-		,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
+		,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
 				,'<div class="result-image-container">'
 					,'<span class="result-image-horizontal-holder">'
 						,'<img src="{{{image_url}}}" alt="{{{title}}}">'
@@ -454,7 +451,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 		} 
 	```
 - **setDefaultFilters** : This option is a function which can be used to set default filters and/or sorts. An example implementation is below.
-	```javascript
+  	```javascript
 		...
 		,setDefaultFilters : function(){
 			//to make the results by default sorted by quantity
@@ -462,17 +459,179 @@ Consider a normal search page with basic layout as shown in the figure below and
 		}
 		...
 	```
+	
 - **onIntialResultLoad** : This option takes a function which will be executed after rendering of first result page with the search response as its first argument.
 - **onPageLoad** : This option takes a function which will be executed after rendering of new result page from second page with the search response as its first argument.
 - **onNoResult** : This option takes a function which will be executed if there are no results available.
 - **bannerSelector** : The jQuery selector for the container where the banner needs to be displayed.
-- **bannerTemp**: The template to be used when rendering the banner.
-- **fields** : This is an array of all required fields for generating result template. This is helpful to load the results faster. An example implementation is below.
+- **bannerTemp** : The template to be used when rendering the banner.
+- **isPagination** : Set to _true_ when using pagination, also set **isAutoScroll** to _false_ when this is set to _true_
+- **paginationContainerSelector** : The jQuery selector for the container where pagination needs to be displayed.
+- **paginationTemp** : The template to be used when rendering pagination
+  ```javascript
+	//configuration
+	,paginationTemp: ['{{#if hasFirst}}',
+	'<span class="unbxd_first" unbxdaction="first"> &laquo; </span>',
+	'{{/if}}',
+	'{{#if hasPrev}}',
+	'<span class="unbxd_prev" unbxdaction="prev"> &lt; </span>',
+	'{{/if}}',
+	'{{#pages}}',
+	'{{#if current}}',
+	'<span class="unbxd_page highlight"> {{page}} </span>',
+	'{{else}}',
+	'<span class="unbxd_page" unbxdaction="{{page}}"> {{page}} </span>',
+	'{{/if}}',
+	'{{/pages}}',
+	'<span class="unbxd_pageof"> of </span>',
+	'<span class="unbxd_totalPages" unbxdaction="{{totalPages}}">{{totalPages}}</span>',
+	'{{#if hasNext}}',
+	'<span class="unbxd_next" unbxdaction="next"> &gt; </span>',
+	'{{/if}}',
+	'{{#if hasLast}}',
+	'<span class="unbxd_last" unbxdaction="last">&raquo;</span>',
+	'{{/if}}'
+	].join('')
+
+	//JSON used for the above template
+	{
+		hasFirst: false,
+		hasPrev: false,
+		pages: [{
+			page: 1,
+			current: false
+		},{
+			page: 2,
+			current: false
+		},{
+			page: 3,
+			current: true
+		},{
+			page: 4,
+			current: false
+		},{
+			page: 5,
+			current: false
+		}]
+		totalPages: 42,
+		hasNext: true,
+		hasLast: true
+	}
+  ```
+
+- **sortContainerSelector** : The jQuery selector for the container where sort template needs to be displayed
+- **sortOptions** : An array of objects containing the name, fieldname and order. These options will be used to display the sort options available
+- **sortContainerType** : Specifies the type of sort container. The value can be either 'select' or 'click'
+- **sortContainerTemp** : The template to be used when rendering the sort options
+  ```javascript
+	//configuration
+	...
+	,sortOptions: [{
+		name: 'Relevancy'
+	},{
+		name: 'Price: H-L',
+		field: 'price',
+		order: 'desc'
+	},{
+		name: 'Price: L-H',
+		field: 'price',
+		order: 'asc'
+	}]
+	,sortContainerType: 'select'
+	,sortContainerTemp: [
+		'<select>',
+		'{{#options}}',
+		'{{#if selected}}',
+		'<option value="{{field}}-{{order}}" unbxdsortField="{{field}}" unbxdsortValue="{{order}}" selected>{{name}}</option>',
+		'{{else}}',
+		'<option value="{{field}}-{{order}}" unbxdsortField="{{field}}" unbxdsortValue="{{order}}">{{name}}</option>',
+		'{{/if}}',
+		'{{/options}}',
+		'</select>'
+	].join('')
+	...
+
+	//sample JSON for sort
+	{
+		options: [{
+			name: 'Relevancy',
+			selected: true
+		},{
+			name: 'Price: H-L',
+			field: 'price',
+			order: 'desc',
+			selected: false
+		},{
+			name: 'Price: L-H',
+			field: 'price',
+			order: 'asc',
+			selected: false
+		}]
+	}
+  ```
+
+- **pageSizeContainerSelector** : The jQuery selector for the container where page size template needs to be displayed
+- **pageSizeOptions** : An array of objects containing the name and value. These options will be used to display the page size options available
+- **pageSizeContainerType** : Specifies the type of page size container. The value can be either 'select' or 'click'
+- **pageSizeContainerTemp** : The template to be used when rendering the page size options
+  ```javascript
+	//configuration
+	...
+	,pageSizeOptions: [{
+		name: '12',
+		value: '12'
+	},{
+		name: '24',
+		value: '24'
+	},{
+		name: '36',
+		value: '36'
+	}]
+	,pageSizeContainerType: 'select'
+	,pageSizeContainerTemp: [
+		'<select>',
+		'{{#options}}',
+		'{{#if selected}}',
+		'<option value="{{value}}" selected unbxdpageSize="{{value}}">{{name}}</option>',
+		'{{else}}',
+		'<option value="{{value}}" unbxdpageSize="{{value}}">{{name}}</option>',
+		'{{/if}}',
+		'{{/options}}',
+		'</select>'
+	].join('')
+	...
+
+	//sample JSON for page size
+	{
+		options: [{
+			name: '12',
+			value: '12',
+			selected: true
+		},{
+			name: '24',
+			value: '24',
+			selected: false
+		},{
+			name: '36',
+			value: '36',
+			selected: false
+		}]
+	}
+  ```
+- **fields** : This is an array of all required fields for generating result template. This is helpful to load the results faster. An example implementation is below
 	```javascript
 		...
 		,fields : ['image_url','title','brand','price','uniqueId']
 		...
 	```
+- **deferInitRender** : This is an array of library features that need to be disabled on initial load.
+  ```javascript
+	...
+	,deferInitRender: ['search']
+	...
+	// The above config means the search results wont be rendered by the SDK on the first page.
+	// The other pages though, will be rendered by the SDK.
+  ```
 
 Note: The HTML served by the server to client should have the minimum requred structure. *Check the below image.*
 
