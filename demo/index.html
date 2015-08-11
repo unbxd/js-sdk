@@ -59,11 +59,6 @@
     <script type="text/javascript">
     
         //search configuration here
-        Handlebars.registerHelper('getIndex', function(index){
-            var total = $('#results_container li').length;
-            return total + index + 1;
-        });
-
     window.searchobj = new Unbxd.setSearch({
 //      siteName: 'allianceonline_co_uk-u1423569528226',
 //      APIKey: 'f2ada89f21e1345bc660786663fb1a09'
@@ -81,7 +76,7 @@
             ,searchQueryDisplayTemp : 'Showing results for {{query}} - {{start}}-{{end}} of {{numberOfProducts}} Results'
         ,pageSize : 24
 	,noEncoding: true
-        ,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{getIndex @index}}" unbxdAttr="product">'
+        ,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
                     ,'<div class="result-image-container">'
                         ,'<span class="result-image-horizontal-holder">'
                             ,'<img src="{{{image_url}}}" alt="{{{title}}}">'
@@ -225,6 +220,7 @@
           ,onPageLoad : function(){
 	    console.log('onPageLoad', arguments, this);
 	  }
+      ,deferInitRender: ['search']
 	  ,bannerSelector: '.banner'
 	  ,sortContainerSelector: '.result-sort-options'
 	  ,pageSizeContainerSelector: '.result-page-size-options'
