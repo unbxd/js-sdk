@@ -605,6 +605,16 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,setEvents : function(){
 	  var self = this;
 
+        var changeViewType = function(e) {
+            e.preventDefault();
+            var $t = jQuery(this);
+            var selected = $t.attr("unbxdviewtype");
+
+            self.setViewType(selected);
+
+            self.callResults(self.paintResultSet, true);
+        };
+
 	  var changeSort = function(e){
 	    e.preventDefault();
 	    var $t = jQuery(this),
@@ -901,6 +911,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		    }
 		}, 3000);
 	    }
+
+        if (this.options.searchResultSetTemp !== null && typeof this.options.searchResultSetTemp === 'object') {
+            jQuery(this.options.viewTypeContainerSelector).on("click", '[unbxdviewtype]',changeViewType);
+        }
 	}
 	,addSort : function(field, dir){
 	    this.params.sort[field] = dir || "desc";
@@ -980,6 +994,15 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,getPageSize : function(){
 	    return this.params.extra.rows;
 	}
+
+    ,setViewType: function(viewType) {
+        this.params.extra.view = viewType;
+        return this;
+    }
+    ,getViewType: function() {
+        return this.params.extra.view;
+    }
+
 	,addQueryParam : function(key, value, dontOverried){
 	    if(!(key in this.params.extra) || !dontOverried){
 		this.params.extra[key] = value;
@@ -1086,7 +1109,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		}
 	      } else if(key === 'wt' || key === 'format') {
 		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
-	      } else if(this.isUsingPagination() && key === 'rows'){
+	      } else if((this.isUsingPagination() && key === 'rows') || key === "view"){
 		url += '&' + key + '=' + encodeURIComponent(value);
 	      } else if(this.defaultParams.hasOwnProperty('extra') && this.defaultParams.extra.hasOwnProperty(key)){
 		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
@@ -1182,6 +1205,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                     format : "json"
                     ,page : 1
                     ,rows : 12
+                    ,view : this.options.viewTypes[0]
 		}
 	    };
 
@@ -1274,6 +1298,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    //lets get pageNo
 	    if("start" in obj)
 	      params.extra.page = (parseInt(obj.start) / parseInt(params.extra.rows)) + 1;
+
+        if(!("view" in obj)) {
+            params.extra.view = this.options.viewTypes[0];
+        } else {
+            params.extra.view = obj["view"];
+        }
 
 	    return params;
 	}
@@ -1384,6 +1414,16 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    if(this.getClass(this.options.searchResultSetTemp) == 'Function'){
 		this.options.searchResultSetTemp.call(this,obj);
+        } else if (this.options.searchResultSetTemp !== null && typeof this.options.searchResultSetTemp === 'object') {
+            this.paintViewTypes(obj);
+            var currentViewType = this.getViewType();
+            if (!this.compiledResultTemp) {
+                this.compiledResultTemp = {};
+                this.options.viewTypes.forEach(function(val) {
+                    this.compiledResultTemp[val] = Handlebars.compile(this.options.searchResultSetTemp[val]);
+                }.bind(this));
+            }
+            jQuery(this.options.searchResultContainer).html(this.compiledResultTemp[currentViewType](obj.response));
 	    }else{
 		if(!this.compiledResultTemp)
 		    this.compiledResultTemp = Handlebars.compile(this.options.searchResultSetTemp);
@@ -1452,6 +1492,28 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  options: pageSizeOptions
 	}));
       }
+
+    ,paintViewTypes: function(obj) {
+        if ("error" in obj || this.options.viewTypeContainerSelector.length <= 0) {
+            return;
+        }
+        if (!this.compiledViewTypesContainerTemp) {
+            this.compiledViewTypesContainerTemp = Handlebars.compile(this.options.viewTypeContainerTemp);
+        }
+        var viewTypeOptions = this.options.viewTypes.map(function(opt) {
+
+            var values = {};
+            values["value"] = opt;
+            values["selected"] = this.getViewType() == opt ? true : false;
+            return values;
+
+            }.bind(this));
+            jQuery(this.options.viewTypeContainerSelector).html(this.compiledViewTypesContainerTemp({
+                options: viewTypeOptions
+            }));
+            return this.getViewType();
+        }
+
       ,paintPagination: function(obj) {
 	if("error" in obj)
 	  return;
