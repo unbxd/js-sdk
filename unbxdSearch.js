@@ -438,6 +438,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	field: 'price',
 	order: 'asc'
       }]
+      ,sortContainerType: 'select' /* value can be select or click */
       ,sortContainerTemp: [
 	'<select>',
 	'{{#options}}',
@@ -458,6 +459,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	name: '24',
 	value: '24'
       }]
+      ,pageSizeContainerType: 'select' /* value can be select or click */
       ,pageSizeContainerTemp: [
 	'<select>',
 	'{{#options}}',
@@ -559,7 +561,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                 finalParams = this._processURL(urlqueryparams);
 	      }
 
-	      if(this.options.deferInitRender.indexOf('search') > -1 
+	      if(this.options.deferInitRender.indexOf('search') > -1
+		 && !this.isUsingPagination()
 		 && finalParams.extra.hasOwnProperty('page')
 		 && finalParams.extra.page >= 1)
 		finalParams.extra.page = finalParams.extra.page + 1;
@@ -605,7 +608,42 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1];
 	}
 	,setEvents : function(){
-	    var self = this;
+	  var self = this;
+
+	  var changeSort = function(e){
+	    e.preventDefault();
+	    var $t = jQuery(this),
+		$selected = (e.type === 'change') ? $t.find(':selected') :
+		(e.currentTarget === e.target) ? $t : undefined,
+		field = $selected && $selected.attr('unbxdsortfield'),
+		value = $selected && $selected.attr('unbxdsortvalue');
+	    
+	    if($selected){
+	      self
+		.resetSort()
+		.setPage(1);
+	      
+	      if(field && value)
+		self.addSort(field, value);
+	      
+	      self.callResults(self.paintOnlyResultSet, true);
+	    }
+	  };
+
+	  var changePageSize = function(e){
+	    e.preventDefault();
+	    var $t = jQuery(this),
+		$selected = (e.type === 'change') ? $t.find(':selected') :
+		(e.currentTarget === e.target) ? $t : undefined,
+		pageSize = $selected && $selected.attr('unbxdpagesize');
+
+	    if($selected && pageSize){
+	      self
+		.setPage(1)
+		.setPageSize(pageSize)
+		.callResults(self.paintOnlyResultSet, true);
+	    }
+	  };
 
 	    if(this.options.type == "search"){
 		if("form" in this.input && this.input.form){
@@ -765,40 +803,29 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    }
 
 	  if(this.options.sortContainerSelector.length > 0){
-	    jQuery(this.options.sortContainerSelector).delegate('*', 'change', function(e){
-	      e.preventDefault();
-	      var $t = jQuery(this),
-		  $selected = $t.find(':selected'),
-		  field = $selected && $selected.attr('unbxdsortfield'),
-		  value = $selected && $selected.attr('unbxdsortvalue');
-
-	      if($selected){
-		self
-		  .resetSort()
-		  .setPage(1);
-	      
-		if(field && value)
-		  self.addSort(field, value);
-	      
-		self.callResults(self.paintOnlyResultSet, true);
-	      }
-
-	    });
+	    if(this.options.sortContainerType === 'select'){
+	      jQuery(this.options.sortContainerSelector).on({
+		change: changeSort
+	      }, '*');
+	    } else if(this.options.sortContainerType === 'click'){
+	      jQuery(this.options.sortContainerSelector).on({
+		click: changeSort
+	      }, '[unbxdsortfield]');
+	    }
 	  }
 
 	  if(this.options.pageSizeContainerSelector.length > 0){
+	    if(this.options.pageSizeContainerType === 'select'){
+	      jQuery(this.options.pageSizeContainerSelector).on({
+		change: changePageSize
+	      }, '*');
+	    } else if(this.options.pageSizeContainerType === 'click'){
+	      jQuery(this.options.pageSizeContainerSelector).on({
+		click: changePageSize
+	      }, '[unbxdpagesize]');
+	    }
 	    jQuery(this.options.pageSizeContainerSelector).delegate('*', 'change', function(e){
-	      e.preventDefault();
-	      var $t = jQuery(this),
-		  $selected = $t.find(':selected'),
-		  pageSize = $selected && $selected.attr('unbxdpagesize');
 
-	      if($selected && pageSize){
-		self
-		  .setPage(1)
-		  .setPageSize(pageSize)
-		  .callResults(self.paintOnlyResultSet, true);
-	      }
 	    });
 	  }
 
@@ -1072,8 +1099,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		}
 	      } else if(key === 'wt' || key === 'format') {
 		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
-	      } else if(!this.isUsingPagination() && key === 'rows'){
-		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
+	      } else if(this.isUsingPagination() && key === 'rows'){
+		url += '&' + key + '=' + encodeURIComponent(value);
 	      } else if(this.defaultParams.hasOwnProperty('extra') && this.defaultParams.extra.hasOwnProperty(key)){
 		nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
 	      } else
@@ -1343,6 +1370,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.paintSelectedFacets();
 	}
 	,paintProductPage : function(obj){
+	  var start = 1;
 	  if("error" in obj)
 	    return;
 	   if (obj.buckets && obj.buckets.totalProducts == 0 || obj.response && obj.response.numberOfProducts == 0) {
@@ -1359,6 +1387,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.productEndIdx = (this.getPage() * this.getPageSize() <= obj.response.numberOfProducts) ?
 	    this.getPage() * this.getPageSize() : obj.response.numberOfProducts;
 	  this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
+
 	}
 	  
 	    jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
@@ -1368,9 +1397,15 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	      ,start: this.productStartIdx
 	      ,end: this.productEndIdx
 	    })).show();
+
 	  this.paintSort(obj);
 	  this.paintPageSize(obj);
 	  this.paintPagination(obj);
+	  obj.response.products = obj.response.products.map(function(product){
+	    product['unbxdprank'] = obj.response.start + start;
+	    start += 1;
+	    return product;
+	  });
 
         if (this.options.enableBuckets) {
             var processed = [];
@@ -1416,7 +1451,6 @@ var unbxdSearchInit = function(jQuery, Handlebars){
             this.currentNumberOfProducts += obj.response.products.length;
             if (this.options.isClickNScroll) jQuery(this.options.clickNScrollSelector)[this.currentNumberOfProducts < this.totalNumberOfProducts ? "show" : "hide"]()
         }
-      
 	}
       ,paintSort: function(obj) {
 	if("error" in obj)
@@ -1428,7 +1462,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.compiledSortContainerTemp = Handlebars.compile(this.options.sortContainerTemp);
 
 	var sortOptions = this.options.sortOptions.map(function(opt){
-	  opt['selected'] = (opt.hasOwnProperty('field') && opt.field in this.params.sort && this.params.sort[opt.field] === opt.order) ? true : false;
+	  opt['selected'] = (opt.hasOwnProperty('field') && opt.field in this.params.sort && this.params.sort[opt.field] === opt.order) ?
+	    true : (!opt.hasOwnProperty('field') && Object.keys(this.params.sort).length === 0) ? true: false;
 	  return opt;
 	}.bind(this));
 
