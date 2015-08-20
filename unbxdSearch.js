@@ -1205,7 +1205,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                     format : "json"
                     ,page : 1
                     ,rows : 12
-                    ,view : this.options.viewTypes[0]
+                    ,view : ( this.options.viewTypes !== undefined && this.options.viewTypes.length > 0 ? this.options.viewTypes[0] : "")
 		}
 	    };
 
@@ -1300,7 +1300,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	      params.extra.page = (parseInt(obj.start) / parseInt(params.extra.rows)) + 1;
 
         if(!("view" in obj)) {
-            params.extra.view = this.options.viewTypes[0];
+            params.extra.view = ( this.options.viewTypes !== undefined && this.options.viewTypes.length > 0 ? this.options.viewTypes[0] : "");
         } else {
             params.extra.view = obj["view"];
         }
