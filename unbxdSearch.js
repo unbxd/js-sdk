@@ -468,9 +468,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       ].join(''),
       viewTypeContainerTemp:
         '{{#options}}'
-        +'<li class="nxt-{{#if selected}}current{{/if}}">'
-            +'<a title="{{value}} View" class="nxt-{{value}}view-button" {{#unless selected}}unbxdviewtype="{{value}}"{{/unless}}>'
+        +'<li class="unbxd-{{#if selected}}current{{/if}}">'
+            +'<a title="{{value}} View" class="unbxd-{{value}}view-button" {{#unless selected}}unbxdviewtype="{{value}}"{{/unless}}>'
                 +'<span class="icon-{{value}}view">'
+                +'{{value}}{{#if selected}}-current{{/if}}'
                 +'</span>'
             +'</a>'
         +'</li>'

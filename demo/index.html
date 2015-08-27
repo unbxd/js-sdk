@@ -41,6 +41,7 @@
 		</div>
 		<div class="result-sort-options">
 		</div>
+        <div class="change-view"></div>
 		<div class="result-pagination">
 		</div>
                 <div class="result-selected-facets clearfix" id="selected_facets">
@@ -76,24 +77,39 @@
             ,searchQueryDisplayTemp : 'Showing results for {{query}} - {{start}}-{{end}} of {{numberOfProducts}} Results'
         ,pageSize : 24
 	,noEncoding: true
-        ,searchResultSetTemp : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
-                    ,'<div class="result-image-container">'
-                        ,'<span class="result-image-horizontal-holder">'
-                            ,'<img src="{{{image_url}}}" alt="{{{title}}}">'
-                        ,'</span>'
-                    ,'</div>'
-                    ,'<div class="result-brand">{{{brand}}}</div>'
-                    ,'<div class="result-title">{{{title}}}</div>'
-                    ,'<div class="result-price">'
-                        ,'${{price}}'
-                    ,'</div>'
-                ,'</a></li>{{/products}}'].join('')
+        ,searchResultSetTemp : {"grid" : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
+                            ,'<div class="result-image-container">'
+                                ,'<span class="result-image-horizontal-holder">'
+                                    ,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+                                ,'</span>'
+                            ,'</div>'
+                            ,'<div class="result-brand">{{{brand}}}</div>'
+                            ,'<div class="result-title">{{{title}}}</div>'
+                            ,'<div class="result-price">'
+                                ,'${{price}}'
+                            ,'</div>'
+                        ,'</a></li>{{/products}}'].join(''),
+
+                        "list": ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
+                            ,'<div class="result-image-container">'
+                                ,'<span class="result-image-horizontal-holder">'
+                                    ,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+                                ,'</span>'
+                            ,'</div>'
+                            ,'<div class="result-brand">{{{brand}}}</div>'
+                            ,'<div class="result-title">{{{title}}}</div>'
+                            ,'<div class="result-price">'
+                                ,'${{price}}'
+                            ,'</div>'
+                        ,'</a></li>{{/products}}'].join('')}
             ,searchResultContainer : '#results_container'
             ,isClickNScroll: false
             ,clickNScrollSelector : ''
           ,isAutoScroll : false
-	  ,isPagination: true
-	  ,paginationContainerSelector: '.result-pagination'
+        ,isPagination: true
+        ,paginationContainerSelector: '.result-pagination'
+        ,viewTypes: ['grid', 'list']
+        ,viewTypeContainerSelector: '.change-view'
         ,facetTemp : ['<div class="facet-block">'
 	,'<div class="facet-title">PRICE</div>'
 	,'<div class="facet-values">'
