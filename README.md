@@ -219,61 +219,31 @@ It can also contain multiple templates to include different view types(grid view
 	,searchResultSetTemp:
     {
         "grid":
-            '{{#products}}'+
-                '{{{every_three}}}'+
-                '<div class="product-container {{{nth_item}}}">'+
-                    '<div class="product-item item-template-0 alternative">'+
-                        '<div class="img">'+
-                            '<a href="{{productUrl}}" >'+
-                                '<img src="{{imageUrl}}" alt="" onerror="this.style.display=\'none\';">'+
-                            '</a>'+
-                        '</div>'+
-                        '<div class="name">'+
-                            '<a href="{{productUrl}}" > {{title}}'+
-                            '</a>'+
-                        '</div>'+
-                        '<div class="stars">'+
-                        '</div>'+
-                        '<div class="price">'+
-                            '{{#if_on_sale this}}'+
-                            '<div class="on-sale">Sale</div>'+
-                            '<del class="price2">${{format_price retail_price}}&nbsp;</del>'+
-                            '{{/if_on_sale}}'+
-                            '<span class="hidden">&nbsp;</span> ${{format_price price}}'+
-                        '</div>'+
-                    '</div>'+
-                '</div>'+
-            '{{/products}}',
+            ['{{#products}}<li class="grid_view"><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
+				,'<div class="result-image-container">'
+					,'<span class="result-image-horizontal-holder">'
+						,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+					,'</span>'
+				,'</div>'
+				,'<div class="result-brand">{{{brand}}}</div>'
+				,'<div class="result-title">{{{title}}}</div>'
+				,'<div class="result-price">'
+					,'${{price}}'
+				,'</div>'
+			,'</a></li>{{/products}}'].join(''),
         "list":
-            '<ul class="nxt-product-list nxt-view-list clearfix">'
-                +'{{#products}}'
-                +'<li class="nxt-product-item product-item">'
-                    +'<div class="nxt-product-item-wrap">'
-                        +'<div class="nxt-image-wrapper">'
-                            +'<a href="{{productUrl}}" >'
-                                +'<img class="nxt-product-image" width="150" height="150" src="{{imageUrl}}" alt="" onerror="this.style.display=\'none\';">'
-                                +'{{#if_on_sale this}}<div class="on-sale">Sale</div>{{/if_on_sale}}'
-                            +'</a>'
-                        +'</div>'
-                        +'<div class="nxt-product-details">'
-                            +'<div class="nxt-product-col1">'
-                                +'<div class="nxt-product-name">'
-                                    +'<a href="{{productUrl}}" >{{title}}</a>'
-                                +'</div>'
-                                +'<div class="nxt-product-description">After more than 14,000 live fittings with lady golfers, Bridgestone Golf has developed a ladies specific model engineered for moderate swing speeds. The new Lady Precept is designed to produce higher launch ...</div>'
-                            +'</div>'
-                            +'<div class="nxt-product-col2">'
-                                +'{{#if_on_sale this}}<del class="price2">${{format_price retail_price}}&nbsp;</del>{{/if_on_sale}}'
-                                +'<span class="hidden">&nbsp;</span> ${{format_price price}} '
-                                +'<div class="nxt-product-buttons">'
-                                    +'<input type="button" class="nxt-btn-primary" onclick="top.location.href=\'{{productUrl}}\'" value="More Info">'
-                                +'</div>'
-                            +'</div>'
-                        +'</div>'
-                    +'</div>'
-                +'</li>'
-                +'{{/products}}'
-            +'</ul>'
+            ['{{#products}}<li class="list_view"><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
+				,'<div class="result-image-container">'
+					,'<span class="result-image-horizontal-holder">'
+						,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+					,'</span>'
+				,'</div>'
+				,'<div class="result-brand">{{{brand}}}</div>'
+				,'<div class="result-title">{{{title}}}</div>'
+				,'<div class="result-price">'
+					,'${{price}}'
+				,'</div>'
+			,'</a></li>{{/products}}'].join('')
     }
 	```
 
@@ -295,12 +265,27 @@ In this case, we need to also mention the different view types under 'viewTypes'
 ,viewTypeContainerTemp:
     '{{#options}}'
     +'<li class="nxt-{{#if selected}}current{{/if}}">'
-        +'<a title="{{value}} View" class="nxt-{{value}}view-button" unbxdviewtype="{{value}}">'
+        +'<a title="{{value}} View" class="nxt-{{value}}view-button" {{#unless selected}}unbxdviewtype="{{value}}"{{/unless}}>'
             +'<span class="icon-{{value}}view">'
             +'</span>'
         +'</a>'
     +'</li>'
     +'{{/options}}'
+```
+
+JSON used for this template:
+
+```
+{
+	0: {
+		"selected": true,
+		"value": "grid"
+	},
+	1: {
+		"selected": false,
+		"value": "list"
+	}
+}
 ```
 
 - **searchResultContainer** : The jQuery selector of DOM element to append the HTML generated from **searchResultSetTemp** (*#results_container* in the first image). 

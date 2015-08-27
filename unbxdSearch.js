@@ -465,7 +465,16 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	'{{/if}}',
 	'{{/options}}',
 	'</select>'
-      ].join('')
+      ].join(''),
+      viewTypeContainerTemp:
+        '{{#options}}'
+        +'<li class="nxt-{{#if selected}}current{{/if}}">'
+            +'<a title="{{value}} View" class="nxt-{{value}}view-button" {{#unless selected}}unbxdviewtype="{{value}}"{{/unless}}>'
+                +'<span class="icon-{{value}}view">'
+                +'</span>'
+            +'</a>'
+        +'</li>'
+        +'{{/options}}'
     };
 
     jQuery.extend(Unbxd.setSearch.prototype,{
@@ -609,10 +618,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
             e.preventDefault();
             var $t = jQuery(this);
             var selected = $t.attr("unbxdviewtype");
-
             self.setViewType(selected);
-
-            self.callResults(self.paintResultSet, true);
+            if(selected && self.options.viewTypes.indexOf(selected) > -1) {
+                self.callResults(self.paintResultSet, true);
+            }
         };
 
 	  var changeSort = function(e){
