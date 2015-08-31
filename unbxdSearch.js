@@ -470,6 +470,17 @@ var unbxdSearchInit = function(jQuery, Handlebars){
   '{{/if}}',
   '{{/options}}',
   '</select>'
+      ].join(''),
+      viewTypeContainerTemp: [
+        '{{#options}}',
+        '<li class="unbxd-{{#if selected}}current{{/if}}">',
+        '<a title="{{value}} View" class="unbxd-{{value}}view-button" {{#unless selected}}unbxdviewtype="{{value}}"{{/unless}}>',
+        '<span class="icon-{{value}}view">',
+        '{{value}}',
+        '</span>',
+        '</a>',
+        '</li>',
+        '{{/options}}'
       ].join('')
     };
 
@@ -603,37 +614,57 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                     this.callResults(this.paintResultSet);
     }
             }
-  }
+}
   ,getClass : function(object){
       return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1];
   }
   ,setEvents : function(){
-      var self = this;
+    var self = this;
 
-      var changeSort = function(e) {
-        e.preventDefault();
-        var $t = jQuery(this),
-          $selected = (e.type === 'change') ? $t.find(':selected') : (e.currentTarget === e.target) ? $t : undefined,
-          field = $selected && $selected.attr('unbxdsortfield'),
-          value = $selected && $selected.attr('unbxdsortvalue');
-        if ($selected) {
-          self.resetSort()
-            .setPage(1);
-          if (field && value) self.addSort(field, value);
-          self.callResults(self.paintOnlyResultSet, true);
-        }
-      };
-      var changePageSize = function(e) {
-        e.preventDefault();
-        var $t = jQuery(this),
-          $selected = (e.type === 'change') ? $t.find(':selected') : (e.currentTarget === e.target) ? $t : undefined,
-          pageSize = $selected && $selected.attr('unbxdpagesize');
-        if ($selected && pageSize) {
-          self.setPage(1)
-            .setPageSize(pageSize)
-            .callResults(self.paintOnlyResultSet, true);
-        }
-      };
+        var changeViewType = function(e) {
+            e.preventDefault();
+            var $t = jQuery(this);
+            var selected = $t.attr("unbxdviewtype");
+            self.setViewType(selected);
+            if(selected && self.options.viewTypes.indexOf(selected) > -1) {
+                self.callResults(self.paintOnlyResultSet, true);
+            }
+        };
+
+    var changeSort = function(e){
+      e.preventDefault();
+      var $t = jQuery(this),
+    $selected = (e.type === 'change') ? $t.find(':selected') :
+    (e.currentTarget === e.target) ? $t : undefined,
+    field = $selected && $selected.attr('unbxdsortfield'),
+    value = $selected && $selected.attr('unbxdsortvalue');
+      
+      if($selected){
+        self
+    .resetSort()
+    .setPage(1);
+        
+        if(field && value)
+    self.addSort(field, value);
+        
+        self.callResults(self.paintOnlyResultSet, true);
+      }
+    };
+
+    var changePageSize = function(e){
+      e.preventDefault();
+      var $t = jQuery(this),
+    $selected = (e.type === 'change') ? $t.find(':selected') :
+    (e.currentTarget === e.target) ? $t : undefined,
+    pageSize = $selected && $selected.attr('unbxdpagesize');
+
+      if($selected && pageSize){
+        self
+    .setPage(1)
+    .setPageSize(pageSize)
+    .callResults(self.paintOnlyResultSet, true);
+      }
+    };
 
       if(this.options.type == "search"){
     if("form" in this.input && this.input.form){
@@ -801,16 +832,17 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     }
 
     if(this.options.pageSizeContainerSelector.length > 0){
-      if (this.options.pageSizeContainerType === 'select') {
-          jQuery(this.options.pageSizeContainerSelector).on({
-            change: changePageSize
-          }, '*');
-        } else if (this.options.pageSizeContainerType === 'click') {
-          jQuery(this.options.pageSizeContainerSelector).on({
-            click: changePageSize
-          }, '[unbxdpagesize]');
-        }
+      if(this.options.pageSizeContainerType === 'select'){
+        jQuery(this.options.pageSizeContainerSelector).on({
+    change: changePageSize
+        }, '*');
+      } else if(this.options.pageSizeContainerType === 'click'){
+        jQuery(this.options.pageSizeContainerSelector).on({
+    click: changePageSize
+        }, '[unbxdpagesize]');
+      }
       jQuery(this.options.pageSizeContainerSelector).delegate('*', 'change', function(e){
+
       });
     }
 
@@ -899,6 +931,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         }
     }, 3000);
       }
+
+        if (this.options.searchResultSetTemp !== null && typeof this.options.searchResultSetTemp === 'object') {
+            jQuery(this.options.viewTypeContainerSelector).on("click", '[unbxdviewtype]',changeViewType);
+        }
   }
   ,addSort : function(field, dir){
       this.params.sort[field] = dir || "desc";
@@ -978,6 +1014,15 @@ var unbxdSearchInit = function(jQuery, Handlebars){
   ,getPageSize : function(){
       return this.params.extra.rows;
   }
+
+    ,setViewType: function(viewType) {
+        this.params.extra.view = viewType;
+        return this;
+    }
+    ,getViewType: function() {
+        return this.params.extra.view;
+    }
+
   ,addQueryParam : function(key, value, dontOverried){
       if(!(key in this.params.extra) || !dontOverried){
     this.params.extra[key] = value;
@@ -990,7 +1035,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
       return this;
   }
-      ,isUsingPagination: function(){
+
+  ,isUsingPagination: function(){
   return !this.options.isAutoScroll && this.options.isPagination;
       }
   ,getHostNPath: function(){
@@ -1084,7 +1130,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     }
         } else if(key === 'wt' || key === 'format') {
     nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
-        } else if(this.isUsingPagination() && key === 'rows'){
+        } else if(this.isUsingPagination() && key === 'rows'|| key === 'view'){
     url += '&' + key + '=' + encodeURIComponent(value);
         } else if(this.defaultParams.hasOwnProperty('extra') && this.defaultParams.extra.hasOwnProperty(key)){
     nonhistoryPath += '&' + key + '=' + encodeURIComponent(value);
@@ -1132,6 +1178,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       jQuery(this.options.loaderSelector).show();
     
     var self = this
+
           ,modifiedCB = callback.bind(self)
           ,cb = function(data){
       this.isLoading = false;
@@ -1186,6 +1233,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                     format : "json"
                     ,page : 1
                     ,rows : 12
+                    ,view : ( this.options.viewTypes !== undefined && this.options.viewTypes.length > 0 ? this.options.viewTypes[0] : "")
     }
       };
 
@@ -1279,6 +1327,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       if("start" in obj)
         params.extra.page = (parseInt(obj.start) / parseInt(params.extra.rows)) + 1;
 
+        if(!("view" in obj)) {
+            params.extra.view = ( this.options.viewTypes !== undefined && this.options.viewTypes.length > 0 ? this.options.viewTypes[0] : "");
+        } else {
+            params.extra.view = obj["view"];
+        }
+
       return params;
   }
   ,paintResultSet: function(obj){
@@ -1300,8 +1354,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     }
 
     if(obj.hasOwnProperty('didYouMean')){
-      // if(obj.response.numberOfProducts == 0 ) { //> this.options.pageSize){
-    if (obj.buckets && obj.buckets.totalProducts == 0 || obj.response && obj.response.numberOfProducts == 0) {
+      if(obj.response.numberOfProducts == 0 ) { //> this.options.pageSize){
         if(this.params.extra.page > 1)
     this.params.extra.page = this.params.extra.page - 1;
 
@@ -1435,10 +1488,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
             this.currentNumberOfProducts += obj.response.products.length;
             if (this.options.isClickNScroll) jQuery(this.options.clickNScrollSelector)[this.currentNumberOfProducts < this.totalNumberOfProducts ? "show" : "hide"]()
         }
-
-      
   }
-      ,paintSort: function(obj) {
+  ,paintSort: function(obj) {
   if("error" in obj)
     return;
   if(this.options.sortContainerSelector.length <= 0)
@@ -1477,6 +1528,28 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     options: pageSizeOptions
   }));
       }
+
+    ,paintViewTypes: function(obj) {
+        if ("error" in obj || this.options.viewTypeContainerSelector.length <= 0) {
+            return;
+        }
+        if (!this.compiledViewTypesContainerTemp) {
+            this.compiledViewTypesContainerTemp = Handlebars.compile(this.options.viewTypeContainerTemp);
+        }
+        var viewTypeOptions = this.options.viewTypes.map(function(opt) {
+
+            var values = {};
+            values["value"] = opt;
+            values["selected"] = this.getViewType() == opt ? true : false;
+            return values;
+
+            }.bind(this));
+            jQuery(this.options.viewTypeContainerSelector).html(this.compiledViewTypesContainerTemp({
+                options: viewTypeOptions
+            }));
+            return this.getViewType();
+        }
+
       ,paintPagination: function(obj) {
   if("error" in obj)
     return;
