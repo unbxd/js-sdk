@@ -277,14 +277,14 @@ JSON used for this template:
 
 ```
 {
-	0: {
+	options: [{
 		"selected": true,
 		"value": "grid"
 	},
-	1: {
+	{
 		"selected": false,
 		"value": "list"
-	}
+	}]
 }
 ```
 
@@ -531,6 +531,8 @@ JSON used for this template:
 		,setDefaultFilters : function(){
 			//to make the results by default sorted by quantity
 			this.addQueryParam('sort',"quantity desc");
+			//to make default filter by category shoes
+			this.addFilter('category_fq', 'shoes');
 		}
 		...
 	```

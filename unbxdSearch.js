@@ -466,16 +466,17 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	'{{/options}}',
 	'</select>'
       ].join(''),
-      viewTypeContainerTemp:
-        '{{#options}}'
-        +'<li class="unbxd-{{#if selected}}current{{/if}}">'
-            +'<a title="{{value}} View" class="unbxd-{{value}}view-button" {{#unless selected}}unbxdviewtype="{{value}}"{{/unless}}>'
-                +'<span class="icon-{{value}}view">'
-                +'{{value}}{{#if selected}}-current{{/if}}'
-                +'</span>'
-            +'</a>'
-        +'</li>'
-        +'{{/options}}'
+      viewTypeContainerTemp: [
+        '{{#options}}',
+        '<li class="unbxd-{{#if selected}}current{{/if}}">',
+        '<a title="{{value}} View" class="unbxd-{{value}}view-button" {{#unless selected}}unbxdviewtype="{{value}}"{{/unless}}>',
+        '<span class="icon-{{value}}view">',
+        '{{value}}{{#if selected}}-current{{/if}}',
+        '</span>',
+        '</a>',
+        '</li>',
+        '{{/options}}'
+      ].join('')
     };
 
     jQuery.extend(Unbxd.setSearch.prototype,{
