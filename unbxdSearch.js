@@ -471,7 +471,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         '<li class="unbxd-{{#if selected}}current{{/if}}">',
         '<a title="{{value}} View" class="unbxd-{{value}}view-button" {{#unless selected}}unbxdviewtype="{{value}}"{{/unless}}>',
         '<span class="icon-{{value}}view">',
-        '{{value}}{{#if selected}}-current{{/if}}',
+        '{{value}}',
         '</span>',
         '</a>',
         '</li>',
