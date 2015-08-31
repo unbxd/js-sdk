@@ -213,6 +213,81 @@ Consider a normal search page with basic layout as shown in the figure below and
 			]
 		}
 	```
+It can also contain multiple templates to include different view types(grid view/list view) like below:
+
+	```
+	,searchResultSetTemp:
+    {
+        "grid":
+            ['{{#products}}<li class="grid_view"><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
+				,'<div class="result-image-container">'
+					,'<span class="result-image-horizontal-holder">'
+						,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+					,'</span>'
+				,'</div>'
+				,'<div class="result-brand">{{{brand}}}</div>'
+				,'<div class="result-title">{{{title}}}</div>'
+				,'<div class="result-price">'
+					,'${{price}}'
+				,'</div>'
+			,'</a></li>{{/products}}'].join(''),
+        "list":
+            ['{{#products}}<li class="list_view"><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
+				,'<div class="result-image-container">'
+					,'<span class="result-image-horizontal-holder">'
+						,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+					,'</span>'
+				,'</div>'
+				,'<div class="result-brand">{{{brand}}}</div>'
+				,'<div class="result-title">{{{title}}}</div>'
+				,'<div class="result-price">'
+					,'${{price}}'
+				,'</div>'
+			,'</a></li>{{/products}}'].join('')
+    }
+	```
+
+In this case, we need to also mention the different view types under 'viewTypes':
+
+```
+,viewTypes: ['grid', 'list']
+```
+
+- **viewTypeContainerSelector** : The selector for the container of view types
+
+```
+,viewTypeContainerSelector: '.view_type_select'
+```
+
+- **viewTypeContainerTemp** : The template which paints the view type to the view type container selector
+
+```
+,viewTypeContainerTemp:
+    '{{#options}}'
+    +'<li class="nxt-{{#if selected}}current{{/if}}">'
+        +'<a title="{{value}} View" class="nxt-{{value}}view-button" {{#unless selected}}unbxdviewtype="{{value}}"{{/unless}}>'
+            +'<span class="icon-{{value}}view">'
+            +'</span>'
+        +'</a>'
+    +'</li>'
+    +'{{/options}}'
+```
+
+JSON used for this template:
+
+```
+{
+	0: {
+		"selected": true,
+		"value": "grid"
+	},
+	1: {
+		"selected": false,
+		"value": "list"
+	}
+}
+```
+
 - **searchResultContainer** : The jQuery selector of DOM element to append the HTML generated from **searchResultSetTemp** (*#results_container* in the first image). 
 - **isClickNScroll** : Set it to **true** if you want users to click an element to fetch the next page.
 - **clickNScrollSelector** : The jQuery selector of the DOM element that can be clicked for displaying the next page.(PS. in this case the new results will be appended to the **searchResultContainer**.)
