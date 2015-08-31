@@ -622,7 +622,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
             var selected = $t.attr("unbxdviewtype");
             self.setViewType(selected);
             if(selected && self.options.viewTypes.indexOf(selected) > -1) {
-                self.callResults(self.paintResultSet, true);
+                self.callResults(self.paintOnlyResultSet, true);
             }
         };
 
