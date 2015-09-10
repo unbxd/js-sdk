@@ -1434,7 +1434,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
                     this.compiledResultTemp[val] = Handlebars.compile(this.options.searchResultSetTemp[val]);
                 }.bind(this));
             }
-            jQuery(this.options.searchResultContainer).html(this.compiledResultTemp[currentViewType](obj.response));
+            if (this.options.deferInitRender.indexOf('search') === -1 || !this.isUsingPagination()) {
+                jQuery(this.options.searchResultContainer).append(this.compiledResultTemp[currentViewType](obj.response));
+            }
 	    }else{
 		if(!this.compiledResultTemp)
 		    this.compiledResultTemp = Handlebars.compile(this.options.searchResultSetTemp);
