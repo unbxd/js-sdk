@@ -1213,17 +1213,19 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		,ranges : {}
 		,categoryId : ""
 		,extra : {
-                    format : "json"
-                    ,page : 1
-                    ,rows : 12
-                    ,view : ( this.options.viewTypes !== undefined && this.options.viewTypes.length > 0 ? this.options.viewTypes[0] : "")
+                  format: "json"
+                  ,page: 1
+                  ,rows: 12
 		}
 	    };
 
-	    if(typeof this.options.customReset == "function")
-		this.options.customReset.call(this);
+	  if( this.options.viewTypes && this.options.viewTypes.length > 0)
+	    this.params.extra.view = this.options.viewTypes[0];
 
-	    return this;
+	  if(typeof this.options.customReset == "function")
+	    this.options.customReset.call(this);
+
+	  return this;
 	}
       ,setDefaultParams: function(params){
 	this.options.setDefaultFilters.call(this);
@@ -1310,13 +1312,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    if("start" in obj)
 	      params.extra.page = (parseInt(obj.start) / parseInt(params.extra.rows)) + 1;
 
-        if(!("view" in obj)) {
-            params.extra.view = ( this.options.viewTypes !== undefined && this.options.viewTypes.length > 0 ? this.options.viewTypes[0] : "");
-        } else {
-            params.extra.view = obj["view"];
-        }
+	  if("view" in obj)
+	    params.extra.view = obj['view'];
+	  else if(this.options.viewTypes && this.options.viewTypes.length > 0)
+	    params.extra.view = this.options.viewTypes[0];
 
-	    return params;
+	  return params;
 	}
 	,paintResultSet: function(obj){
 	    this._internalPaintResultSet(obj,true);
