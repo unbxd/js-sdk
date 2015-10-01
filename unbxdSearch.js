@@ -1616,7 +1616,25 @@ var unbxdSearchInit = function(jQuery, Handlebars){
             ,isSelected = false
             ,selectedOnly = [];
 
-	    for(var x in facets){
+    var positionExists = false;
+     for(var x in facets) {
+        if("position" in facets[x]) {
+            positionExists = true;
+        }
+        break;
+    }
+    var sortable = [];
+    for(var facet in facets) {
+        sortable.push(positionExists ? ([facet, facets[facet]["position"]]) : [facet]);
+    }
+
+    if(positionExists) {
+        sortable.sort(function(a, b) {return a[1] - b[1]});
+    }
+    for(var newI = 0; newI < sortable.length; newI++) {
+
+        var x = sortable[newI][0];
+    // for(var x in facets) {
 		singlefacet = {
 		    name : self.prepareFacetName(x)
                     ,facet_name : x
