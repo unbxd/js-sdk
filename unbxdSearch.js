@@ -561,7 +561,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
               ,decodedParamscount = Object.keys(decodedParams).length
               ,finalParams = null;
 
-	      if(decodedParamscount > 0){
+	      if(!this.options.noEncoding && decodedParamscount > 0){
                 finalParams = this._processURL(decodedParams);
 	      }else{
                 finalParams = this._processURL(urlqueryparams);
