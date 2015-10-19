@@ -617,13 +617,16 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  var self = this;
 
         var changeViewType = function(e) {
-            e.preventDefault();
-            var $t = jQuery(this);
-            var selected = $t.attr("unbxdviewtype");
-            self.setViewType(selected);
-            if(selected && self.options.viewTypes.indexOf(selected) > -1) {
-                self.callResults(self.paintOnlyResultSet, true);
-            }
+          e.preventDefault();
+          var $t = jQuery(this);
+          var selected = $t.attr("unbxdviewtype");
+          self.setViewType(selected);
+          if(selected && self.options.viewTypes.indexOf(selected) > -1) {
+	    if(!self.isUsingPagination()) self.setPage(2);
+	    if(self.options.deferInitRender.indexOf('search') > 0
+	       && !self.isUsingPagination()) self.setPage(2);
+            self.callResults(self.paintOnlyResultSet, true);
+          }
         };
 
 	  var changeSort = function(e){
