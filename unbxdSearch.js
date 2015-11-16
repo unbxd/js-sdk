@@ -1,6 +1,7 @@
 //uglifyjs unbxdSearch.js -o unbxdSearch.min.js && gzip -c unbxdSearch.min.js > unbxdSearch.min.js.gz && aws s3 cp unbxdSearch.min.js.gz s3://unbxd/unbxdSearch.js --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --content-encoding gzip --cache-control max-age=3600
 var unbxdSearchInit = function(jQuery, Handlebars){    
   window.Unbxd = window.Unbxd || {};
+  Unbxd.jsSdkVersion = "1.0.1";
 
   // Production steps of ECMA-262, Edition 5, 15.4.4.14
   // Reference: http://es5.github.io/#x15.4.4.14
@@ -477,6 +478,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         '</li>',
         '{{/options}}'
       ].join('')
+      ,searchQueryParam:"q"
     };
 
     jQuery.extend(Unbxd.setSearch.prototype,{
@@ -1045,7 +1047,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  var nonhistoryPath = "";
 
 	  if(this.options.type == "search" && this.params['query'] != undefined){
-	    url += '&q=' + encodeURIComponent(this.params.query);
+      url += '&' +this.options.searchQueryParam +'='+ encodeURIComponent(this.params.query);
 	  }else if(this.options.type == "browse" && this.params['categoryId'] != undefined){
 	    url += '&category-id=' + encodeURIComponent(this.params.categoryId);
 	  }
