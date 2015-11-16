@@ -129,6 +129,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,bannerSelector: ".banner"
 		,bannerTemp: "<a href='{{landingUrl}}'><img src='{{imageUrl}}'/></a>"
 		,fields : ['image_url','title','brand','price','uniqueId']
+		,searchQueryParam:"q"
     });
 ```
 
@@ -701,6 +702,7 @@ JSON used for this template:
 	,fields : ['image_url','title','brand','price','uniqueId']
 	...
 ```
+- **searchQueryParam** : searh query param name to be shown in browser url, default is "q"    
 - **deferInitRender** : This is an array of library features that need to be disabled on initial load.
 ```javascript
 	...
