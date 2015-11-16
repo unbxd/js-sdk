@@ -1036,7 +1036,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    return "//search.unbxdapi.com/"+ this.options.APIKey + "/" + this.options.siteName + "/"  + (this.options.type == "browse" ? "browse" : "search" )
 	}
 	,getUrlSubstring: function(){
-	    return window.location.hash.substring(1) || window.location.search.substring(1);
+	    return window.location.search.substring(1) || window.location.hash.substring(1);
 	}
 	,url : function(){
 	  var host_path = this.getHostNPath();
