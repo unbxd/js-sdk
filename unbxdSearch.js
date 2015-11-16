@@ -1357,7 +1357,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    }else{
 		  
-	      this.params.query = obj.searchMetaData.queryParams[this.options.searchQueryParam];   //obj.didYouMean[0].suggestion;
+	      this.params.query = obj.searchMetaData.queryParams.q;   //obj.didYouMean[0].suggestion;
 	      
 	      if(!this.compiledSpellCheckTemp)
 		this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
@@ -1413,7 +1413,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
 
 	  jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
-	    query : obj.searchMetaData.queryParams[this.options.searchQueryParam]
+	    query : obj.searchMetaData.queryParams.q
 	    ,numberOfProducts : obj.response.numberOfProducts
 	    ,start: this.productStartIdx
 	    ,end: this.productEndIdx
