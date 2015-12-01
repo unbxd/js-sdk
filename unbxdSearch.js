@@ -519,27 +519,38 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,hashChangeInterval : null
 	,ajaxCall : null
 	,init : function(){
-            this.isHashChange = !!("onhashchange" in window.document.body);
-
-            this.$input = jQuery(this.options.inputSelector);
-            this.$input.val('');
-            this.input = this.$input[0];
-
-            this.setEvents();
-
-            this.reset();
-
-            this.params.categoryId = this.options.type == "browse" && typeof this.options.getCategoryId == "function" ? this.options.getCategoryId() : "";
-
-            if(this.params.categoryId.length > 0){
-		if(typeof this.options.setDefaultFilters == "function")
-		  this.setDefaultParams(this.params);
-
-		this.setPage(1)
-                    .setPageSize(this.options.pageSize);
-
-		this.callResults(this.paintResultSet);
-            }else if(this.options.type == "search" && this.input.value.trim().length){
+        this.isHashChange = !!("onhashchange" in window.document.body);
+        this.$input = jQuery(this.options.inputSelector);
+        this.$input.val('');
+        this.input = this.$input[0];
+        this.setEvents();
+        this.reset();
+        this.params.categoryId = this.options.type == "browse" && typeof this.options.getCategoryId == "function" ? this.options.getCategoryId() : "";
+        if(this.params.categoryId.length > 0){
+    		if(this.getQueryParams()["category-id"] == this.params.categoryId){
+                var cur_url = this.getUrlSubstring()
+                  , urlqueryparams = this.getQueryParams(cur_url)
+                  , decodedParams = !/[^A-Za-z0-9\+\/\=]/g.test(cur_url) ? this.getQueryParams(this.decode(cur_url)) : {}
+                  , queryparamcount = Object.keys(urlqueryparams).length
+                  , decodedParamscount = Object.keys(decodedParams).length
+                  , finalParams = null ;
+                if (!this.options.noEncoding && decodedParamscount > 0) {
+                    finalParams = this._processURL(decodedParams)
+                } else {
+                    finalParams = this._processURL(urlqueryparams)
+                }
+                this.params = finalParams;
+                this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1).setPageSize("rows" in finalParams.extra ? finalParams.extra.rows : this.options.pageSize);
+                if (typeof this.options.setDefaultFilters == "function")
+                    this.setDefaultParams(this.params);
+                this.callResults(this.paintResultSet)
+            }else{
+                if (typeof this.options.setDefaultFilters == "function")
+                    this.setDefaultParams(this.params);
+                this.setPage(1).setPageSize(this.options.pageSize);
+                this.callResults(this.paintResultSet)    
+            }
+        }else if(this.options.type == "search" && this.input.value.trim().length){
 	      if(typeof this.options.setDefaultFilters == "function")
                 this.setDefaultParams(this.params);
 
