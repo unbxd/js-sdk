@@ -529,7 +529,6 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
           this.reset();
 
-          this.params.categoryId = this.options.type == "browse" && typeof this.options.getCategoryId == "function" ? this.options.getCategoryId() : "";
 	  var cur_url = this.getUrlSubstring()
           ,urlqueryparams = this.getQueryParams(cur_url)
 	  // add test to check if the url is encoded,
@@ -553,6 +552,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    finalParams.extra.page = finalParams.extra.page + 1;
 
 	  this.params = finalParams;
+
+	  this.params.categoryId = this.options.type == "browse" && typeof this.options.getCategoryId == "function" ? this.options.getCategoryId() : "";
 
 	  this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
 	    .setPageSize("rows" in finalParams.extra ? finalParams.extra.rows :  this.options.pageSize);
