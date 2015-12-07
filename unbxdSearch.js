@@ -1,7 +1,7 @@
 //uglifyjs unbxdSearch.js -o unbxdSearch.min.js && gzip -c unbxdSearch.min.js > unbxdSearch.min.js.gz && aws s3 cp unbxdSearch.min.js.gz s3://unbxd/unbxdSearch.js --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --content-encoding gzip --cache-control max-age=3600
-var unbxdSearchInit = function(jQuery, Handlebars){    
+var unbxdSearchInit = function(jQuery, Handlebars){
   window.Unbxd = window.Unbxd || {};
-  Unbxd.jsSdkVersion = "1.0.2";
+  Unbxd.jsSdkVersion = "1.0.3";
 
   // Production steps of ECMA-262, Edition 5, 15.4.4.14
   // Reference: http://es5.github.io/#x15.4.4.14
@@ -519,109 +519,66 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,hashChangeInterval : null
 	,ajaxCall : null
 	,init : function(){
-        this.isHashChange = !!("onhashchange" in window.document.body);
-        this.$input = jQuery(this.options.inputSelector);
-        this.$input.val('');
-        this.input = this.$input[0];
-        this.setEvents();
-        this.reset();
-        this.params.categoryId = this.options.type == "browse" && typeof this.options.getCategoryId == "function" ? this.options.getCategoryId() : "";
-        if(this.params.categoryId.length > 0){
-    		if(this.getQueryParams()["category-id"] == this.params.categoryId){
-                var cur_url = this.getUrlSubstring()
-                  , urlqueryparams = this.getQueryParams(cur_url)
-                  , decodedParams = !/[^A-Za-z0-9\+\/\=]/g.test(cur_url) ? this.getQueryParams(this.decode(cur_url)) : {}
-                  , queryparamcount = Object.keys(urlqueryparams).length
-                  , decodedParamscount = Object.keys(decodedParams).length
-                  , finalParams = null ;
-                if (!this.options.noEncoding && decodedParamscount > 0) {
-                    finalParams = this._processURL(decodedParams)
-                } else {
-                    finalParams = this._processURL(urlqueryparams)
-                }
-                this.params = finalParams;
-                this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1).setPageSize("rows" in finalParams.extra ? finalParams.extra.rows : this.options.pageSize);
-                if (typeof this.options.setDefaultFilters == "function")
-                    this.setDefaultParams(this.params);
-                this.callResults(this.paintResultSet)
-            }else{
-                if (typeof this.options.setDefaultFilters == "function")
-                    this.setDefaultParams(this.params);
-                this.setPage(1).setPageSize(this.options.pageSize);
-                this.callResults(this.paintResultSet)    
-            }
-        }else if(this.options.type == "search" && this.input.value.trim().length){
-	      if(typeof this.options.setDefaultFilters == "function")
-                this.setDefaultParams(this.params);
+          this.isHashChange = !!("onhashchange" in window.document.body);
 
+          this.$input = jQuery(this.options.inputSelector);
+          this.$input.val('');
+          this.input = this.$input[0];
+
+          this.setEvents();
+
+          this.reset();
+
+	  var cur_url = this.getUrlSubstring()
+          ,urlqueryparams = this.getQueryParams(cur_url)
+	  // add test to check if the url is encoded,
+	  // decode the query parameters only if url is encoded
+	  // fixes SKU searches like writ0035/WRIT0035 & HSWD0015
+          ,decodedParams = !(/[^A-Za-z0-9\+\/\=]/g.test(cur_url)) ? this.getQueryParams(this.decode(cur_url)) : {}
+          ,queryparamcount = Object.keys(urlqueryparams).length
+          ,decodedParamscount = Object.keys(decodedParams).length
+          ,finalParams = null;
+
+	  if(!this.options.noEncoding && decodedParamscount > 0){
+            finalParams = this._processURL(decodedParams);
+	  }else{
+            finalParams = this._processURL(urlqueryparams);
+	  }
+
+	  if(this.options.deferInitRender.indexOf('search') > -1
+	     && !this.isUsingPagination()
+	     && finalParams.extra.hasOwnProperty('page')
+	     && finalParams.extra.page >= 1)
+	    finalParams.extra.page = finalParams.extra.page + 1;
+
+	  this.params = finalParams;
+
+	  this.params.categoryId = this.options.type == "browse" && typeof this.options.getCategoryId == "function" ? this.options.getCategoryId() : "";
+
+	  this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
+	    .setPageSize("rows" in finalParams.extra ? finalParams.extra.rows :  this.options.pageSize);
+
+	  if(this.options.type == "search"){
+	    if(this.input.value.trim().length)
 	      this.params.query = this.$input.val().trim();
+            else if(!("query" in this.params) || (this.params.query + "").trim().length == 0)
+	      this.params.query = "*";
 
-	      if(this.options.deferInitRender.indexOf('search') === -1)
-		jQuery(this.options.searchResultContainer).html('');
+            this.params.query = this.options.sanitizeQueryString.call(this,this.params.query);
 
-	      this.setPage(1)
-                .setPageSize(this.options.pageSize);
+            this.$input.val(this.params.query != "*" ? this.params.query : "");
 
-	      this.callResults(this.paintResultSet);
-            }else{
-	      var cur_url = this.getUrlSubstring()
-              ,urlqueryparams = this.getQueryParams(cur_url)
-	      // add test to check if the url is encoded,
-	      // decode the query parameters only if url is encoded
-	      // fixes SKU searches like writ0035/WRIT0035 & HSWD0015
-              ,decodedParams = !(/[^A-Za-z0-9\+\/\=]/g.test(cur_url)) ? this.getQueryParams(this.decode(cur_url)) : {}
-              ,queryparamcount = Object.keys(urlqueryparams).length
-              ,decodedParamscount = Object.keys(decodedParams).length
-              ,finalParams = null;
+	    if(this.options.deferInitRender.indexOf('search') === -1)
+	      jQuery(this.options.searchResultContainer).html('');
 
-	      if(!this.options.noEncoding && decodedParamscount > 0){
-                finalParams = this._processURL(decodedParams);
-	      }else{
-                finalParams = this._processURL(urlqueryparams);
-	      }
+	  }
 
-	      if(this.options.deferInitRender.indexOf('search') > -1
-		 && !this.isUsingPagination()
-		 && finalParams.extra.hasOwnProperty('page')
-		 && finalParams.extra.page >= 1)
-		finalParams.extra.page = finalParams.extra.page + 1;
+	  if(typeof this.options.setDefaultFilters == "function")
+	    this.setDefaultParams(this.params);
 
-
-		if(this.options.type == "search"){
-                    this.params = finalParams;
-
-                    if(typeof this.options.setDefaultFilters == "function")
-		      this.setDefaultParams(this.params);
-
-
-                    if(!("query" in this.params) || (this.params.query + "").trim().length == 0)
-			this.params.query = "*";
-
-                    this.params.query = this.options.sanitizeQueryString.call(this,this.params.query);
-
-                    this.$input.val(this.params.query != "*" ? this.params.query : "");
-
-		  if(this.options.deferInitRender.indexOf('search') === -1)
-		    jQuery(this.options.searchResultContainer).html('');
-
-                    this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
-		    .setPageSize("rows" in finalParams.extra ? finalParams.extra.rows : this.options.pageSize);
-
-                    if(this.params.query){
-		      this.callResults(this.paintResultSet);
-                    }
-		}else if(this.options.type == "browse" && "categoryId" in finalParams && finalParams["categoryId"].trim().length > 0){
-                    this.params = finalParams;
-
-                    if(typeof this.options.setDefaultFilters == "function")
-		      this.setDefaultParams(this.params);
-
-                    this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
-		    .setPageSize("rows" in finalParams.extra ? finalParams.extra.rows :  this.options.pageSize);
-
-                    this.callResults(this.paintResultSet);
-		}
-            }
+	  if((this.options.type == "search" && "query" in this.params && this.params["query"].trim().length > 0) ||
+	      (this.options.type == "browse" && "categoryId" in this.params && this.params["categoryId"].trim().length > 0))
+	    this.callResults(this.paintResultSet);
 	}
 	,getClass : function(object){
 	    return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1];
@@ -680,63 +637,57 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    if(this.options.type == "search"){
 		if("form" in this.input && this.input.form){
 		    jQuery(this.input.form).bind("submit",function(e){
-			e.preventDefault();
+		      e.preventDefault();
 
-			self.reset();
+		      self.reset();
 
-			self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
+		      self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
 
 		      if(self.options.deferInitRender.indexOf('search') === -1)
 			jQuery(self.options.searchResultContainer).html('');
 
-			if(typeof self.options.setDefaultFilters == "function")
-			  self.setDefaultParams(self.params);
+		      self.setPage(1)
+			.setPageSize(self.options.pageSize)
 
-			self.setPage(1)
-			    .setPageSize(self.options.pageSize)
-
-			if(self.params.query)
-			    self.callResults(self.paintResultSet,true);
+		      if(self.params.query)
+			self.callResults(self.paintResultSet,true);
 		    });
 		}else{
 		    this.$input.bind('keydown',function(e){
 			if(e.which == 13){
-			    e.preventDefault();
+			  e.preventDefault();
 
-			    self.reset();
+			  self.reset();
 
-			    self.params.query = self.options.sanitizeQueryString.call(self, this.value );
+			  self.params.query = self.options.sanitizeQueryString.call(self, this.value );
 
 			  if(self.options.deferInitRender.indexOf('search') === -1)
 			    jQuery(self.options.searchResultContainer).html('');
 
-			    if(typeof self.options.setDefaultFilters == "function")
-			      self.setDefaultParams(self.params);
+			  self.clearFilters(true).setPage(1)
+			    .setPageSize(self.options.pageSize)
 
-			    self.clearFilters(true).setPage(1)
-				.setPageSize(self.options.pageSize)
-
-			    if(self.params.query)
-				self.callResults(self.paintResultSet,true);
+			  if(self.params.query)
+			    self.callResults(self.paintResultSet,true);
 			}
 		    });
 
 		    if(this.options.searchButtonSelector.length){
 			jQuery(this.options.searchButtonSelector).bind("click",function(e){
-			    e.preventDefault();
+			  e.preventDefault();
 
-			    self.reset();
+			  self.reset();
 
-			    self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
+			  self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
 
 			  if(self.options.deferInitRender.indexOf('search') === -1)
 			    jQuery(self.options.searchResultContainer).html('');
 
-			    self.clearFilters(true).setPage(1)
-				.setPageSize(self.options.pageSize)
+			  self.clearFilters(true).setPage(1)
+			    .setPageSize(self.options.pageSize)
 
-			    if(self.params.query)
-				self.callResults(self.paintResultSet,true);
+			  if(self.params.query)
+			    self.callResults(self.paintResultSet,true);
 			});
 		    }
 		}
@@ -1058,7 +1009,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  var nonhistoryPath = "";
 
 	  if(this.options.type == "search" && this.params['query'] != undefined){
-      url += '&'+ this.options.searchQueryParam +'='+ encodeURIComponent(this.params.query);
+	    url += '&'+ this.options.searchQueryParam +'='+ encodeURIComponent(this.params.query);
 	  }else if(this.options.type == "browse" && this.params['categoryId'] != undefined){
 	    url += '&category-id=' + encodeURIComponent(this.params.categoryId);
 	  }
@@ -1218,22 +1169,22 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  
 	  jQuery(this.options.facetContainerSelector).empty();
 
-	    this.options.selectedFacetHolderSelector && jQuery(this.options.selectedFacetHolderSelector).hide();
+	  this.options.selectedFacetHolderSelector && jQuery(this.options.selectedFacetHolderSelector).hide();
 
-	    this.options.loaderSelector.length > 0 && jQuery(this.options.loaderSelector).hide();
+	  this.options.loaderSelector.length > 0 && jQuery(this.options.loaderSelector).hide();
 
-	    this.params = {
-		query : '*'
-		,filters : {}
-		,sort : {}
-		,ranges : {}
-		,categoryId : ""
-		,extra : {
-                  format: "json"
-                  ,page: 1
-                  ,rows: 12
-		}
-	    };
+	  this.params = {
+	    query : '*'
+	    ,filters : {}
+	    ,sort : {}
+	    ,ranges : {}
+	    ,categoryId : ""
+	    ,extra : {
+              format: "json"
+              ,page: 1
+              ,rows: 12
+	    }
+	  };
 
 	  if( this.options.viewTypes && this.options.viewTypes.length > 0)
 	    this.params.extra.view = this.options.viewTypes[0];
@@ -1241,13 +1192,19 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if(typeof this.options.customReset == "function")
 	    this.options.customReset.call(this);
 
+	  if(typeof this.options.setDefaultFilters == "function")
+	    this.setDefaultParams(this.params);
+
 	  return this;
 	}
       ,setDefaultParams: function(params){
+	var newparams, diff;
+	var oldparams = JSON.stringify(params);
 	this.options.setDefaultFilters.call(this);
-	
+	newparams = JSON.stringify(this.params);
+
 	if(Object.keys(this.defaultParams).length === 0)
-	  this.defaultParams = jQuery.extend(true, {}, this.params);
+	  this.defaultParams = JSON.parse(newparams);
       }
 	,_processURL: function(url){
 	    var obj = typeof url == "string" ? this.getQueryParams(url) : url
