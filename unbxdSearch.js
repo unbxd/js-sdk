@@ -592,7 +592,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
           var selected = $t.attr("unbxdviewtype");
           self.setViewType(selected);
           if(selected && self.options.viewTypes.indexOf(selected) > -1) {
-	    if(!self.isUsingPagination()) self.setPage(2);
+	    if(!self.isUsingPagination()) self.setPage(1);
 	    if(self.options.deferInitRender.indexOf('search') > 0
 	       && !self.isUsingPagination()) self.setPage(2);
             self.callResults(self.paintOnlyResultSet, true);
