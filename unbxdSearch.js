@@ -593,9 +593,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
           var selected = $t.attr("unbxdviewtype");
           self.setViewType(selected);
           if(selected && self.options.viewTypes.indexOf(selected) > -1) {
-	    if(!self.isUsingPagination()) self.setPage(1);
-	    if(self.options.deferInitRender.indexOf('search') > 0
-	       && !self.isUsingPagination()) self.setPage(2);
+      	    if(!self.isUsingPagination()) {
+              self.setPage(1);
+              self.currentNumberOfProducts = 0;
+            }
+      	    if(self.options.deferInitRender.indexOf('search') > 0
+            && !self.isUsingPagination()) self.setPage(2);
             self.callResults(self.paintOnlyResultSet, true);
           }
         };
@@ -710,7 +713,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    if(this.options.isAutoScroll){
 		jQuery(window).scroll(function() {
 		    var wind = jQuery(window),docu = jQuery(document);
-		    if((wind.scrollTop()) > (docu.height() - wind.height() - self.options.heightDiffToTriggerNextPage) && self.currentNumberOfProducts < self.totalNumberOfProducts && !self.isLoading){
+		    if((wind.scrollTop()) > (docu.height() - wind.height() - self.options.heightDiffToTriggerNextPage) && self.getPage() < self.totalPages && !self.isLoading){
 			self.setPage(self.getPage() + 1)
 			    .callResults(self.paintProductPage);
 		    }
