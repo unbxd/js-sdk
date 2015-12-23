@@ -1,7 +1,7 @@
 //uglifyjs unbxdSearch.js -o unbxdSearch.min.js && gzip -c unbxdSearch.min.js > unbxdSearch.min.js.gz && aws s3 cp unbxdSearch.min.js.gz s3://unbxd/unbxdSearch.js --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --content-encoding gzip --cache-control max-age=3600
 var unbxdSearchInit = function(jQuery, Handlebars){
   window.Unbxd = window.Unbxd || {};
-  Unbxd.jsSdkVersion = "1.0.5";
+  Unbxd.jsSdkVersion = "1.0.6";
 
   // Production steps of ECMA-262, Edition 5, 15.4.4.14
   // Reference: http://es5.github.io/#x15.4.4.14
@@ -1431,7 +1431,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	    this.totalNumberOfProducts = obj.response.numberOfProducts;
 
-	    this.currentNumberOfProducts += obj.response.products.length;
+	    this.currentNumberOfProducts = obj.response.start + obj.response.products.length;
 
 	    if(typeof this.options.setPagination == "function"){
 		this.options.setPagination.call(this,this.totalNumberOfProducts,this.getPageSize(),this.getPage());
