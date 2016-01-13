@@ -414,6 +414,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,getFacetStats : ""
         ,processFacetStats : function(obj){}
 	,setDefaultFilters : function(){}
+  ,enableBuckets: !1
+  ,noOfBuckets: 5
+  ,bucketSize: 5
+  ,bucketField: ""
+  ,bucketResultSetTemp: ""
 	,fields : []
         ,onNoResult : function(obj){}
 	,noEncoding : false
@@ -697,23 +702,25 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    //click on somthing like "Load more results" to fetch next page
 	    if(this.options.isClickNScroll){
 		jQuery(this.options.clickNScrollElementSelector).bind('click',function(e){
-		    e.preventDefault();
-
-		    self.setPage(self.getPage() + 1);
-
-		    if(self.params.query)
-			self.callResults(self.paintProductPage);
+		    if(!self.enableBuckets){
+          e.preventDefault();
+          self.setPage(self.getPage() + 1);
+          if (self.params.query){
+              self.callResults(self.paintProductPage)
+          }
+      }
 		});
 	    }
 
 	    //to load results on scrolling down
 	    if(this.options.isAutoScroll){
 		jQuery(window).scroll(function() {
-		    var wind = jQuery(window),docu = jQuery(document);
-		    if((wind.scrollTop()) > (docu.height() - wind.height() - self.options.heightDiffToTriggerNextPage) && self.currentNumberOfProducts < self.totalNumberOfProducts && !self.isLoading){
-			self.setPage(self.getPage() + 1)
-			    .callResults(self.paintProductPage);
-		    }
+        if(!self.enableBuckets){
+  		    var wind = jQuery(window),docu = jQuery(document);
+  		    if((wind.scrollTop()) > (docu.height() - wind.height() - self.options.heightDiffToTriggerNextPage) && self.currentNumberOfProducts < self.totalNumberOfProducts && !self.isLoading){
+  			     self.setPage(self.getPage() + 1).callResults(self.paintProductPage);
+  		    }
+        }
 		});
 	    }
 
@@ -1111,6 +1118,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if(this.options.facetMultiSelect)
 	    nonhistoryPath += '&facet.multiselect=true';
 	  
+    if(this.options.enableBuckets){
+      url += "&bucket.field=" + this.options.bucketField;
+      url += "&rows=" + this.options.noOfBuckets;
+      url += "&bucket.limit=" + this.options.bucketSize
+    }
+
 	  nonhistoryPath += '&indent=off';
 
 	  return {
@@ -1302,6 +1315,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  
 	  this.totalNumberOfProducts = 0;
 
+    if(obj.hasOwnProperty("buckets")){
+        totalProducts = obj.buckets.totalProducts;
+    }else{
+        totalProducts = obj.response.numberOfProducts;
+    }
+
 	  this.currentNumberOfProducts = 0;
 
 	  if (!obj.hasOwnProperty('banner')){
@@ -1311,38 +1330,41 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    this.paintBanners(obj);
 	  }
 
-	  if(obj.hasOwnProperty('didYouMean')){
-	    if(obj.response.numberOfProducts == 0 ) { //> this.options.pageSize){
-	      if(this.params.extra.page > 1)
-		this.params.extra.page = this.params.extra.page - 1;
-
-	      this.params.query = obj.didYouMean[0].suggestion;
-	      
-	      if(!this.compiledSpellCheckTemp)
-		this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
-	      
-	      jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
-	      
-	      facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
-
-	    }else{
-		  
-	      this.params.query = obj.searchMetaData.queryParams.q;   //obj.didYouMean[0].suggestion;
-	      
-	      if(!this.compiledSpellCheckTemp)
-		this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
-
-	      jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
-
-	      facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
-	    }
-	  }else{
-	    jQuery(this.options.spellCheck).hide();
-	    if(this.options.deferInitRender.indexOf('search') === -1)
-	      jQuery(this.options.searchResultContainer).empty();
-	    this.paintProductPage(obj);
-	    facetsAlso && this.paintFacets(obj);
-	  }
+	  if (obj.hasOwnProperty("didYouMean")) {
+      if (totalProducts == 0) { //> this.options.pageSize){
+        if( (obj.buckets && obj.didYouMean[0].suggestion) || (obj.response && 0 == obj.response.numberOfProducts)){
+            if (this.params.extra.page > 1) {
+              this.params.extra.page = this.params.extra.page - 1;
+            }
+            
+            this.params.query = obj.didYouMean[0].suggestion;
+            
+            if (!this.compiledSpellCheckTemp) {
+              this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
+            }
+            
+            jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({
+              suggestion: obj.didYouMean[0].suggestion
+            })).show();
+            
+            facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet)
+        }
+      } else {
+          this.params.query = obj.searchMetaData.queryParams.q;
+          if (!this.compiledSpellCheckTemp){
+            this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
+          }
+          jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion: obj.didYouMean[0].suggestion})).show();
+          facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet)
+      }
+    } else {
+      jQuery(this.options.spellCheck).hide();
+      if (this.options.deferInitRender.indexOf("search") === -1) {
+        jQuery(this.options.searchResultContainer).empty();
+      }
+      this.paintProductPage(obj);
+      facetsAlso && this.paintFacets(obj)
+    }
 	}
 	,paintOnlyResultSet : function(obj){
 	  if(this.options.deferInitRender.indexOf('search') === -1)
@@ -1366,7 +1388,13 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if("error" in obj)
 	    return;
 
-	  if(!obj.response.numberOfProducts){
+    if(obj.hasOwnProperty("buckets")){
+      totalProducts = obj.buckets.totalProducts;
+    }else{
+      totalProducts = obj.response.numberOfProducts;
+    }
+
+	  if(!totalProducts){
 	    this.reset();
 
 	    this.options.onNoResult.call(this,obj);
@@ -1376,15 +1404,19 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	  if(!this.compiledSearchQueryTemp)
 	    this.compiledSearchQueryTemp = Handlebars.compile(this.options.searchQueryDisplayTemp);
-
-	  this.productStartIdx = (this.isUsingPagination()) ? obj.response.start + 1 : 1;
-	  this.productEndIdx = (this.getPage() * this.getPageSize() <= obj.response.numberOfProducts) ?
-	    this.getPage() * this.getPageSize() : obj.response.numberOfProducts;
-	  this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
+    if(!obj.buckets){
+  	  this.productStartIdx = (this.isUsingPagination()) ? obj.response.start + 1 : 1;
+  	  this.productEndIdx = (this.getPage() * this.getPageSize() <= obj.response.numberOfProducts) ? this.getPage() * this.getPageSize() : obj.response.numberOfProducts;
+  	  this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
+    }else{
+      this.productStartIdx = (this.isUsingPagination()) ?  ( obj.searchMetaData.queryParams.hasOwnProperty("start") ? obj.searchMetaData.queryParams.start : 0 ) + 1 : 1;
+      this.productEndIdx = (this.getPage() * this.getPageSize() <= obj.buckets.numberOfBuckets) ? this.getPage() * this.getPageSize() : obj.buckets.numberOfBuckets;
+      this.totalPages = Math.ceil(obj.buckets.numberOfBuckets / this.getPageSize());
+    }
 
 	  jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
 	    query : obj.searchMetaData.queryParams.q
-	    ,numberOfProducts : obj.response.numberOfProducts
+	    ,numberOfProducts : obj.hasOwnProperty("buckets") ? obj.buckets.totalProducts : obj.response.numberOfProducts
 	    ,start: this.productStartIdx
 	    ,end: this.productEndIdx
 	  })).show();
@@ -1392,35 +1424,63 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  this.paintSort(obj);
 	  this.paintPageSize(obj);
 	  this.paintPagination(obj);
-	  obj.response.products = obj.response.products.map(function(product){
-	    product['unbxdprank'] = obj.response.start + start;
-	    start += 1;
-	    return product;
-	  });
+	  if(obj.response){
+	    obj.response.products = obj.response.products.map(function(product){
+	      product['unbxdprank'] = obj.response.start + start;
+	      start += 1;
+	      return product;
+	    });
+	  }
 
+    if(this.options.enableBuckets){
+      var i = [];
+      for (var a in obj.buckets){
+        if (obj.buckets.hasOwnProperty(a)) {
+          if ("totalProducts" === a || "numberOfBuckets" === a) continue;
+          i.push({
+            name: a,
+            numberOfProducts: obj.buckets[a].numberOfProducts,
+            products: obj.buckets[a].products
+          });
+        }
+      }
+      if(this.getClass(this.options.bucketResultSetTemp) == "Function"){
+        this.options.bucketResultSetTemp.call(this,{buckets: i});
+      }else{
+        if (!this.compiledBucketResultTemp) {
+          this.compiledBucketResultTemp = Handlebars.compile(this.options.bucketResultSetTemp);
+        }
+        jQuery(this.options.searchResultContainer).append(this.compiledBucketResultTemp({
+          buckets: i,
+          query: obj.searchMetaData.queryParams.q,
+          numberOfProducts: this.options.enableBuckets ? obj.buckets.totalProducts : obj.response.numberOfProducts
+        }));
+        if(typeof this.options.onIntialResultLoad ){
+          this.options.onIntialResultLoad.call(this);
+        }
+      }
+    }else{
 	    if(this.getClass(this.options.searchResultSetTemp) == 'Function'){
-		this.options.searchResultSetTemp.call(this,obj);
-        } else if (this.options.searchResultSetTemp !== null && typeof this.options.searchResultSetTemp === 'object') {
-            this.paintViewTypes(obj);
-            var currentViewType = this.getViewType();
-            if (!this.compiledResultTemp) {
-                this.compiledResultTemp = {};
-                this.options.viewTypes.forEach(function(val) {
-                    this.compiledResultTemp[val] = Handlebars.compile(this.options.searchResultSetTemp[val]);
-                }.bind(this));
-            }
-            if (this.options.deferInitRender.indexOf('search') === -1 || !this.isUsingPagination()) {
-                jQuery(this.options.searchResultContainer).append(this.compiledResultTemp[currentViewType](obj.response));
-            }
+		    this.options.searchResultSetTemp.call(this,obj);
+      } else if (this.options.searchResultSetTemp !== null && typeof this.options.searchResultSetTemp === 'object') {
+        this.paintViewTypes(obj);
+        var currentViewType = this.getViewType();
+        if (!this.compiledResultTemp) {
+            this.compiledResultTemp = {};
+            this.options.viewTypes.forEach(function(val) {
+                this.compiledResultTemp[val] = Handlebars.compile(this.options.searchResultSetTemp[val]);
+            }.bind(this));
+        }
+        if (this.options.deferInitRender.indexOf('search') === -1 || !this.isUsingPagination()) {
+            jQuery(this.options.searchResultContainer).append(this.compiledResultTemp[currentViewType](obj.response));
+        }
 	    }else{
-		if(!this.compiledResultTemp)
-		    this.compiledResultTemp = Handlebars.compile(this.options.searchResultSetTemp);
-
+		    if(!this.compiledResultTemp)
+		      this.compiledResultTemp = Handlebars.compile(this.options.searchResultSetTemp);
 	      if(this.options.deferInitRender.indexOf('search') === -1 || !this.isUsingPagination()){
-		jQuery(this.options.searchResultContainer).append(this.compiledResultTemp(obj.response));
+		      jQuery(this.options.searchResultContainer).append(this.compiledResultTemp(obj.response));
 	      }
 	    }
-
 	    if(!this.currentNumberOfProducts && typeof this.options.onIntialResultLoad == "function") {
 	      this.options.onIntialResultLoad.call(this, obj);
 	    }
@@ -1434,12 +1494,12 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    this.currentNumberOfProducts = obj.response.start + obj.response.products.length;
 
 	    if(typeof this.options.setPagination == "function"){
-		this.options.setPagination.call(this,this.totalNumberOfProducts,this.getPageSize(),this.getPage());
+		    this.options.setPagination.call(this,this.totalNumberOfProducts,this.getPageSize(),this.getPage());
 	    }
 
 	    if(this.options.isClickNScroll)
-		jQuery(this.options.clickNScrollElementSelector)[(this.currentNumberOfProducts < this.totalNumberOfProducts) ? 'show' : 'hide']();
-
+		  jQuery(this.options.clickNScrollElementSelector)[(this.currentNumberOfProducts < this.totalNumberOfProducts) ? 'show' : 'hide']();
+    }
 	}
       ,paintSort: function(obj) {
 	if("error" in obj)
@@ -1575,7 +1635,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if("error" in obj)
 	    return;
 
-	  if(!obj.response.numberOfProducts)
+	  if(!obj.buckets && !obj.response.numberOfProducts)
 	    return this;
 
 	    var facets = obj.facets
