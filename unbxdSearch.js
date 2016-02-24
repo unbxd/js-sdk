@@ -68,7 +68,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       return -1;
     };
   }
-  
+
   /**
    * Shim for "fixing" IE's lack of support (IE < 9) for applying slice
    * on host objects like NamedNodeMap, NodeList, and HTMLCollection
@@ -81,7 +81,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
   (function () {
     'use strict';
     var _slice = Array.prototype.slice;
-    
+
     try {
       // Can't be used with DOM elements in IE < 9
       _slice.call(document.documentElement);
@@ -243,7 +243,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       return A;
     };
   }
-  
+
   if (!Array.prototype.filter) {
     Array.prototype.filter = function(fun/*, thisArg*/) {
       'use strict';
@@ -278,7 +278,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       return res;
     };
   }
-  
+
   // Production steps of ECMA-262, Edition 5, 15.4.4.21
   // Reference: http://es5.github.io/#x15.4.4.21
   if (!Array.prototype.reduce) {
@@ -607,15 +607,15 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		(e.currentTarget === e.target) ? $t : undefined,
 		field = $selected && $selected.attr('unbxdsortfield'),
 		value = $selected && $selected.attr('unbxdsortvalue');
-	    
+
 	    if($selected){
 	      self
 		.resetSort()
 		.setPage(1);
-	      
+
 	      if(field && value)
 		self.addSort(field, value);
-	      
+
 	      self.callResults(self.paintOnlyResultSet, true);
 	    }
 	  };
@@ -763,7 +763,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		  ,checkbox_sel = self.options.facetCheckBoxSelector + "[unbxdParam_facetName='"+ name +"'][unbxdParam_facetValue='" + val + "']";
 
 		  jQuery(checkbox_sel).removeAttr("checked");
-		  
+
 		  if(typeof self.options.facetOnDeselect == "function"){
 		    self.options.facetOnDeselect(jQuery(checkbox_sel).parents(self.options.facetElementSelector));
 		  }
@@ -825,7 +825,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		}
 		self.callResults(self.paintOnlyResultSet, true);
 	      }
-	      
+
 	    });
 	  }
 
@@ -936,8 +936,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	}
 	,addRangeFilter : function(field, lb, ub){
 	    if(!(field in this.params.ranges))
-		this.params.ranges[field] = {}; 
-	    
+		this.params.ranges[field] = {};
+
 	    this.params.ranges[field][lb + ' TO ' + ub] = {lb : lb || '*', ub : ub || '*'};
 
 	    return this;
@@ -945,7 +945,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,removeRangeFilter : function(field, lb, ub){
 	  if(!lb && !ub && field in this.params.ranges)
 	    delete this.params.ranges[field];
-	  
+
 	  if(lb && ub && field in this.params.ranges && (lb + ' TO ' + ub in this.params.ranges[field]))
 	    delete this.params.ranges[field][lb + ' TO ' + ub];
 
@@ -1010,7 +1010,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  var nonhistoryPath = "";
 
 	  if(this.options.type == "search" && this.params['query'] != undefined){
-	    url += '&'+ this.options.searchQueryParam +'='+ encodeURIComponent(this.params.query);
+      var escapedQuery = this.params.query.replace(/[\/]/g, "\\$&").replace(/\\\\/g,"\\");
+	    url += '&'+ this.options.searchQueryParam +'='+ encodeURIComponent(escapedQuery);
 	  }else if(this.options.type == "browse" && this.params['categoryId'] != undefined){
 	    url += '&category-id=' + encodeURIComponent(this.params.categoryId);
 	  }
@@ -1056,7 +1057,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    else if(b.length > 0)
 	      nonhistoryPath += '&filter='+b.join(' OR ');
 	  }
-	  
+
 	  var a = [];
 	  var b = [];
 	  for(var field in this.params.sort){
@@ -1110,7 +1111,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	  if(this.options.facetMultiSelect)
 	    nonhistoryPath += '&facet.multiselect=true';
-	  
+
 	  nonhistoryPath += '&indent=off';
 
 	  return {
@@ -1123,26 +1124,26 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if(this.isLoading){
 	    this.ajaxCall.abort();
 	  }
-	  
+
 	  this.isLoading = true;
 
 	  if(this.options.loaderSelector.length > 0)
 	    jQuery(this.options.loaderSelector).show();
-	  
+
 	  var self = this
           ,modifiedCB = callback.bind(self)
           ,cb = function(data){
 	    this.isLoading = false;
 	    if(this.options.loaderSelector.length > 0)
               jQuery(this.options.loaderSelector).hide();
-	    
+
 	    if("error" in data)
               return false;
 
 	    modifiedCB(data);
           }
 	  ,urlobj = self.url();
-	  
+
 	  if(doPush){
 	    var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
 	    if(this.isHistory){
@@ -1167,7 +1168,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  jQuery(this.options.searchQueryDisplay).empty();
 	  if(this.options.deferInitRender.indexOf('search') === -1)
 	    jQuery(this.options.searchResultContainer).empty();
-	  
+
 	  jQuery(this.options.facetContainerSelector).empty();
 
 	  this.options.selectedFacetHolderSelector && jQuery(this.options.selectedFacetHolderSelector).hide();
@@ -1239,7 +1240,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 			    if(vals.length > 1){
 				if(!(arr[0] in params.ranges))
 				    params.ranges[arr[0]] = {};
-				
+
 				params.ranges[arr[0]][arr[1]] = {lb : isNaN(parseFloat(vals[0])) ? '*' : parseFloat(vals[0]), ub : isNaN(parseFloat(vals[1])) ? '*' : parseFloat(vals[1])};
 			    } else {
 				if(!(arr[0] in params.filters))
@@ -1299,7 +1300,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,_internalPaintResultSet: function(obj, facetsAlso){
 	  if("error" in obj)
 	    return false;
-	  
+
 	  this.totalNumberOfProducts = 0;
 
 	  this.currentNumberOfProducts = 0;
@@ -1317,18 +1318,18 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		this.params.extra.page = this.params.extra.page - 1;
 
 	      this.params.query = obj.didYouMean[0].suggestion;
-	      
+
 	      if(!this.compiledSpellCheckTemp)
 		this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
-	      
+
 	      jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
-	      
+
 	      facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
 
 	    }else{
-		  
+
 	      this.params.query = obj.searchMetaData.queryParams.q;   //obj.didYouMean[0].suggestion;
-	      
+
 	      if(!this.compiledSpellCheckTemp)
 		this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
 
@@ -1534,8 +1535,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  return obj.page > 0 && obj.page <= this.totalPages;
 	}.bind(this))
 
-	
-	  
+
+
 	jQuery(this.options.paginationContainerSelector).html(this.compiledPaginationTemp({
 	  hasFirst: this.getPage() > 1 ? true : false,
 	  hasPrev: this.getPage() > 1 ? true : false,
@@ -1567,9 +1568,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		}
 	      ));
 	    }.bind(this), []);
-	  
+
 	  jQuery(this.options.bannerSelector).html(bannersToDraw.join(''));
-	  
+
 	}
 	,paintFacets: function(obj){
 	  if("error" in obj)
@@ -1632,7 +1633,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		    }
 
 		    if((singlefacet.unordered.length) > 0) textfacets.push(singlefacet);
-		    
+
 		} else {
 		    for(var i = 0, len = facets[x]['values']['counts'].length/2; i < len; i++){
 			facetValStart = parseFloat(facets[x]['values']['counts'][2 * i]).toString();
@@ -1664,7 +1665,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if (this.options.deferInitRender.indexOf('search') > -1){
 	    this.options.deferInitRender = [];
 	  }
-	  
+
 	    if (typeof this.options.onFacetLoad == "function") {
 	      this.options.onFacetLoad.call(this, obj);
 	    }
@@ -1672,7 +1673,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if(this.options.getFacetStats.length &&
 	     typeof this.options.processFacetStats == "function" &&
 	     "stats" in obj && obj.stats[this.options.getFacetStats] != null){
-	    
+
 	    obj.stats[this.options.getFacetStats].values = {
 	      min: obj.stats[this.options.getFacetStats].min,
 	      max: obj.stats[this.options.getFacetStats].max
@@ -1688,7 +1689,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 		    obj.stats[this.options.getFacetStats].max
 		};
 	      }
-	      
+
 	    }
 
 	    this.options.processFacetStats.call(this,obj.stats);
@@ -1698,7 +1699,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  var selFacetKeysLength = Math.max(Object.keys(this.params.filters).length,
 					    Object.keys(this.params.ranges).length);
 	  var selectedFacets = {};
-	  
+
 	  if(selFacetKeysLength){
 	    selectedFacets.filters = this.params.filters;
 	    selectedFacets.ranges = {};
@@ -1706,7 +1707,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    for (var x in this.params.ranges){
 	      if(!selectedFacets.ranges.hasOwnProperty(x))
 		selectedFacets.ranges[x] = {};
-	      
+
 	      for (var y in this.params.ranges[x]){
 		selectedFacets.ranges[x][y] = x;
 	      }
@@ -1740,7 +1741,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	    while (e = r.exec(q)) {
 		var e1 = e[1].indexOf("[")
 		//first group of regex match
-		,k = e1 == "-1" ? e[1] : e[1].slice(0, e1) 
+		,k = e1 == "-1" ? e[1] : e[1].slice(0, e1)
 		,i = e1 != "-1" ? d(e[1].slice(e1+1, e[1].indexOf("]", e1))) : ""
 		,v = d(e[2]);
 
@@ -1849,11 +1850,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     });
 };
 
-if(!window.jQuery || !window.Handlebars) 
+if(!window.jQuery || !window.Handlebars)
     throw "Please include jQuery & Handlebars libraries before loading unbxdSearch.js";
 
 var arr = jQuery.fn.jquery.split('.');
-if( arr[0] < 1 || (arr[0] == 1 && arr[1] < 7) ) 
+if( arr[0] < 1 || (arr[0] == 1 && arr[1] < 7) )
     throw "jQuery version needs to be greater than 1.7 to use unbxdSearch.js. You can pass custom jQuery & Handlebars by calling unbxdSeachInit(jQuery, Handlebars)";
 
 
