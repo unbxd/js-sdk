@@ -1560,12 +1560,16 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
       bannersToDraw = banner.banners.slice(0, this.options.bannerCount)
 	.reduce(function(prev, curr){
-	  return prev.concat(this.compiledBannerTemp(
-	    {
-	      landingUrl: curr.landingUrl,
-	      imageUrl: curr.imageUrl
-	    }
-	  ));
+	  if(curr.hasOwnProperty('bannerHtml') && curr['bannerHtml']) {
+	    return prev.concat(curr.bannerHtml);
+	  } else {
+	    return prev.concat(this.compiledBannerTemp(
+	      {
+		landingUrl: curr.landingUrl,
+		imageUrl: curr.imageUrl
+	      }
+	    ));
+	  }
 	}.bind(this), []);
       
       jQuery(this.options.bannerSelector).html(bannersToDraw.join(''));
