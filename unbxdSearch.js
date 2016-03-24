@@ -1304,6 +1304,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
       this.currentNumberOfProducts = 0;
 
+      if(obj.hasOwnProperty('redirect')) {
+	window.location = obj['redirect']['value'];
+	return false;
+      }
+
       if (!obj.hasOwnProperty('banner')){
 	this.options.bannerSelector.length
 	  && jQuery(this.options.bannerSelector).empty();
