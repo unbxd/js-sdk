@@ -479,6 +479,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       '{{/options}}'
     ].join('')
     ,searchQueryParam:"q"
+    ,retainbaseParam: false
+    ,baseParams:[]
   };
 
   jQuery.extend(Unbxd.setSearch.prototype,{
@@ -1008,6 +1010,21 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
       var url ="";
       var nonhistoryPath = "";
+      // To Retain the fields which are are required from the params of the base URL
+      var cur_url = this.getUrlSubstring();
+      var urlParams = this.getQueryParams(cur_url);
+      var baseParams = {};
+      if( typeof(this.options.baseParams) == "object" && this.options.baseParams.length > 0 ){
+        for( i in urlParams ){
+          if((urlParams.hasOwnProperty(i)) && !(i in this.params)){
+            for( param in this.options.baseParams ){
+              if(i == this.options.baseParams[param]){
+                baseParams[i] = urlParams[i]
+              }
+            }
+          }
+        }
+      }
 
       if(this.options.type == "search" && this.params['query'] != undefined){
 	url += '&'+ this.options.searchQueryParam +'='+ encodeURIComponent(this.params.query);
@@ -1117,6 +1134,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	url : host_path + "?" + url + nonhistoryPath
 	,query : url
 	,host : host_path
+	,baseParams : baseParams
       };
     }
     ,callResults : function(callback, doPush){
@@ -1146,6 +1164,15 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       if(doPush){
 	var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
 	if(this.isHistory){
+	  if( self.options.retainbaseParam == true ){
+	    var finalBaseParams = '';
+	    for( i in urlobj.baseParams){
+	      if(urlobj.baseParams.hasOwnProperty(i)){
+	        finalBaseParams += "&" + i + "=" + urlobj.baseParams[i];
+	      }
+	    }
+	    finalquery += finalquery + this.options.noEncoding ? finalBaseParams : this.encode(finalBaseParams);
+	  }
 	  history.pushState(this.params,null,location.protocol + "//" + location.host + location.pathname + "?" + finalquery);
 	}else{
 	  window.location.hash = finalquery;
