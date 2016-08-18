@@ -1882,6 +1882,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       }
       return t;
     }
+    ,log : function(str){
+      if(this.readCookie("debug") === '1'){
+        console.log("Unbxd : " + str);
+      }
+    }
   });
 };
 
