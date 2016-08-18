@@ -1887,6 +1887,48 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         console.log("Unbxd : " + str);
       }
     }
+    ,decodeAndParse : function(s) {
+      if (s.indexOf('"') === 0) {
+        // This is a quoted cookie as according to RFC2068, unescape...
+        s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+      }
+
+      return this.decodeCookie(s);
+    }
+    ,decodeCookie : function(s) {
+      var pluses = /\+/g;
+      return decodeURIComponent(s.replace(pluses, ' '));
+    }
+    ,cookie : function (key) {
+      // Read
+      var cookies = document.cookie.split('; ');
+      var result;
+      for (var i = 0, l = cookies.length; i < l; i++) {
+        var parts = cookies[i].split('=');
+        var name = this.decodeCookie(parts.shift());
+        var cookie = parts.join('=');
+
+        if (key && key === name) {
+          try{
+            result = this.decodeAndParse(cookie);
+            break;
+          }catch(e){
+            this.log(e);
+          }
+        }
+      }
+
+      return result;
+    }
+    ,readCookie : function(name){
+      try{
+        return this.cookie('unbxd.' + name);
+      }catch(e){
+        this.log(e);
+      }
+
+      return undefined;
+    }
   });
 };
 
