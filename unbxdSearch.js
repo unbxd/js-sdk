@@ -481,6 +481,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     ,searchQueryParam:"q"
     ,retainbaseParam: false
     ,baseParams:[]
+    ,requestHeaders: {}
   };
 
   jQuery.extend(Unbxd.setSearch.prototype,{
@@ -1159,7 +1160,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	modifiedCB(data);
       }
-      ,urlobj = self.url();
+      ,urlobj = self.url()
+      ,requestHeaders = jQuery.extend({}, this.getDefaultRequestHeaders(), this.options.requestHeaders);
       
       if(doPush){
 	var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
@@ -1185,6 +1187,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,dataType: "jsonp"
 	,jsonp: 'json.wrf'
 	,success: cb.bind(self)
+	,headers: requestHeaders
       });
     }
     ,reset: function(){
@@ -1928,6 +1931,37 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       }
 
       return undefined;
+    }
+    ,getDeviceInfo : function(){
+      var smallDeviceMaxWidth = 768,
+      mediumDeviceMaxWidth = 992;
+      if(window.outerWidth < smallDeviceMaxWidth){
+        return "Mobile";
+      } else if(window.outerWidth < mediumDeviceMaxWidth){
+        return "Tablet";
+      } else {
+        return "Desktop";
+      }
+    }
+    ,getUserType : function(){
+      return this.readCookie('visit') === "repeat" ? "repeat" : "new";
+    }
+    ,getUserId : function(){
+      return this.readCookie('userId');
+    }
+    ,getDefaultRequestHeaders : function(){
+      var self = this,
+      userId = this.getUserId(),
+      defaultRequestHeaders = {
+        "Device-Type": self.getDeviceInfo()
+        ,"Unbxd-Url": document.URL
+        ,"Unbxd-Referrer": document.referrer
+        ,"User-Type": self.getUserType()
+      };
+      if(userId){
+        defaultRequestHeaders["User-Id"] = userId;
+      }
+      return defaultRequestHeaders;
     }
   });
 };
