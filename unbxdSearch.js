@@ -481,6 +481,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     ,searchQueryParam:"q"
     ,retainbaseParam: false
     ,baseParams:[]
+    ,requestHeaders: {}
   };
 
   jQuery.extend(Unbxd.setSearch.prototype,{
@@ -1159,7 +1160,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
 	modifiedCB(data);
       }
-      ,urlobj = self.url();
+      ,urlobj = self.url()
+      ,requestHeaders = jQuery.extend({}, this.getDefaultRequestHeaders(), this.options.requestHeaders);
       
       if(doPush){
 	var finalquery = this.options.noEncoding ? urlobj.query : this.encode( urlobj.query );
@@ -1185,6 +1187,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,dataType: "jsonp"
 	,jsonp: 'json.wrf'
 	,success: cb.bind(self)
+	,headers: requestHeaders
       });
     }
     ,reset: function(){
@@ -1881,6 +1884,84 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	}
       }
       return t;
+    }
+    ,log : function(str){
+      if(this.readCookie("debug") === '1'){
+        console.log("Unbxd : " + str);
+      }
+    }
+    ,decodeAndParse : function(s) {
+      if (s.indexOf('"') === 0) {
+        // This is a quoted cookie as according to RFC2068, unescape...
+        s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+      }
+
+      return this.decodeCookie(s);
+    }
+    ,decodeCookie : function(s) {
+      var pluses = /\+/g;
+      return decodeURIComponent(s.replace(pluses, ' '));
+    }
+    ,cookie : function (key) {
+      // Read
+      var cookies = document.cookie.split('; ');
+      var result;
+      for (var i = 0, l = cookies.length; i < l; i++) {
+        var parts = cookies[i].split('=');
+        var name = this.decodeCookie(parts.shift());
+        var cookie = parts.join('=');
+
+        if (key && key === name) {
+          try{
+            result = this.decodeAndParse(cookie);
+            break;
+          }catch(e){
+            this.log(e);
+          }
+        }
+      }
+
+      return result;
+    }
+    ,readCookie : function(name){
+      try{
+        return this.cookie('unbxd.' + name);
+      }catch(e){
+        this.log(e);
+      }
+
+      return undefined;
+    }
+    ,getDeviceInfo : function(){
+      var smallDeviceMaxWidth = 768,
+      mediumDeviceMaxWidth = 992;
+      if(window.outerWidth < smallDeviceMaxWidth){
+        return "Mobile";
+      } else if(window.outerWidth < mediumDeviceMaxWidth){
+        return "Tablet";
+      } else {
+        return "Desktop";
+      }
+    }
+    ,getUserType : function(){
+      return this.readCookie('visit') === "repeat" ? "repeat" : "new";
+    }
+    ,getUserId : function(){
+      return this.readCookie('userId');
+    }
+    ,getDefaultRequestHeaders : function(){
+      var self = this,
+      userId = this.getUserId(),
+      defaultRequestHeaders = {
+        "Device-Type": self.getDeviceInfo()
+        ,"Unbxd-Url": document.URL
+        ,"Unbxd-Referrer": document.referrer
+        ,"User-Type": self.getUserType()
+      };
+      if(userId){
+        defaultRequestHeaders["User-Id"] = userId;
+      }
+      return defaultRequestHeaders;
     }
   });
 };
