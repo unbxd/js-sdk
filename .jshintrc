@@ -1,0 +1,24 @@
+{
+  "undef": true,
+  "unused": true,
+  "expr": true,
+  "maxlen": 80,
+  "camelcase": true,
+  "quotmark": true,
+  "globals":{
+    "expect": false,
+    "module": true,
+    "describe": false,
+    "window": true,
+    "document": true,
+    "before": false,
+    "after": false,
+    "beforeEach": false,
+    "fixture": false,
+    "__html__": false,
+    "html": false,
+    "sinon": false,
+    "jQuery": false,
+    "it": false
+  }
+}
