@@ -207,4 +207,27 @@ var config = {
       '</li>',
     '{{/options}}'
   ].join('')
+  ,pageSizeContainerSelector: '.page_size_container'
+  ,pageSizeOptions: [{
+      name: '12',
+      value: '12'
+  },{
+      name: '24',
+      value: '24'
+  },{
+      name: '36',
+      value: '36'
+  }]
+  ,pageSizeContainerType: 'select'
+  ,pageSizeContainerTemp: [
+      '<select>',
+      '{{#options}}',
+      '{{#if selected}}',
+      '<option value="{{value}}" selected unbxdpageSize="{{value}}">{{name}}</option>',
+      '{{else}}',
+      '<option value="{{value}}" unbxdpageSize="{{value}}">{{name}}</option>',
+      '{{/if}}',
+      '{{/options}}',
+      '</select>'
+  ].join('')
 };
