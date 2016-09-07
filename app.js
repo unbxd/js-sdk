@@ -51,7 +51,7 @@ var config = {
   }
   ,searchResultContainer : '#results_container'
   ,isClickNScroll: false
-  ,clickNScrollSelector : ''
+  ,clickNScrollElementSelector : '#load-more'
   ,isAutoScroll : true
   ,facetTemp : [
     '{{#facets}}'
