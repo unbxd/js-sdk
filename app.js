@@ -10,24 +10,45 @@ var config = {
   ,searchQueryDisplay : '#search_title'
   ,searchQueryDisplayTemp : 'Showing results for {{query}} - {{start}}-{{end}} of {{numberOfProducts}} Results'
   ,pageSize : 12
-  ,searchResultSetTemp : [
-    '{{#products}}'
-      ,'<li>'
-        ,'<a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
-          ,'<div class="result-image-container">'
-            ,'<span class="result-image-horizontal-holder">'
-              ,'<img src="{{{image_url}}}" alt="{{{title}}}">'
-            ,'</span>'
-          ,'</div>'
-          ,'<div class="result-brand">{{{brand}}}</div>'
-          ,'<div class="result-title">{{{title}}}</div>'
-          ,'<div class="result-price">'
-            ,'${{price}}'
-          ,'</div>'
-        ,'</a>'
-      ,'</li>'
-    ,'{{/products}}'
-  ].join('')
+  ,searchResultSetTemp :
+  {
+    "grid" : [
+      '{{#products}}'
+        ,'<li class="grid_view">'
+          ,'<a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
+            ,'<div class="result-image-container">'
+              ,'<span class="result-image-horizontal-holder">'
+                ,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+              ,'</span>'
+            ,'</div>'
+            ,'<div class="result-brand">{{{brand}}}</div>'
+            ,'<div class="result-title">{{{title}}}</div>'
+            ,'<div class="result-price">'
+              ,'${{price}}'
+            ,'</div>'
+          ,'</a>'
+        ,'</li>'
+      ,'{{/products}}'
+    ].join(''),
+    "list" : [
+      '{{#products}}'
+        ,'<li class="list_view">'
+          ,'<a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
+            ,'<div class="result-image-container">'
+              ,'<span class="result-image-horizontal-holder">'
+                ,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+              ,'</span>'
+            ,'</div>'
+            ,'<div class="result-brand">{{{brand}}}</div>'
+            ,'<div class="result-title">{{{title}}}</div>'
+            ,'<div class="result-price">'
+              ,'${{price}}'
+            ,'</div>'
+          ,'</a>'
+        ,'</li>'
+      ,'{{/products}}'
+    ].join('')
+  }
   ,searchResultContainer : '#results_container'
   ,isClickNScroll: false
   ,clickNScrollSelector : ''
@@ -173,4 +194,17 @@ var config = {
   ].join('')
   ,fields : ['image_url','title','brand','price','uniqueId']
   ,searchQueryParam:"q"
+  ,viewTypes: ['grid', 'list']
+  ,viewTypeContainerSelector: '.view_type_select'
+  ,viewTypeContainerTemp: [
+    '{{#options}}',
+      '<li class="unbxd-{{#if selected}}current{{/if}}">',
+        '<a title="{{value}} View" class="unbxd-{{value}}view-button" {{#unless selected}}unbxdviewtype="{{value}}"{{/unless}}>',
+          '<span class="icon-{{value}}view">',
+            '{{value}}',
+          '</span>',
+        '</a>',
+      '</li>',
+    '{{/options}}'
+  ].join('')
 };
