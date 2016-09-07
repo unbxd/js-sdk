@@ -90,6 +90,24 @@ var config = {
       //jQuery(el).removeClass('selected');
   }
   ,facetMultiSelect : true
+  ,selectedFacetTemp : [
+    '{{#each filters}}'
+      ,'{{#each this}}'
+        ,'<div class="selected-facet clearfix">'
+          ,'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
+          ,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
+        ,'</div>'
+      ,'{{/each}}'
+    ,'{{/each}}'
+    ,'{{#each ranges}}'
+      ,'{{#each this}}'
+        ,'<div class="selected-facet clearfix">'
+          ,'<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>'
+          ,'<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>'
+        ,'</div>'
+      ,'{{/each}}'
+    ,'{{/each}}'
+  ].join('')
   ,selectedFacetContainerSelector : "#selected_facets"
   ,clearSelectedFacetsSelector : "#clear_all_selected_facets"
   ,removeSelectedFacetSelector : ".selected-facet-delete"
