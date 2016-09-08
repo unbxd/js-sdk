@@ -26,6 +26,7 @@ describe('Facets', function () {
 
   after(function(){
     this.stub.restore();
+    fixture.cleanup();
   });
 
   beforeEach(function(){

@@ -19,6 +19,7 @@ describe('SpellCheck - with results', function () {
 
   after(function(){
     this.stub.restore();
+    fixture.cleanup();
   });
   
   it('Should display didYouMean', function(){

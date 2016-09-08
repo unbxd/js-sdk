@@ -17,6 +17,7 @@ describe('Banners', function () {
 
   after(function(){
     this.stub.restore();
+    fixture.cleanup();
   });
 
   beforeEach(function(){

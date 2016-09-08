@@ -25,6 +25,7 @@ describe('On Init', function () {
 
   after(function(){
     this.stub.restore();
+    fixture.cleanup();
   });
   
   it('Should call onIntialResultLoad', function(){

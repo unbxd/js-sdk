@@ -27,6 +27,7 @@ describe('Redirect', function () {
   after(function(){
     this.stub.restore();
     this.stubInternalPaintResultSet.restore();
+    fixture.cleanup();
   });
   
   it('Should not call onIntialResultLoad',function(){

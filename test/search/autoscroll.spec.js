@@ -20,6 +20,7 @@ describe('Autoscroll', function () {
 
   after(function(){
     this.stub.restore();
+    fixture.cleanup();
   });
 
   beforeEach(function(){
