@@ -14,7 +14,7 @@ module.exports = function (config) {
       'karma-fixture',
       'karma-json-fixtures-preprocessor',
       'karma-handlebars-preprocessor',
-      'karma-verbose-reporter',
+      'karma-spec-reporter',
     ],
 
     frameworks: ['mocha', 'chai','jquery-1.8.3','sinon','fixture'],
@@ -37,8 +37,7 @@ module.exports = function (config) {
         'test/search/*.spec.js',
     ],
 
-    reporters: ['verbose','progress'],
-
+    reporters: ['spec'],
     port: 9876,
     colors: true,
     autoWatch: false,
