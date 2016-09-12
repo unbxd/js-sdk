@@ -1,10 +1,8 @@
 describe('clickNScroll', function () {
-  var expect = window.expect;
-  fixture.setBase('mock');
-  var searchTest = fixture.load('searchTestResponse.json');
 
   before(function(){
 
+    this.searchTest = fixture.load('mock/searchTestResponse.json');
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
 
@@ -14,10 +12,11 @@ describe('clickNScroll', function () {
     window.config.isClickNScroll = true;
 
     //initialize search
-    window.searchobj = new window.Unbxd.setSearch(window.config);
+    this.searchobj = new window.Unbxd.setSearch(window.config);
 
     //stub search ajax call with mock response
-    this.stub = sinon.stub(jQuery, 'ajax').yieldsTo('success',searchTest);
+    this.stub = sinon.stub(jQuery, 'ajax')
+      .yieldsTo('success',this.searchTest);
 
   });
 
@@ -28,25 +27,26 @@ describe('clickNScroll', function () {
 
   beforeEach(function(){
     //reset params applied
-    window.searchobj.reset();
-    window.searchobj.callResults(window.searchobj.paintResultSet);
+    this.searchobj.reset();
+    this.searchobj.callResults(this.searchobj.paintResultSet);
   });
 
   it('Should load Next page on clicking on clickNScrollElement',function(){
-    var beforeAtPage = window.searchobj.getPage();
+    var beforeAtPage = this.searchobj.getPage();
     var AfterAtPage;
-    jQuery(window.searchobj.options.clickNScrollElementSelector).click();
-    AfterAtPage = window.searchobj.getPage();
+    jQuery(this.searchobj.options.clickNScrollElementSelector).click();
+    AfterAtPage = this.searchobj.getPage();
     expect(beforeAtPage + 1).to.be.equal(AfterAtPage);
   });
 
   it('Should hide clickNScrollElement on last page', function(){
-    searchTest.response.start = searchTest.response.numberOfProducts - 
-      searchTest.searchMetaData.queryParams.rows;
-    window.searchobj.setPage(window.searchobj.totalPages);
-    window.searchobj.callResults(window.searchobj.paintResultSet);
+    this.searchTest.response.start = this.searchTest
+      .response.numberOfProducts - 
+      this.searchTest.searchMetaData.queryParams.rows;
+    this.searchobj.setPage(this.searchobj.totalPages);
+    this.searchobj.callResults(this.searchobj.paintResultSet);
 
-    expect(jQuery(window.searchobj.options.clickNScrollElementSelector)
+    expect(jQuery(this.searchobj.options.clickNScrollElementSelector)
       .is(':visible')).to.be.false;
   });
 });

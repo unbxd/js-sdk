@@ -1,27 +1,27 @@
 describe('Redirect', function () {
-  var expect = window.expect;
   
   before(function(){
-    fixture.setBase('mock');
-    var RedirectTest = fixture.load('redirect.json');
+    this.RedirectTest = fixture.load('mock/redirect.json');
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
 
     //initialize search
-    window.searchobj = new window.Unbxd.setSearch(window.config);
+    this.searchobj = new window.Unbxd.setSearch(window.config);
 
     //stub search ajax call with mock response
-    this.stub = sinon.stub(jQuery, 'ajax').yieldsTo('success',RedirectTest);
+    this.stub = sinon.stub(jQuery, 'ajax')
+      .yieldsTo('success',this.RedirectTest);
 
-    this.spyOnIntialResultLoad = sinon.spy(window.searchobj.options,
+    this.spyOnIntialResultLoad = sinon.spy(this.searchobj.options,
       'onIntialResultLoad');
 
     //stubbing _internalPaintResultSet here to avoid page reload
-    this.stubInternalPaintResultSet = sinon.stub(window.searchobj,
+    this.stubInternalPaintResultSet = sinon.stub(this.searchobj,
       '_internalPaintResultSet');
-    this.stubInternalPaintResultSet.withArgs(RedirectTest,true).returns(false);
+    this.stubInternalPaintResultSet.withArgs(this.RedirectTest,true)
+      .returns(false);
     
-    window.searchobj.callResults(window.searchobj.paintResultSet);
+    this.searchobj.callResults(this.searchobj.paintResultSet);
   });
 
   after(function(){

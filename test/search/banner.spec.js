@@ -1,17 +1,16 @@
 describe('Banners', function () {
-  var expect = window.expect;
-  fixture.setBase('mock');
-  var bannerResponse = fixture.load('bannerResponse.json');
 
   before(function(){
+    this.bannerResponse = fixture.load('mock/bannerResponse.json');
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
 
     //initialize search
-    window.searchobj = new window.Unbxd.setSearch(window.config);
+    this.searchobj = new window.Unbxd.setSearch(window.config);
 
     //stub search ajax call with mock response
-    this.stub = sinon.stub(jQuery, 'ajax').yieldsTo('success',bannerResponse);
+    this.stub = sinon.stub(jQuery, 'ajax')
+      .yieldsTo('success',this.bannerResponse);
 
   });
 
@@ -21,16 +20,16 @@ describe('Banners', function () {
   });
 
   beforeEach(function(){
-    window.searchobj.callResults(window.searchobj.paintResultSet);
+    this.searchobj.callResults(this.searchobj.paintResultSet);
   });
 
   it('Should update the Banner landingUrl', function(){
-    expect(jQuery(window.searchobj.options.bannerSelector + ' a').attr('href'))
-      .to.be.equal(bannerResponse.banner.banners[0].landingUrl);
+    expect(jQuery(this.searchobj.options.bannerSelector + ' a').attr('href'))
+      .to.be.equal(this.bannerResponse.banner.banners[0].landingUrl);
   });
 
   it('Should update the Banner imageUrl', function(){
-    expect(jQuery(window.searchobj.options.bannerSelector + ' img').attr('src'))
-      .to.be.equal(bannerResponse.banner.banners[0].imageUrl);
+    expect(jQuery(this.searchobj.options.bannerSelector + ' img').attr('src'))
+      .to.be.equal(this.bannerResponse.banner.banners[0].imageUrl);
   });
 });

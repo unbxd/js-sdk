@@ -1,26 +1,25 @@
 describe('On Init', function () {
-  var expect = window.expect;
+
   before(function(){
-    fixture.setBase('mock');
-    var searchTest = fixture.load('searchTestResponse.json');
+    this.searchTest = fixture.load('mock/searchTestResponse.json');
 
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
 
     //initialize search
-    window.searchobj = new window.Unbxd.setSearch(window.config);
+    this.searchobj = new window.Unbxd.setSearch(window.config);
     
     //stub search ajax call with mock response
-    this.stub = sinon.stub(jQuery, 'ajax').yieldsTo('success',searchTest);
+    this.stub = sinon.stub(jQuery, 'ajax').yieldsTo('success',this.searchTest);
 
     //spy OnIntialResultLoad, OnFacetLoad, OnPageLoad  and OnNoResult
-    this.spyOnIntialResultLoad = sinon.spy(window.searchobj.options,
+    this.spyOnIntialResultLoad = sinon.spy(this.searchobj.options,
      'onIntialResultLoad');
-    this.spyOnFacetLoad = sinon.spy(window.searchobj.options, 'onFacetLoad');
-    this.spyOnPageLoad = sinon.spy(window.searchobj.options, 'onPageLoad');
-    this.spyOnNoResult = sinon.spy(window.searchobj.options, 'onNoResult');
+    this.spyOnFacetLoad = sinon.spy(this.searchobj.options, 'onFacetLoad');
+    this.spyOnPageLoad = sinon.spy(this.searchobj.options, 'onPageLoad');
+    this.spyOnNoResult = sinon.spy(this.searchobj.options, 'onNoResult');
 
-    window.searchobj.callResults(window.searchobj.paintResultSet);
+    this.searchobj.callResults(this.searchobj.paintResultSet);
   });
 
   after(function(){

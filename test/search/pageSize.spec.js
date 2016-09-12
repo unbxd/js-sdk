@@ -1,10 +1,7 @@
 describe('PageSize', function () {
-  var expect = window.expect;
-  fixture.setBase('mock');
-  var searchTest = fixture.load('searchTestResponse.json');
 
   before(function(){
-
+    this.searchTest = fixture.load('mock/searchTestResponse.json');
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
 
@@ -12,10 +9,10 @@ describe('PageSize', function () {
     window.config.isPagination = true;
 
     //initialize search
-    window.searchobj = new window.Unbxd.setSearch(window.config);
+    this.searchobj = new window.Unbxd.setSearch(window.config);
 
     //stub search ajax call with mock response
-    this.stub = sinon.stub(jQuery, 'ajax').yieldsTo('success',searchTest);
+    this.stub = sinon.stub(jQuery, 'ajax').yieldsTo('success',this.searchTest);
   });
 
   after(function(){
@@ -25,17 +22,17 @@ describe('PageSize', function () {
   
   beforeEach(function(){
     //reset filters applied
-    window.searchobj.reset();
-    window.searchobj.callResults(window.searchobj.paintResultSet);
+    this.searchobj.reset();
+    this.searchobj.callResults(this.searchobj.paintResultSet);
   });
 
   it('Should update the PageSize', function(){
     
-    var pageSize = window.searchobj.options.pageSizeOptions[2].value;
-    searchTest.searchMetaData.queryParams.rows = pageSize;
-    this.stub.yieldsTo('success',searchTest);
-    jQuery(window.searchobj.options.pageSizeContainerSelector + ' select')
-    	.val(pageSize).change();
-    expect(window.searchobj.getPageSize()).to.be.equal(pageSize);
+    var pageSize = this.searchobj.options.pageSizeOptions[2].value;
+    this.searchTest.searchMetaData.queryParams.rows = pageSize;
+    this.stub.yieldsTo('success',this.searchTest);
+    jQuery(this.searchobj.options.pageSizeContainerSelector + ' select')
+      .val(pageSize).change();
+    expect(this.searchobj.getPageSize()).to.be.equal(pageSize);
   });
 });
