@@ -1,6 +1,6 @@
 describe('No results', function () {
 
-  before(function(){
+  before(function(done){
     this.zeroResultTest = fixture.load('mock/zeroResult.json');
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
@@ -16,6 +16,7 @@ describe('No results', function () {
       'onIntialResultLoad');
     this.spyOnNoResult = sinon.spy(this.searchobj.options,'onNoResult');
     this.searchobj.callResults(this.searchobj.paintResultSet);
+    done();
   });
 
   after(function(){

@@ -1,6 +1,6 @@
 describe('SpellCheck - Zero results', function () {
 
-  before(function(){
+  before(function(done){
 
     this.spellCheckTest = fixture.load('mock/spellCheckWithZeroResults.json');
     this.searchTest = fixture.load('mock/searchTestResponse.json');
@@ -16,6 +16,7 @@ describe('SpellCheck - Zero results', function () {
     this.stub.onFirstCall().yieldsTo('success',this.spellCheckTest);
 
     this.searchobj.callResults(this.searchobj.paintResultSet);
+    done();
   });
 
   after(function(){

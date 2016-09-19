@@ -1,6 +1,6 @@
 describe('ViewTypes', function () {
 
-  before(function(){
+  before(function(done){
     this.searchTest = fixture.load('mock/searchTestResponse.json');
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
@@ -10,7 +10,7 @@ describe('ViewTypes', function () {
 
     //stub search ajax call with mock response
     this.stub = sinon.stub(jQuery, 'ajax').yieldsTo('success', this.searchTest);
-
+    done();
   });
 
   after(function(){

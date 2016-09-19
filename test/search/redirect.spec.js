@@ -1,6 +1,6 @@
 describe('Redirect', function () {
   
-  before(function(){
+  before(function(done){
     this.RedirectTest = fixture.load('mock/redirect.json');
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
@@ -22,6 +22,7 @@ describe('Redirect', function () {
       .returns(false);
     
     this.searchobj.callResults(this.searchobj.paintResultSet);
+    done();
   });
 
   after(function(){

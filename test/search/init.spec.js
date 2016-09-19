@@ -1,6 +1,6 @@
 describe('On Init', function () {
 
-  before(function(){
+  before(function(done){
     this.searchTest = fixture.load('mock/searchTestResponse.json');
 
     //setup document to hold search results
@@ -20,6 +20,7 @@ describe('On Init', function () {
     this.spyOnNoResult = sinon.spy(this.searchobj.options, 'onNoResult');
 
     this.searchobj.callResults(this.searchobj.paintResultSet);
+    done();
   });
 
   after(function(){

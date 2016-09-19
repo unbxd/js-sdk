@@ -1,6 +1,6 @@
 describe('clickNScroll', function () {
 
-  before(function(){
+  before(function(done){
 
     this.searchTest = fixture.load('mock/searchTestResponse.json');
     //setup document to hold search results
@@ -17,7 +17,7 @@ describe('clickNScroll', function () {
     //stub search ajax call with mock response
     this.stub = sinon.stub(jQuery, 'ajax')
       .yieldsTo('success',this.searchTest);
-
+    done();
   });
 
   after(function(){

@@ -1,6 +1,6 @@
 describe('SpellCheck - with results', function () {
 
-  before(function(){
+  before(function(done){
     this.spellCheckTest = fixture.load('mock/spellCheckWithResults.json');
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
@@ -11,6 +11,7 @@ describe('SpellCheck - with results', function () {
     this.stub = sinon.stub(jQuery, 'ajax')
       .yieldsTo('success', this.spellCheckTest);
     this.searchobj.callResults(this.searchobj.paintResultSet);
+    done();
   });
 
   after(function(){

@@ -1,6 +1,6 @@
 describe('Facets', function () {
 
-  before(function(){
+  before(function(done){
     this.searchTest = fixture.load('mock/searchTestResponse.json');
 
     //setup document to hold search results
@@ -19,7 +19,7 @@ describe('Facets', function () {
       .spy(this.searchobj.options, 'facetOnDeselect');
     this.spyRemoveFilter = sinon.spy(this.searchobj, 'removeFilter');
     this.spyClearFilters = sinon.spy(this.searchobj, 'clearFilters');
-
+    done();
   });
 
   after(function(){

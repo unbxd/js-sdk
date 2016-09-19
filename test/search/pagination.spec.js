@@ -1,6 +1,6 @@
 describe('Pagination', function () {
 
-  before(function(){
+  before(function(done){
     this.searchTest = fixture.load('mock/searchTestResponse.json');
 
     //setup document to hold search results
@@ -19,6 +19,7 @@ describe('Pagination', function () {
     this.spyOnIntialResultLoad = sinon.spy(this.searchobj.options,
       'onIntialResultLoad');
     this.spyOnPageLoad = sinon.spy(this.searchobj.options, 'onPageLoad');
+    done();
   });
 
   after(function(){
