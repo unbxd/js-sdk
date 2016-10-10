@@ -1955,14 +1955,14 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       var self = this,
       userId = this.getUserId(),
       defaultRequestHeaders = {
-        "Device-Type": self.getDeviceInfo()
-        ,"Unbxd-Url": document.URL
-        ,"Unbxd-Referrer": document.referrer
-        ,"User-Type": self.getUserType()
-        ,"Api-Key": self.options.APIKey
+        "device-type": self.getDeviceInfo()
+        ,"unbxd-url": document.URL
+        ,"unbxd-referrer": document.referrer
+        ,"user-type": self.getUserType()
+        ,"api-key": self.options.APIKey
       };
       if(userId){
-        defaultRequestHeaders["User-Id"] = userId;
+        defaultRequestHeaders["user-id"] = userId;
       }
       return defaultRequestHeaders;
     }
