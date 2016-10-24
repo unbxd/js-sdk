@@ -1962,7 +1962,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
         ,"api-key": self.options.APIKey
       };
       if(userId){
-        defaultRequestHeaders["user-id"] = userId;
+        defaultRequestHeaders["uid"] = userId;
       }
       return defaultRequestHeaders;
     }
