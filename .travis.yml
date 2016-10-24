@@ -11,6 +11,7 @@ cache:
 
 before_install:
   - "npm --version"
+  - "npm install -g bower"
 
 install:
   - "npm install"

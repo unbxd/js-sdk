@@ -1,0 +1,8 @@
+{
+  "name": "js-sdk",
+  "version": "1.0.0",
+  "main": "unbxd-sdk.js",
+  "dependencies": {
+    "handlebars": "^4.0.5"
+  }
+}
