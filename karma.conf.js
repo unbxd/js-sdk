@@ -17,7 +17,7 @@ module.exports = function (config) {
       'karma-spec-reporter',
     ],
 
-    frameworks: ['mocha', 'chai','jquery-1.8.3','sinon','fixture'],
+    frameworks: ['mocha', 'chai', 'jquery-1.8.3', 'sinon', 'fixture'],
 
     jsonFixturesPreprocessor: {
       variableName: '__json__'
@@ -29,7 +29,7 @@ module.exports = function (config) {
     },
 
     files: [
-        './bower_components/handlebars/handlebars.min.js',
+        './node_modules/handlebars/dist/handlebars.min.js',
         './index.html',
         './unbxdSearch.js',
         './app.js',
