@@ -1,9 +1,8 @@
 describe('SpellCheck - Zero results', function () {
 
   before(function(done){
-
-    this.spellCheckTest = fixture.load('mock/spellCheckWithZeroResults.json');
     this.searchTest = fixture.load('mock/searchTestResponse.json');
+    this.spellCheckTest = fixture.load('mock/spellCheckWithZeroResults.json');
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
     //initialize search
@@ -23,7 +22,7 @@ describe('SpellCheck - Zero results', function () {
     this.stub.restore();
     fixture.cleanup();
   });
-  
+
   it('Should display didYouMean', function(){
     expect(jQuery(this.searchobj.options.spellCheck).text())
     .to.equal('Did you mean : '+ this.spellCheckTest
