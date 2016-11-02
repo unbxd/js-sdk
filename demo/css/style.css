@@ -21,7 +21,7 @@ h1{
 }
 
 h2{
-	font-size:22px;	
+	font-size:22px;
 }
 
 h3{
@@ -50,7 +50,7 @@ h6{
 	src : url(../fonts/HelveticaNeue.otf);
 }
 
-body{	
+body{
 	background: #ffffff;
 	font-family: proxima-nova,Arial, sans-serif;
 	font-size:12px;
@@ -436,6 +436,60 @@ input,textarea,select {
 	margin-right: 5px;
 }
 /* search ends here*/
+.ui-widget-content {
+	height: 10px;
+	background: #54c5cf;
+	border-radius:5px;
+	color: #222222/*{fcContent}*/;
+	cursor: pointer;
+}
+
+.ui-widget-header {
+	background: #d1d5d7;
+  border-radius:5px;
+  cursor: pointer;
+}
+
+
+/* Interaction states
+----------------------------------*/
+.ui-state-default,
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default {
+	 -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 20px;
+  background: #54c5cf;
+  border: 4px solid #fff;
+  width: 20px;
+  height: 20px;
+  margin-top: 0px;
+  outline:0;
+  padding-left:1px;
+  cursor: pointer;
+}
+
+.slider-range-max {
+	float: none !important;
+	margin-left:auto;
+	margin-right: auto;
+}
+.amount {
+	border:0;
+  outline:0;
+  color:#1a1c1c;
+  background-color:#e8eeef;
+  margin-top: 10px;
+  width:67px;
+  text-align: right;
+  font-family: Helvetica; font-size: 13px;
+}
+
+.amount-text {
+  font-weight: normal;
+  font-family: Helvetica; font-size: 13px;
+  margin-left:2px;
+}
 
 .ui-widget-header {
 background-color: #45b5c1 !important;
@@ -444,6 +498,10 @@ background-color: #45b5c1 !important;
 .ui-widget-content
 {
 background-color: #d1d5d7 !important;
+}
+
+.ui-slider {
+  width: 200px;
 }
 
 .ui-slider-horizontal .ui-slider-handle {
