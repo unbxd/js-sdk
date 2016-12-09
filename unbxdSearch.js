@@ -1265,7 +1265,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  for(var x = 0; x < filterStrArr.length; x++){
 	    var arr = filterStrArr[x].split(":");
 	    if(arr.length == 2){
-	      arr[1] = arr[1].replace(/(^")|("$)/g, '').replace(/\"{2,}/g, '"').replace(/(^\[)|(\]$)/g, '');
+	      arr[1] = arr[1].replace(/(^")|("$)/g, '').replace(/\"{2,}/g, '"').replace(/\\\"/g, '"').replace(/(^\[)|(\]$)/g, '');
 
 	      var vals = arr[1].split(" TO ");
 	      if(vals.length > 1){
