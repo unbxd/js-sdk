@@ -130,6 +130,8 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,bannerTemp: "<a href='{{landingUrl}}'><img src='{{imageUrl}}'/></a>"
 		,fields : ['image_url','title','brand','price','uniqueId']
 		,searchQueryParam:"q"
+		,retainbaseParam: false
+		,baseParams:[]
     });
 ```
 
@@ -703,6 +705,8 @@ JSON used for this template:
 	...
 ```
 - **searchQueryParam** : searh query param name to be shown in browser url, default is "q"    
+- **retainbaseParam** : Set this to true, if you want to retain some extra url params from the SRP
+- **baseParams** : Array of params which will be retained from SRP. This will come into picture only if retainbaseParam is set to true
 - **deferInitRender** : This is an array of library features that need to be disabled on initial load.
 ```javascript
 	...
