@@ -1063,9 +1063,9 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	     && this.defaultParams.ranges.hasOwnProperty(x)
 	     && this.defaultParams.ranges[x].hasOwnProperty(y)
 	     && this.params.ranges[x].hasOwnProperty(y)){
-	    b.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + ']');
+	    b.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + '}');
 	  }else if(this.params.ranges[x].hasOwnProperty(y)){
-	    a.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + ']');
+	    a.push(x + ':[' + this.params.ranges[x][y].lb + " TO " + this.params.ranges[x][y].ub + '}');
 	  }
 	}
 
@@ -1265,7 +1265,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  for(var x = 0; x < filterStrArr.length; x++){
 	    var arr = filterStrArr[x].split(":");
 	    if(arr.length == 2){
-	      arr[1] = arr[1].replace(/(^")|("$)/g, '').replace(/\"{2,}/g, '"').replace(/\\\"/g, '"').replace(/(^\[)|(\]$)/g, '');
+	      arr[1] = arr[1].replace(/(^")|("$)/g, '').replace(/\"{2,}/g, '"').replace(/\\\"/g, '"').replace(/(^\[)|(\]$)|(\}$)/g, '');
 
 	      var vals = arr[1].split(" TO ");
 	      if(vals.length > 1){
