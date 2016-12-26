@@ -5,11 +5,12 @@ describe('PageSize', function () {
     //setup document to hold search results
     document.body.innerHTML = __html__['index.html'];
 
-    window.config.isAutoScroll = false;
-    window.config.isPagination = true;
+    var searchConfig = jQuery.extend({}, window.config);
+    searchConfig.isAutoScroll = false;
+    searchConfig.isPagination = true;
 
     //initialize search
-    this.searchobj = new window.Unbxd.setSearch(window.config);
+    this.searchobj = new window.Unbxd.setSearch(searchConfig);
 
     //stub search ajax call with mock response
     this.stub = sinon.stub(jQuery, 'ajax').yieldsTo('success',this.searchTest);

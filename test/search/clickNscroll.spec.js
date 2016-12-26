@@ -7,12 +7,13 @@ describe('clickNScroll', function () {
     document.body.innerHTML = __html__['index.html'];
 
     //change configuration to pagination from autoscroll
-    window.config.isAutoScroll = false;
-    window.config.isPagination = false;
-    window.config.isClickNScroll = true;
+    var searchConfig = jQuery.extend({}, window.config);
+    searchConfig.isAutoScroll = false;
+    searchConfig.isPagination = false;
+    searchConfig.isClickNScroll = true;
 
     //initialize search
-    this.searchobj = new window.Unbxd.setSearch(window.config);
+    this.searchobj = new window.Unbxd.setSearch(searchConfig);
 
     //stub search ajax call with mock response
     this.stub = sinon.stub(jQuery, 'ajax')
