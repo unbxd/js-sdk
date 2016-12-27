@@ -115,6 +115,10 @@ describe('Facets', function () {
       this.searchobj.addRangeFilter(rangeField,start,end);
       expect(this.searchobj.params.ranges[rangeField][start + ' TO ' + end])
         .to.exist;
+      var rangeFacet = this.searchobj.params.ranges[rangeField];
+      expect(rangeFacet.hasOwnProperty(start + ' TO ' + end)).to.be.true;
+      expect(rangeFacet[start + ' TO ' + end].lb).to.equal(start);
+      expect(rangeFacet[start + ' TO ' + end].ub).to.equal(end);
     }
   );
 
@@ -182,5 +186,20 @@ describe('Facets', function () {
       expect(this.spyClearFilters.calledWith(true)).to.be.true;
     }
   );
+
+  it('Range facet - validate processUrl',  function(){
+    var rangeField = 'price_fq';
+    var start = 5;
+    var end = 10;
+    var filter = rangeField + ':[' + start + ' TO ' + end + '}';
+    var processedParams = this.searchobj._processURL({
+      filter: filter
+    });
+
+    var rangeFacet = processedParams.ranges[rangeField];
+    expect(rangeFacet.hasOwnProperty(start + ' TO ' + end)).to.be.true;
+    expect(rangeFacet[start + ' TO ' + end].lb).to.equal(start);
+    expect(rangeFacet[start + ' TO ' + end].ub).to.equal(end);
+  });
 
 });
