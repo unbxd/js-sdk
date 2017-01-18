@@ -373,10 +373,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
   });
 
   Handlebars.registerHelper("isRangeFacet", function(type, options){
-    if(type === "facet_ranges")
+    if(type === "facet_ranges") {
       return options.fn(this);
-    else
+    } else {
       return options.inverse(this);
+    }
   });
 
   Unbxd.setSearch.prototype.defaultOptions = {
@@ -1700,9 +1701,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       for(var newI = 0; newI < sortable.length; newI++) {
 
         var x = sortable[newI][0];
+        var displayName = facets[x].displayName ?
+          self.prepareFacetName(facets[x].displayName) : '';
 	// for(var x in facets) {
 	singlefacet = {
-	  name : self.prepareFacetName(x)
+	  name : displayName || self.prepareFacetName(x)
           ,facet_name : x
           ,type : facets[x]['type']
           ,selected : []
