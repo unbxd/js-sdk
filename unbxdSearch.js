@@ -372,6 +372,13 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     return txt.trim().length > 0 ? txt : "&nbsp;&nbsp;&nbsp;";
   });
 
+  Handlebars.registerHelper("isRangeFacet", function(type, options){
+    if(type === "facet_ranges")
+      return options.fn(this);
+    else
+      return options.inverse(this);
+  });
+
   Unbxd.setSearch.prototype.defaultOptions = {
     inputSelector : '#search_query'
     ,searchButtonSelector : '#search_button'
