@@ -1666,6 +1666,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       ,facetKeys = Object.keys(facets)
       ,textfacets = []
       ,rangefacets = []
+      ,sortedFacets = []
       ,singlefacet = {}
       ,self = this
       ,facetVal = ""
@@ -1732,15 +1733,27 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if((singlefacet.unordered.length) > 0) rangefacets.push(singlefacet);
 
 	}
+        if(singlefacet.unordered && (singlefacet.unordered.length) > 0) {
+          sortedFacets.push(singlefacet);
+        }
       }
 
       if(this.getClass(this.options.facetTemp) == 'Function'){
-	this.options.facetTemp.call(this,{facets: textfacets, rangefacets: rangefacets});
+        this.options.facetTemp.call(this,{
+          facets: textfacets,
+          rangefacets: rangefacets,
+          sortedFacets: sortedFacets
+        });
       }else{
 	if(!this.compiledFacetTemp && this.options.facetTemp.length)
 	  this.compiledFacetTemp = Handlebars.compile(this.options.facetTemp);
 
-	this.options.facetContainerSelector.length && jQuery(this.options.facetContainerSelector).html(this.compiledFacetTemp({facets: textfacets, rangefacets: rangefacets}));
+        this.options.facetContainerSelector.length &&
+          jQuery(this.options.facetContainerSelector).html(this.compiledFacetTemp({
+            facets: textfacets,
+            rangefacets: rangefacets,
+            sortedFacets: sortedFacets
+          }));
       }
 
       this.paintSelectedFacets();
