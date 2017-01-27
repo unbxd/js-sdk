@@ -1711,6 +1711,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
           ,selected : []
           ,unselected : []
           ,unordered : []
+          ,position: facets[x].position
 	};
 
 	if(singlefacet.type !== 'facet_ranges'){
