@@ -17,6 +17,8 @@ before_install:
 install:
   - "npm install"
 
+cache: yarn
+
 script:
   - npm test
 
