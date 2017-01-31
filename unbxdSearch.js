@@ -1247,7 +1247,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	,sort : {}
 	,ranges : {}
 	,extra : {
-          wt : "json"
+          format : "json"
           ,page : 1
           ,rows : 12
 	}
