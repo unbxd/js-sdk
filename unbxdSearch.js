@@ -1358,7 +1358,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if(!this.compiledSpellCheckTemp)
 	    this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
 	  
-	  jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
+	  jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion  , numberOfProducts : obj.response.numberOfProducts })).show();
 	  
 	  facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
 
@@ -1369,7 +1369,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if(!this.compiledSpellCheckTemp)
 	    this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
 
-	  jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion})).show();
+	  jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({suggestion : obj.didYouMean[0].suggestion  , numberOfProducts : obj.response.numberOfProducts })).show();
 
 	  facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet) ;
 	}
