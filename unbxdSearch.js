@@ -1981,12 +1981,31 @@ var unbxdSearchInit = function(jQuery, Handlebars){
   });
 };
 
-if(!window.jQuery || !window.Handlebars) 
-  throw "Please include jQuery & Handlebars libraries before loading unbxdSearch.js";
 
-var arr = jQuery.fn.jquery.split('.');
-if( arr[0] < 1 || (arr[0] == 1 && arr[1] < 7) ) 
-  throw "jQuery version needs to be greater than 1.7 to use unbxdSearch.js. You can pass custom jQuery & Handlebars by calling unbxdSeachInit(jQuery, Handlebars)";
+Unbxd = window.Unbxd || {};
 
+Unbxd.isJqueryRequiredVersion = Unbxd.isJqueryRequiredVersion ||
+  function isJqueryRequiredVersion(current) {
+    var jQueryVersion = current.split('.');
+    jQueryVersion = jQueryVersion.map(function convertToNumber(version) {
+      return Number(version);
+    });
+    if (
+      jQueryVersion[0] > 1 || (jQueryVersion[0] === 1 && jQueryVersion[1] >= 7)
+    ) {
+      return true;
+    }
+    return false;
+  };
 
-unbxdSearchInit(jQuery, Handlebars);
+if (!window.jQuery || !window.Handlebars) {
+  console.error(
+    'Please include jQuery & Handlebars libraries before loading unbxdSearch.js or You can pass custom jQuery & Handlebars by calling unbxdSeachInit(jQuery, Handlebars) '
+  );
+} else if (!Unbxd.isJqueryRequiredVersion(jQuery.fn.jquery)) {
+  console.error(
+    'jQuery version needs to be greater than 1.7 to use unbxdSearch.js. You can pass custom jQuery & Handlebars by calling unbxdSeachInit(jQuery, Handlebars)'
+  );
+} else {
+  unbxdSearchInit(jQuery, Handlebars);
+}
