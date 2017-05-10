@@ -339,6 +339,30 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     this.init();
   }
 
+  var isTypeSearch = function isTypeSearch(type) {
+    return type === "search";
+  };
+
+  var isTypeBrowse = function isTypeBrowse(type) {
+    return type === "browse";
+  };
+
+  var isTypeCategory = function isTypeCategory(type) {
+    return type === "category";
+  };
+
+  var isTypeBrowseOrCategory = function isTypeBrowseOrCategory(type) {
+    return isTypeBrowse(type) || isTypeCategory(type);
+  };
+
+  var isCategoryIdPresent = function isCategoryIdPresent(params) {
+    return ("categoryId" in params && params.categoryId.trim().length > 0);
+  };
+
+  var isQueryPresent = function isQueryPresent(params) {
+    return ("query" in params && params.query.trim().length > 0);
+  };
+
   Handlebars.registerHelper('prepareFacetName', function(txt){
     txt = txt.replace("_fq","");
     return txt.replace("_"," ");
@@ -556,8 +580,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 
       this.params = finalParams;
 
-      this.params.categoryId = this.options.type == "browse" && typeof this.options.getCategoryId == "function" ?
-	this.options.getCategoryId() : (this.params.categoryId ? this.params.categoryId : "");
+      this.params.categoryId = isTypeBrowseOrCategory(this.options.type) &&
+        typeof this.options.getCategoryId == 'function'
+        ? this.options.getCategoryId()
+        : this.params.categoryId ? this.params.categoryId : '';
 
       this.setPage("page" in finalParams.extra ? finalParams.extra.page : 1)
 	.setPageSize("rows" in finalParams.extra ? finalParams.extra.rows :  this.options.pageSize);
@@ -580,9 +606,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       if(typeof this.options.setDefaultFilters == "function")
 	this.setDefaultParams(this.params);
 
-      if((this.options.type == "search" && "query" in this.params && this.params["query"].trim().length > 0) ||
-	 (this.options.type == "browse" && "categoryId" in this.params && this.params["categoryId"].trim().length > 0))
-	this.callResults(this.paintResultSet);
+      if (
+        (isTypeSearch(this.options.type) && isQueryPresent(this.params)) ||
+        (isTypeBrowseOrCategory(this.options.type) && isCategoryIdPresent(this.params))
+      )
+        this.callResults(this.paintResultSet);
     }
     ,getClass : function(object){
       return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1];
@@ -1001,7 +1029,11 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       return !this.options.isAutoScroll && this.options.isPagination;
     }
     ,getHostNPath: function(){
-      return "//search.unbxdapi.com/"+ this.options.APIKey + "/" + this.options.siteName + "/"  + (this.options.type == "browse" ? "browse" : "search" )
+      var handler = "search";
+      if(isTypeBrowseOrCategory(this.options.type)) {
+        handler = this.options.type;
+      }
+      return "//search.unbxdapi.com/"+ this.options.APIKey + "/" + this.options.siteName + "/"  + handler;
     }
     ,getUrlSubstring: function(){
       return window.location.search.substring(1) || window.location.hash.substring(1);
@@ -1031,6 +1063,8 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	url += '&'+ this.options.searchQueryParam +'='+ encodeURIComponent(this.params.query);
       }else if(this.options.type == "browse" && this.params['categoryId'] != undefined){
 	url += '&category-id=' + encodeURIComponent(this.params.categoryId);
+      } else if(isTypeCategory(this.options.type) && this.params.categoryId !== undefined) {
+        url += "&p=" + encodeURIComponent(this.params.categoryId);
       }
 
       for(var x in this.params.filters){
@@ -1310,6 +1344,10 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       if("category-id" in obj)
 	params.categoryId = obj["category-id"];
 
+      //lets get categoryId(navigation)
+      if("p" in obj)
+	params.categoryId = obj["p"];
+
       //lets get boost
       if("boost" in obj)
 	params.extra.boost = obj.boost;
@@ -1418,13 +1456,18 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       this.productEndIdx = (this.getPage() * this.getPageSize() <= obj.response.numberOfProducts) ?
 	this.getPage() * this.getPageSize() : obj.response.numberOfProducts;
       this.totalPages = Math.ceil(obj.response.numberOfProducts/this.getPageSize());
+      var queryParams = {
+        numberOfProducts : obj.response.numberOfProducts
+        ,start: this.productStartIdx
+        ,end: this.productEndIdx
+      }
+      if (isTypeCategory(this.options.type)) {
+        queryParams.categoryId = obj.searchMetaData.queryParams.p
+      } else {
+        queryParams.query = obj.searchMetaData.queryParams.q
+      }
 
-      jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp({
-	query : obj.searchMetaData.queryParams.q
-	,numberOfProducts : obj.response.numberOfProducts
-	,start: this.productStartIdx
-	,end: this.productEndIdx
-      })).show();
+      jQuery(this.options.searchQueryDisplay).html(this.compiledSearchQueryTemp(queryParams)).show();
 
       this.paintSort(obj);
       this.paintPageSize(obj);
