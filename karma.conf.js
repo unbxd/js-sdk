@@ -34,6 +34,7 @@ module.exports = function (config) {
         './unbxdSearch.js',
         './app.js',
         'mock/*.json',
+        'test/navigation/*.spec.js',
         'test/search/*.spec.js',
     ],
 

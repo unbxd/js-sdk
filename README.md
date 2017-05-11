@@ -2,16 +2,16 @@ Unbxd JavaScript Search library
 ===============================
 [![Build Status](https://travis-ci.org/unbxd/js-sdk.svg?branch=master)](https://travis-ci.org/unbxd/js-sdk.svg?branch=master)
 
-unbxdSearch.js library can be used to integrated UNBXD search or browse on client side. It supports History API, so users can share the URI. 
+unbxdSearch.js library can be used to integrated UNBXD search and category page on client side. It supports History API, so users can share the URI.
 
 Note : _*This library makes use of jQuery selectors and Handlebars templates.*_
 
 _*Please find an example of implementation in demo folder.*_
 
-##Usage
+## Usage
 Just include [unbxdSearch.js](//d21gpk1vhmjuf5.cloudfront.net/unbxdSearch.js) in HTML and include the configuration.
 
-##configuration
+## configuration
 Consider a normal search page with basic layout as shown in the figure below and respective configuration below the image.
 
 ![Basic search layout](https://raw.githubusercontent.com/unbxd/js-sdk/master/images/search_layout.png "Basic search layout")
@@ -137,11 +137,11 @@ Consider a normal search page with basic layout as shown in the figure below and
 
 - **siteName** : This value can be found in UNBXD dashboard. It is unique for every search site created in the dashboard.
 - **APIKey** : This is a unique for every user account. It can also be found in dashboard.
-- **type** : It has to be either _*search*_ or _*browse*_.
-- **getCategoryId** : This option has to be a function which return the category_id in case of *browse*. Please ignore incase of *search*.
-- **inputSelector** : The jQuery selector for search input. Please make sure that the form of this input has no action and method is GET. Please ignore incase of *browse*.
-- **searchButtonSelector** : The jQuery selector for search submit button. Please ignore incase of *browse*.
-- **spellCheck** : The jQuery selector for DOM element to display spell suggestion. Please ignore incase of *browse*.
+- **type** : It has to be either _*search*_, _*browse*_ or _*category*_.
+- **getCategoryId** : This option has to be a function which return the category_id in case of *browse* and *category*. Please ignore incase of *search*.
+- **inputSelector** : The jQuery selector for search input. Please make sure that the form of this input has no action and method is GET. Please ignore incase of *browse* and *category*.
+- **searchButtonSelector** : The jQuery selector for search submit button. Please ignore incase of *browse* and *category*.
+- **spellCheck** : The jQuery selector for DOM element to display spell suggestion. Please ignore incase of *browse* and *category*.
 - **spellCheckTemp** : Handlebars template for generating the spell suggestion template.
 	```javascript
 		...
@@ -154,7 +154,7 @@ Consider a normal search page with basic layout as shown in the figure below and
 			suggestion : "something else"
 		}
 	```
-- **searchQueryDisplay** : The jQuery selector of DOM element to display the query (which use has searched for) and total number of results from search. Please ignore incase of *browse*.
+- **searchQueryDisplay** : The jQuery selector of DOM element to display the query (which use has searched for) and total number of results from search. Please ignore incase of *browse* and *category*.
 - **searchQueryDisplayTemp** : Handlebars template for displaying the search query and total number of results. Please ignore incase of *browse*.
 	```javascript
 		...
