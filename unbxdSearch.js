@@ -791,7 +791,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  ,name = $t.attr("unbxdParam_facetName")
 	  ,val = $t.attr("unbxdParam_facetValue")
 	  ,vals = val.split(' TO ')
-	  ,checkbox_sel = self.options.facetCheckBoxSelector + "[unbxdParam_facetName='"+ name +"'][unbxdParam_facetValue='" + val + "']";
+	  ,checkbox_sel = self.options.facetCheckBoxSelector + "[unbxdParam_facetName=\""+ name +"\"][unbxdParam_facetValue=\"" + val + "\"]";
 
 	  jQuery(checkbox_sel).removeAttr("checked");
 	  
