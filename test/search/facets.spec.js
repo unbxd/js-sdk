@@ -56,12 +56,13 @@ describe('Facets', function () {
 
   it('Should call facetOnDeselect with element as args on deselecting facet',
     function(){
-      var facetElement = jQuery(this.searchobj.options
-        .facetContainerSelector +' label').first();
       //apply facet
-      facetElement.click();
+      jQuery(this.searchobj.options
+        .facetContainerSelector +' label').first().click();
+
       //remove facet
-      facetElement.click();
+      jQuery(this.searchobj.options
+        .facetContainerSelector +' label').first().click();
       expect(jQuery(this.spyFacetOnDeselect.args[0][0][0]).text())
         .to.be.equal(jQuery(this.searchobj.options
           .facetContainerSelector +' label').first().text());
