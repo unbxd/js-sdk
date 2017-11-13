@@ -8,7 +8,8 @@ module.exports = function (config) {
       'karma-mocha',
       'karma-chai',
       'karma-jquery',
-      'karma-phantomjs-launcher',
+      'karma-chrome-launcher',
+      'karma-firefox-launcher',
       'karma-html2js-preprocessor',
       'karma-sinon',
       'karma-fixture',
@@ -25,17 +26,17 @@ module.exports = function (config) {
 
     preprocessors: {
       '**/*.html': ['html2js'],
-      '**/*.json'   : ['json_fixtures']
+      '**/*.json': ['json_fixtures']
     },
 
     files: [
-        './node_modules/handlebars/dist/handlebars.min.js',
-        './index.html',
-        './unbxdSearch.js',
-        './app.js',
-        'mock/*.json',
-        'test/navigation/*.spec.js',
-        'test/search/*.spec.js',
+      './node_modules/handlebars/dist/handlebars.min.js',
+      './index.html',
+      './unbxdSearch.js',
+      './app.js',
+      'mock/*.json',
+      'test/navigation/*.spec.js',
+      'test/search/*.spec.js',
     ],
 
     reporters: ['spec'],
@@ -47,6 +48,6 @@ module.exports = function (config) {
     // level of logging
     logLevel: config.LOG_INFO,
 
-    browsers: ['PhantomJS']
+    browsers: ['Chrome', 'ChromeHeadless', 'Firefox']
   });
 };
