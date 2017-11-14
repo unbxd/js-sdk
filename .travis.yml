@@ -8,11 +8,9 @@ node_js:
 cache:
   directories:
     - node_modules
-    - bower_components
 
 before_install:
   - "npm --version"
-  - "npm install -g bower"
 
 install:
   - "npm install"
@@ -21,5 +19,3 @@ cache: yarn
 
 script:
   - npm test
-
-
