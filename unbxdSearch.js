@@ -557,16 +557,16 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       this.reset();
 
       var cur_url = this.getUrlSubstring()
-      ,urlqueryparams = this.getQueryParams(cur_url)
-      // add test to check if the url is encoded,
-      // decode the query parameters only if url is encoded
-      // fixes SKU searches like writ0035/WRIT0035 & HSWD0015
-      ,decodedParams = !(/[^A-Za-z0-9\+\/\=]/g.test(cur_url)) ? this.getQueryParams(this.decode(cur_url)) : {}
-      ,queryparamcount = Object.keys(urlqueryparams).length
-      ,decodedParamscount = Object.keys(decodedParams).length
-      ,finalParams = null;
+        , urlqueryparams = this.getQueryParams(cur_url)
+        // add test to check if the url is encoded,
+        // decode the query parameters only if url is encoded
+        // fixes SKU searches like writ0035/WRIT0035 & HSWD0015
+        , decodedParams = !(this.options.noEncoding && /[^A-Za-z0-9\+\/\=]/g.test(cur_url)) ? this.getQueryParams(this.decode(cur_url)) : {}
+        , queryparamcount = Object.keys(urlqueryparams).length
+        , decodedParamscount = Object.keys(decodedParams).length
+        , finalParams = null;
 
-      if(!this.options.noEncoding && decodedParamscount > 0){
+      if (!this.options.noEncoding && decodedParamscount > 0) {
         finalParams = this._processURL(decodedParams);
       }else{
         finalParams = this._processURL(urlqueryparams);
