@@ -1,7 +1,7 @@
 //uglifyjs unbxdSearch.js -o unbxdSearch.min.js && gzip -c unbxdSearch.min.js > unbxdSearch.min.js.gz && aws s3 cp unbxdSearch.min.js.gz s3://unbxd/unbxdSearch.js --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --content-encoding gzip --cache-control max-age=3600
 var unbxdSearchInit = function(jQuery, Handlebars){
   window.Unbxd = window.Unbxd || {};
-  Unbxd.jsSdkVersion = "2.0.1";
+  Unbxd.jsSdkVersion = "2.0.2";
 
   // Production steps of ECMA-262, Edition 5, 15.4.4.14
   // Reference: http://es5.github.io/#x15.4.4.14
@@ -557,16 +557,16 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       this.reset();
 
       var cur_url = this.getUrlSubstring()
-      ,urlqueryparams = this.getQueryParams(cur_url)
-      // add test to check if the url is encoded,
-      // decode the query parameters only if url is encoded
-      // fixes SKU searches like writ0035/WRIT0035 & HSWD0015
-      ,decodedParams = !(/[^A-Za-z0-9\+\/\=]/g.test(cur_url)) ? this.getQueryParams(this.decode(cur_url)) : {}
-      ,queryparamcount = Object.keys(urlqueryparams).length
-      ,decodedParamscount = Object.keys(decodedParams).length
-      ,finalParams = null;
+        , urlqueryparams = this.getQueryParams(cur_url)
+        // add test to check if the url is encoded,
+        // decode the query parameters only if url is encoded
+        // fixes SKU searches like writ0035/WRIT0035 & HSWD0015
+        , decodedParams = !(this.options.noEncoding && /[^A-Za-z0-9\+\/\=]/g.test(cur_url)) ? this.getQueryParams(this.decode(cur_url)) : {}
+        , queryparamcount = Object.keys(urlqueryparams).length
+        , decodedParamscount = Object.keys(decodedParams).length
+        , finalParams = null;
 
-      if(!this.options.noEncoding && decodedParamscount > 0){
+      if (!this.options.noEncoding && decodedParamscount > 0) {
         finalParams = this._processURL(decodedParams);
       }else{
         finalParams = this._processURL(urlqueryparams);
