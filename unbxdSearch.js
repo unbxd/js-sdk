@@ -372,6 +372,14 @@ var unbxdSearchInit = function(jQuery, Handlebars){
     return txt.trim().length > 0 ? txt : "&nbsp;&nbsp;&nbsp;";
   });
 
+  Handlebars.registerHelper("isRangeFacet", function(type, options){
+    if(type === "facet_ranges") {
+      return options.fn(this);
+    } else {
+      return options.inverse(this);
+    }
+  });
+
   Unbxd.setSearch.prototype.defaultOptions = {
     inputSelector : '#search_query'
     ,searchButtonSelector : '#search_button'
@@ -1666,6 +1674,7 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       ,facetKeys = Object.keys(facets)
       ,textfacets = []
       ,rangefacets = []
+      ,sortedFacets = []
       ,singlefacet = {}
       ,self = this
       ,facetVal = ""
@@ -1692,14 +1701,17 @@ var unbxdSearchInit = function(jQuery, Handlebars){
       for(var newI = 0; newI < sortable.length; newI++) {
 
         var x = sortable[newI][0];
+        var displayName = facets[x].displayName ?
+          self.prepareFacetName(facets[x].displayName) : '';
 	// for(var x in facets) {
 	singlefacet = {
-	  name : self.prepareFacetName(x)
+	  name : displayName || self.prepareFacetName(x)
           ,facet_name : x
           ,type : facets[x]['type']
           ,selected : []
           ,unselected : []
           ,unordered : []
+          ,position: facets[x].position
 	};
 
 	if(singlefacet.type !== 'facet_ranges'){
@@ -1732,15 +1744,27 @@ var unbxdSearchInit = function(jQuery, Handlebars){
 	  if((singlefacet.unordered.length) > 0) rangefacets.push(singlefacet);
 
 	}
+        if(singlefacet.unordered && (singlefacet.unordered.length) > 0) {
+          sortedFacets.push(singlefacet);
+        }
       }
 
       if(this.getClass(this.options.facetTemp) == 'Function'){
-	this.options.facetTemp.call(this,{facets: textfacets, rangefacets: rangefacets});
+        this.options.facetTemp.call(this,{
+          facets: textfacets,
+          rangefacets: rangefacets,
+          sortedFacets: sortedFacets
+        });
       }else{
 	if(!this.compiledFacetTemp && this.options.facetTemp.length)
 	  this.compiledFacetTemp = Handlebars.compile(this.options.facetTemp);
 
-	this.options.facetContainerSelector.length && jQuery(this.options.facetContainerSelector).html(this.compiledFacetTemp({facets: textfacets, rangefacets: rangefacets}));
+        this.options.facetContainerSelector.length &&
+          jQuery(this.options.facetContainerSelector).html(this.compiledFacetTemp({
+            facets: textfacets,
+            rangefacets: rangefacets,
+            sortedFacets: sortedFacets
+          }));
       }
 
       this.paintSelectedFacets();
