@@ -1050,9 +1050,9 @@ isstream@0.1.x, isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
 
-jquery-ui@1.10.4:
-  version "1.10.4"
-  resolved "https://registry.yarnpkg.com/jquery-ui/-/jquery-ui-1.10.4.tgz#a096fe5f4e0f2ab69a0585cf10455877f57506bd"
+jquery-ui@1.12.0:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/jquery-ui/-/jquery-ui-1.12.0.tgz#59c6037a2d9c57e9a2521a9b7a497116d41b4246"
 
 jquery@1.9.1:
   version "1.9.1"
