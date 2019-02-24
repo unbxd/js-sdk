@@ -1,0 +1,12 @@
+node_modules/
+.idea/
+package-lock.json
+**/.DS_Store
+.yo-rc.json
+public/dist/
+**/*.css
+**/*.map
+logs/
+settings.json
+.vscode
+webpack-stats.json
