@@ -1,50 +1,16 @@
 {
-  "name": "js-sdk",
+  "name": "version2",
   "version": "1.0.0",
-  "description": "Unbxd JavaScript Search library =============================== [![Build Status](https://secure.travis-ci.org/emberjs/ember-rails.svg?branch=master)](http://travis-ci.org/emberjs/ember-rails) unbxdSearch.js library can be used to integrated UNBXD search or browse on client side. It supports History API, so users can share the URI.",
-  "main": "unbxd-sdk.js",
-  "directories": {
-    "test": "tests"
-  },
-  "dependencies": {
-    "colors": "^1.0.3",
-    "cryptiles": "^4.1.2",
-    "hoek": "^4.2.1",
-    "nodemailer": "^5.1.1",
-    "sshpk": "^1.13.2"
-  },
+  "description": "Asgard for ajax implementation",
+  "main": "src/main.js",
   "scripts": {
-    "test": "karma start"
+    "build": "webpack",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/unbxd/js-sdk.git"
   },
   "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/unbxd/js-sdk/issues"
-  },
-  "homepage": "https://github.com/unbxd/js-sdk",
-  "devDependencies": {
-    "chai": "^4.2.0",
-    "handlebars": "^4.0.5",
-    "jquery": "^3.3.1",
-    "jquery-ui": "^1.12.1",
-    "karma": "^4.0.0",
-    "karma-chai": "^0.1.0",
-    "karma-fixture": "^0.2.6",
-    "karma-handlebars-preprocessor": "^0.3.0",
-    "karma-html2js-preprocessor": "^1.0.0",
-    "karma-jquery": "^0.2.3",
-    "karma-json-fixtures-preprocessor": "0.0.6",
-    "karma-mocha": "^1.3.0",
-    "karma-phantomjs-launcher": "^1.0.2",
-    "karma-sinon": "^1.0.5",
-    "karma-spec-reporter": "0.0.32",
-    "karma-verbose-reporter": "0.0.6",
-    "mocha": "^6.0.1",
-    "phantom": "^6.0.3",
-    "sinon": "^7.2.4"
-  }
+  "license": "ISC"
 }
