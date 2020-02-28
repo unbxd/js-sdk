@@ -202,7 +202,7 @@ input,textarea,select {
 }
 
 .search-facet-column{
-	width: 217px;
+    width: 225px;
 }
 
 .facet-block{
@@ -296,11 +296,11 @@ input,textarea,select {
 
 .selected-facet{
 	display: inline-block;
-	margin: 0 15px 11px 0;
+    margin: 0 10px;
 	height: 26px;
-	float: left;
 	border-radius: 3px;
-	background-color: #f6f8f8;
+    background-color: #dfdfdf;
+    vertical-align: middle;
 }
 
 .selected-facet-name{
@@ -527,3 +527,32 @@ margin-left: -.6em;
 	background-color: rgb(60, 67, 69);
 }
 /* footer ends here */
+
+.result-page-size-options, .result-sort-options, .change-view, .result-pagination {
+    display: inline-block;
+}
+
+.result-sort-options select {
+    border: 1px solid #d5d6d9;
+    border-radius: 2px;
+    box-sizing: border-box;
+    color: #282c3f;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 14px;
+    height: 34px;
+    padding: 8px 14px;
+    position: relative;
+    text-align: left;
+    width: 185px;
+}
+
+.sort-by-container {
+    float: right;
+}
+
+.sort-by-container:after {
+    content: " ";
+    display: block;
+    clear: both;
+}

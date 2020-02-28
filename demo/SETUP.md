@@ -1,8 +1,18 @@
-### Run http-server
+### Prerequisites
+
+Install [npm](https://www.npmjs.com/get-npm)
+
+### Switch to demo folder
+
+```
+cd demo/
+```
+
+### Run http-server in demo folder
 
 Run `http-server` by installing  the [npm package](https://www.npmjs.com/package/http-server)
 
-OR run it using npx
+OR run it using `npx`
 
 ```
 npx http-server
