@@ -2,15 +2,18 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>UNBXD - Search</title>
-    <link rel="stylesheet" type="text/css" href="../node_modules/jquery-ui/themes/base/jquery.ui.theme.css">
-    <link rel="stylesheet" type="text/css" href="../node_modules/jquery-ui/themes/base/jquery.ui.slider.css">
+    <!-- <link rel="stylesheet" type="text/css" href="../node_modules/jquery-ui/themes/base/jquery.ui.theme.css">
+    <link rel="stylesheet" type="text/css" href="../node_modules/jquery-ui/themes/base/jquery.ui.slider.css"> -->
+    
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.theme.min.css">
+    <!-- <link rel="stylesheet" type="text/css" href="../node_modules/jquery-ui/themes/base/jquery.ui.slider.css"> -->
     <link rel="stylesheet" type="text/css" href="css/style.css">
 
-    <script type="text/javascript" src="../node_modules/jquery/jquery.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script type="text/javascript" src="js/jquery.ui.widget.js"></script>
     <script type="text/javascript" src="js/jquery.ui.mouse.js"></script>
     <script type="text/javascript" src="js/jquery.ui.slider.js"></script>
-    <script type="text/javascript" src="../node_modules/handlebars/dist/handlebars.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
     <script type="text/javascript" src="../unbxdSearch.js"></script>
 </head>
 <body>
@@ -80,7 +83,7 @@
         ,searchResultSetTemp : {"grid" : ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
                             ,'<div class="result-image-container">'
                                 ,'<span class="result-image-horizontal-holder">'
-                                    ,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+                                    ,'<img src="{{{imageUrl}}}" alt="{{{title}}}">'
                                 ,'</span>'
                             ,'</div>'
                             ,'<div class="result-brand">{{{brand}}}</div>'
@@ -93,7 +96,7 @@
                         "list": ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">'
                             ,'<div class="result-image-container">'
                                 ,'<span class="result-image-horizontal-holder">'
-                                    ,'<img src="{{{image_url}}}" alt="{{{title}}}">'
+                                    ,'<img src="{{{imageUrl}}}" alt="{{{title}}}">'
                                 ,'</span>'
                             ,'</div>'
                             ,'<div class="result-brand">{{{brand}}}</div>'

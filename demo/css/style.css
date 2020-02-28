@@ -164,7 +164,7 @@ input,textarea,select {
 	height: 30px;
 	background-color: #45b5c1;
 	cursor: pointer;
-	background-image: url("../../images/search-icon-demo.png");
+	background-image: url("/images/search-icon-demo.png");
 	background-repeat: no-repeat;
 	background-position: 10px 7px;
 	cursor: pointer;
