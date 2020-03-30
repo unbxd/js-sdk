@@ -108,7 +108,26 @@
         bannerSelector: '.banner',
         sortContainerSelector: '.result-sort-options',
         pageSizeContainerSelector: '.result-page-size-options',
-        mappedFields: window.mappedFields
+        mappedFields: {               
+            "imageUrl":"imageUrl",
+            "productUrl":"productUrl",
+            "title":"title",
+            "description":"description",
+            "price":"price",
+            "categoryPath":"categoryPath",
+            "variantFields":{
+                "imageUrl":"v_imageUrl",
+                "productUrl":"v_productUrl",
+                "title":"v_title",
+                "price":"v_price",
+                "groupBy":"variant_color",
+                "swatchFields": {
+                "swatch_background_image":"variant_overhead_swatch",
+                "swatch_background_color":"variant_color",
+                "swatch_click_image":"variant_image_array"
+                }
+            }
+        }
     });
 
 
