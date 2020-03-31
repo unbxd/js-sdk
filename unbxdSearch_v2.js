@@ -551,7 +551,9 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             //         .callResults(searchobj.paintResultSet, true);
             // })
         },
-        setDefaultFilters: function() {},
+        setDefaultFilters: function() {
+           
+        },
         fields: [],
         onNoResult: function(obj) {},
         noEncoding: false,
@@ -1173,7 +1175,8 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             if (isTypeBrowseOrCategory(this.options.type)) {
                 handler = this.options.type;
             }
-            return "https://search.unbxd.io/" + this.options.APIKey + "/" + this.options.siteName + "/" + handler;
+            var searchEndPoint = this.options.searchEndPoint || "https://search.unbxd.io";
+            return searchEndPoint + "/" + this.options.APIKey + "/" + this.options.siteName + "/" + handler;
         },
         getUrlSubstring: function() {
             return window.location.search.substring(1) || window.location.hash.substring(1);
@@ -1407,16 +1410,24 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             var newparams, diff;
             var oldparams = JSON.stringify(params);
             this.options.setDefaultFilters.call(this);
+
+            this.params['extra']['version'] = 'V2';
             
             if (this.options.facetMultilevel) {
-                this.params['extra']['version'] = 'V2';
                 this.params['extra']['facet.multilevel'] = this.options.mappedFields.categoryPath;
                 this.params['extra']['f.categoryPath.displayName'] = this.options.facetMultilevelName;
                 this.params['extra']['f.categoryPath.max.depth'] = '6';
                 this.params['extra']['f.categoryPath.facet.limit'] = '100';
               }
-            
-              this.params['extra']['variants.groupby'] = this.options.mappedFields.variantFields.groupBy;
+
+              if (this.options.variants) {
+                this.params['extra']['variants'] = true;
+                this.params['extra']['variants.count'] = this.options.variantsCount || 1;
+              }
+
+              if (this.options.isSwatches) {
+                this.params['extra']['variants.groupby'] = this.options.mappedFields.variantFields.groupBy;
+              }
 
               newparams = JSON.stringify(this.params);
 
