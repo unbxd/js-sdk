@@ -1,7 +1,7 @@
 
     window.searchobj = new window.Unbxd.setSearch({
-        siteName: window.unbxdSiteKey,
-        APIKey: window.unbxdApiKey,
+        siteName: "prod-rugsusa808581564092094",
+        APIKey: "ea4823934059ff8ad5def0be04f8dd4e",
         type: 'search',
         getCategoryId: '',
         inputSelector: '#search_input',
@@ -16,23 +16,19 @@
         facetMultilevelName: 'CATEGORY',
         isSwatches: true,
         swatchesSelector: ".swatch-box",
+        variants: true,
+        variantsCount: 3,
         searchResultSetTemp: {
             "grid": ['{{#each (productVariant products)}}<li class="grid"><a href="{{productUrl}}" id="{{sku}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">', 
             '<div class="result-image-container">',
-             '<img id="img-{{uniqueId}}" src="{{{imageUrl}}}" alt="{{{title}}}">', 
-            
-             '{{log variants}}',
-            
+             '<img id="img-{{uniqueId}}" src="{{{imageUrl}}}" alt="{{{title}}}">',             
             '</div>',
             '{{#isSwatches}}',
             '<div class="swatch-container">',
             '{{#each variants}}',
-            
             '<span class="swatch-box" unbxdparam_sku={{../uniqueId}} unbxdparam_swatchImage={{getSwatchImage swatch_click_image}} style="background-image:url(\'{{swatch_background_image}}\')">',
             '</span>',
-            
             '{{/each}}',
-             
             '{{/isSwatches}}',
             '</div>', 
             '<div class="result-brand">{{{brand}}}</div>', 
@@ -88,8 +84,6 @@
         loaderSelector: ".result-loader",
         getFacetStats: "price",
         setDefaultFilters: function () {
-            this.addQueryParam('variants', 'true');
-            this.addQueryParam('variants.count', 5);
         },
         'template-features': {
             "autoScroll": false,
@@ -108,7 +102,7 @@
         bannerSelector: '.banner',
         sortContainerSelector: '.result-sort-options',
         pageSizeContainerSelector: '.result-page-size-options',
-        mappedFields: {               
+        mappedFields: {
             "imageUrl":"imageUrl",
             "productUrl":"productUrl",
             "title":"title",
@@ -127,7 +121,8 @@
                 "swatch_click_image":"variant_image_array"
                 }
             }
-        }
+        },
+        searchEndPoint: "https://search.unbxd.io"
     });
 
 

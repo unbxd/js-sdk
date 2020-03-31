@@ -1,0 +1,86 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.theme.min.css">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="unbxdSearch.css">   
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script type="text/javascript" src="js/jquery.ui.widget.js"></script>
+        <script type="text/javascript" src="js/jquery.ui.mouse.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+        <script type="text/javascript" src="../unbxdSearch_v2.js"></script>
+        
+    </head>
+    <body>
+        <div class="search-preview">
+            <div class="header-container clearfix">
+                <div class="header row clearfix">
+                    <div class="header-search">
+                        <div class="search-input-button-holder clearfix">
+                            <form method="GET" action="">
+                                <input type="text" class="search-input lt" id="search_input" unbxdattr="sq" name="q" autoComplete="off" placeholder="Search..." />
+                                <button type="submit" class="search-button lt" id="search_button" unbxdattr="sq_bt"></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="preview-search-container">
+                <div class="row clearfix banner">
+                </div>
+                <div class="row clearfix">
+                    <div class="lt search-facet-column" id="facets_container">
+                    </div>
+                    <div class="rt search-result-column">
+                        <h2 class="result-spell-check" id="did_you_mean">
+                        </h2>
+                        <h3 class="result-title-count" id="search_title">
+                        </h3>
+                        <div class="search-header-options">
+                            <div class="page-size-container">
+                                <span>Results Per Page:</span>
+                                <div class="result-page-size-options"></div>
+                            </div>
+                            <div class="sort-by-container">
+                                <span>Sort By:</span>
+                                <div class="result-sort-options">
+                                </div>
+                            </div>
+                            <div class="change-view">
+                                <span>View By:</span>
+                                <div class="view-types">
+                                    <div class="list-view">
+                                        List View
+                            </div>
+                                    <div class="grid-view">
+                                        Grid View
+                            </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-pagination">
+                        </div>
+                        <div class="result-selected-facets clearfix" id="selected_facets">
+                        </div>
+                        <ul class="search-result-list clearfix" id="results_container">
+                        </ul>
+                        <div class="result-loader" id="ajax_loader">
+                            <a href="#"><img src="/images/blueLoader.svg" />Loading more...</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    Copyright &copy; <span class="year"></span> Unbxd
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+            var date = new Date();
+            var year = date.getFullYear();
+            document.getElementsByClassName("year")[0].innerHTML=year;
+    </script>
+    <script type="text/javascript" src="triggerSearch.js"></script>
+</html>
