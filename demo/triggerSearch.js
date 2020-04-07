@@ -1,7 +1,7 @@
 
     window.searchobj = new window.Unbxd.setSearch({
-        siteName: "prod-rugsusa808581564092094",
-        APIKey: "ea4823934059ff8ad5def0be04f8dd4e",
+        siteName: "<yoursiteKey>",
+        APIKey: "<yourAPIkey>",
         type: 'search',
         getCategoryId: '',
         inputSelector: '#search_input',
