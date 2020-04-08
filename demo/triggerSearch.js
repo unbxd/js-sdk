@@ -1,7 +1,7 @@
 
     window.searchobj = new window.Unbxd.setSearch({
-        siteName: "prod-kookai-com-au4541568774205",
-        APIKey: "1c406c7058fdd75c04293fa87c2f9720",
+        siteName: "<yoursiteKey>",
+        APIKey: "<yourAPIkey>",
         type: 'search',
         getCategoryId: '',
         inputSelector: '#search_input',
