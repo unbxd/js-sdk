@@ -388,6 +388,10 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
         return txt.trim().length > 0 ? txt : "&nbsp;&nbsp;&nbsp;";
     });
 
+    Handlebars.registerHelper('isFacetMultilevel', function(isMultilevel, options) {
+        return isMultilevel ? options.fn(this) : options.inverse(this);
+    });
+
     Handlebars.registerHelper("ifGrid", function (viewType, options) {
         if (viewType.value === 'grid') {
             return options.fn(this);
@@ -1078,19 +1082,34 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             return this;
         },
         addFilter: function(field, value) {
-            if (!(field in this.params.filters))
+            if ( this.options.facetMultilevel && field === 'categoryPath') {
+                this.params.categoryFilter = value;
+            } else {
+                if (!(field in this.params.filters))
                 this.params.filters[field] = {};
-
-            this.params.filters[field][value] = field;
-
+                this.params.filters[field][value] = field;
+            }
             return this;
         },
         removeFilter: function(field, value) {
-            if (value in this.params.filters[field])
+            if (this.options.facetMultilevel && field === 'categoryPath') {
+                if (value !== '') {
+                    var breadcrumbString = '';
+                    if (value.indexOf('>') !== -1) {
+                        var breadcrumbArray = value.split('>');
+                        breadcrumbArray.pop();
+                        breadcrumbString = breadcrumbArray.join('>');
+                    }
+                    this.params.categoryFilter = breadcrumbString;
+                }
+            } else {
+                if (value in this.params.filters[field])
                 delete this.params.filters[field][value];
 
-            if (Object.keys(this.params.filters[field]).length == 0)
+                if (Object.keys(this.params.filters[field]).length == 0)
                 delete this.params.filters[field];
+            }
+
 
             return this;
         },
@@ -1208,6 +1227,10 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 url += '&category-id=' + encodeURIComponent(this.params.categoryId);
             } else if (isTypeCategory(this.options.type) && this.params.categoryId !== undefined) {
                 url += "&p=" + encodeURIComponent(this.params.categoryId);
+            }
+
+            if (this.params.hasOwnProperty('categoryFilter') && this.params.categoryFilter !== '') {
+                url += '&category-filter='+encodeURIComponent(this.params.categoryFilter);
             }
 
             for (var x in this.params.filters) {
@@ -1363,7 +1386,8 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             }
             this.ajaxCall = jQuery.ajax({
                 url: urlobj.url.replace(this.options.searchQueryParam + "=", "q="),
-                dataType: "jsonp",
+                dataType: "json",
+                method: "get",
                 jsonp: 'json.wrf',
                 success: cb.bind(self)
             });
@@ -1392,7 +1416,8 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                     format: "json",
                     page: 1,
                     rows: 12
-                }
+                },
+                categoryFilter: ""
             };
 
             if (this.options.viewTypes && this.options.viewTypes.length > 0)
@@ -1418,6 +1443,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 this.params['extra']['f.categoryPath.displayName'] = this.options.facetMultilevelName;
                 this.params['extra']['f.categoryPath.max.depth'] = '6';
                 this.params['extra']['f.categoryPath.facet.limit'] = '100';
+                this.params['extra']['f.categoryPath.facet.version'] = 'V2';
               }
 
               if (this.options.variants) {
@@ -1445,7 +1471,8 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                         format: "json",
                         page: 1,
                         rows: 12
-                    }
+                    },
+                    categoryFilter: ''
                 };
 
             //lets get filters
@@ -1480,6 +1507,11 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                         }
                     }
                 }
+            }
+
+            //lets get category-filters
+            if ("category-filter" in obj) {
+                params.categoryFilter = obj["category-filter"];
             }
 
             //lets get sort now
@@ -1838,6 +1870,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
         var mod_textfacets = [];
         var mod_rangefacets = [];
         var multilevelFacet = {};
+        var currentCategoryLevel = 1;
         var breadcrumbs = {};
 
         if (obj.facets.hasOwnProperty("text")) {
@@ -1870,29 +1903,87 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
               }
               multilevelFacet[i].values = multilevelFacetValues;
             }
+            if (obj.facets.multilevel.hasOwnProperty("breadcrumb")) {
+                breadcrumbs = obj.facets.multilevel.breadcrumb;
+            }
           }
-          if (obj.facets.multilevel.hasOwnProperty("breadcrumb")) {
-            breadcrumbs = obj.facets.multilevel.breadcrumb;
+          else if (obj.facets.multilevel.hasOwnProperty('list')) {
+            multilevelFacet = obj.facets.multilevel.list;
+            for (var i = 0; i < multilevelFacet.length; i++) {
+              var multilevelFacetValues = [];
+                // Mock data for facets. To be removed when this information is returned in v2
+                if (!multilevelFacet[i].displayName) {
+                  multilevelFacet[i].displayName = "CATEGORIES";
+                }
+
+                // Mock data for facets. To be removed when this information is returned in v2
+                if (!multilevelFacet[i].multiLevelField) {
+                    multilevelFacet[i].multiLevelField = "categoryPath";
+                }
+
+                if (multilevelFacet[i].hasOwnProperty("breadcrumb")) {
+                    breadcrumbs = multilevelFacet[i].breadcrumb;
+                }
+              for (var j = 0, len = multilevelFacet[i].values.length; j < len; j++) {
+                var multilevelFacetValue = {}
+                multilevelFacetValue['name'] = multilevelFacet[i]['values'][j].name;
+                multilevelFacetValue['count'] = multilevelFacet[i]['values'][j].count;
+                multilevelFacetValue['id'] = multilevelFacetValue['name'];
+                multilevelFacetValue['level'] = multilevelFacet[0]['level'];
+                if (multilevelFacetValue['name']) {
+                  multilevelFacetValues.push(multilevelFacetValue)
+                }
+                parentCategoryItemsCount += multilevelFacetValue['count']
+                currentChildCats.push(multilevelFacetValue['name']);
+              }
+              multilevelFacet[i].values = multilevelFacetValues;
+              
+            }
           }
         }
 
         var isBreadcrumbFound = false;
         var breadcrumbList = [];
         var breadcrumbsString = "";
-
+        var breadcrumbsObj = [];
         if (breadcrumbs.hasOwnProperty("values")) {
-          breadcrumbList.push(breadcrumbs.values[0].value);
-
+          // name for v2, value for v1 facet  
+          breadcrumbList.push(breadcrumbs.values[0].value || breadcrumbs.values[0].name);
+           
+          // name for v2, value for v1 facet 
           while (breadcrumbs.hasOwnProperty("child")) {
             breadcrumbs = breadcrumbs.child;
-            breadcrumbList.push(breadcrumbs.values[0].value);
+            breadcrumbList.push(breadcrumbs.values[0].value || breadcrumbs.values[0].name);
           }
 
           isBreadcrumbFound = true;
         }
 
         if (isBreadcrumbFound && breadcrumbList.length != 0) {
-          breadcrumbsString = breadcrumbList.join(">");
+            breadcrumbsString = breadcrumbList.join(">");
+            breadcrumbList = breadcrumbList.map(function(value) {
+                var index = breadcrumbList.indexOf(value);
+                if (index > 0) {
+                    return breadcrumbList.slice(0, index).join('>') + ">" + value;
+                }
+                return value;
+            });
+            breadcrumbsObj = breadcrumbList.map(function(value, index) {
+                var values = value.split('>');
+                var last_value = values[values.length - 1];
+                return {
+                    level: index + 1,
+                    id : value,
+                    value : last_value,
+                    facet_name: "categoryPath"
+                }
+            });
+            breadcrumbsObj = breadcrumbsObj.filter(function(breadcrumb) {
+                if (breadcrumb.level == currentCategoryLevel) {
+                    return false;
+                }
+                return true;
+            });
         }
 
 
@@ -1912,6 +2003,8 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
           for (var i = 0; i < multilevelFacet.length; i++) {
             multilevelFacet[i].type = "facet_fields";
             multilevelFacet[i].id = "";
+
+            
             var multilevelFacetName = multilevelFacet[i].multiLevelField;
             // if ("displayName" in multilevelFacet[i]) {
             //     multilevelFacetName = multilevelFacet[i].displayName
@@ -2000,6 +2093,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
         for (var newI = 0; newI < sortable.length; newI++) {
           var x = sortable[newI][0];
+         
           singlefacet = {
             name: facets[x].hasOwnProperty('displayName') ? self.prepareFacetName(facets[x].displayName) : self.prepareFacetName(x),
             facet_name: x,
@@ -2007,7 +2101,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             selected: [],
             unselected: [],
             unordered: [],
-            isMultilevel: facets[x].hasOwnProperty("multiLevelField") ? true : false
+            isMultilevel: (facets[x].hasOwnProperty("multiLevelField"))  ? true : false
           };
           // custom solution
           if (singlefacet["facet_name"] == "categoryPath") {
@@ -2016,7 +2110,9 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
           if (singlefacet.type !== 'facet_ranges') {
             if (singlefacet.isMultilevel) {
+                
               for (var i = 0, len = facets[x]['values'].length; i < len; i++) {
+                  
                 facetVal = facets[x]['values'][i].name;
                 if (facetVal != "") {
                   facetValId = facets[x]['values'][i].id;
@@ -2044,21 +2140,23 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 }
               }
             } else {
-              if (facets[x].displayName.indexOf('{multi-select-and}') > -1) {
-                if (!window.Unbxd['multiselectAndFacets']) {
-                  window.Unbxd['multiselectAndFacets'] = [];
+                if (facets[x].displayName) {
+                    if (facets[x].displayName.indexOf('{multi-select-and}') > -1) {
+                        if (!window.Unbxd['multiselectAndFacets']) {
+                          window.Unbxd['multiselectAndFacets'] = [];
+                        }
+                        if (window.Unbxd['multiselectAndFacets'].indexOf(x) == -1) {
+                          window.Unbxd['multiselectAndFacets'].push(x);
+                        }
+                        // Adding the multiselect-and fields in the query params for exclusion
+                        this.addQueryParam('facet.multiselect.exclude', x);
+                      }
                 }
-                if (window.Unbxd['multiselectAndFacets'].indexOf(x) == -1) {
-                  window.Unbxd['multiselectAndFacets'].push(x);
-                }
 
-
-                // Adding the multiselect-and fields in the query params for exclusion
-                this.addQueryParam('facet.multiselect.exclude', x);
-
-              }
               for (var i = 0, len = facets[x]['values'].length / 2; i < len; i++) {
                 facetVal = facets[x]['values'][2 * i];
+                
+                console.log(facetVal);
                 if (facetVal.trim().length == 0) continue;
                 isSelected = x in self.params.filters && facetVal in self.params.filters[x] && self.params.filters[x][facetVal] == x ? true : false;
 
