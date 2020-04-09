@@ -1918,7 +1918,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
 
                         // Mock data for facets. To be removed when this information is returned in v2
                         if (!multilevelFacet[i].multiLevelField) {
-                            multilevelFacet[i].multiLevelField = "categoryPath";
+                            multilevelFacet[i].multiLevelField = multilevelFacet[i].filterField;
                         }
 
                         if (multilevelFacet[i].hasOwnProperty("breadcrumb")) {
