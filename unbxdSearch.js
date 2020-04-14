@@ -1873,18 +1873,18 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             var currentCategoryLevel = 1;
             var breadcrumbs = {};
 
-            if (obj.facets.hasOwnProperty("text")) {
+            if (obj.facets && obj.facets.hasOwnProperty("text")) {
                 mod_textfacets = obj.facets.text.list;
             }
 
-            if (obj.facets.hasOwnProperty("range")) {
+            if (obj.facets && obj.facets.hasOwnProperty("range")) {
                 mod_rangefacets = obj.facets.range.list;
             }
 
             var parentCategoryItemsCount = 0;
             var currentChildCats = [];
 
-            if (obj.facets.hasOwnProperty("multilevel")) {
+            if (obj.facets && obj.facets.hasOwnProperty("multilevel")) {
                 if (obj.facets.multilevel.hasOwnProperty('bucket')) {
                     multilevelFacet = obj.facets.multilevel.bucket;
                     for (var i = 0; i < multilevelFacet.length; i++) {
