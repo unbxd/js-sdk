@@ -1226,7 +1226,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             } else if (this.options.type == "browse" && this.params['categoryId'] != undefined) {
                 url += '&category-id=' + encodeURIComponent(this.params.categoryId);
             } else if (isTypeCategory(this.options.type) && this.params.categoryId !== undefined) {
-                url += "&p=" + encodeURIComponent(this.params.categoryId);
+                url += "&p=categoryPath:\"" + encodeURIComponent(this.params.categoryId) + "\"" + '&pagetype=boolean';
             }
 
             if (this.params.hasOwnProperty('categoryFilter') && this.params.categoryFilter !== '') {
