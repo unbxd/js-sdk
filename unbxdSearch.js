@@ -459,6 +459,8 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
         spellCheck: '' //
         ,
         spellCheckTemp: '<h3>Did you mean : {{suggestion}}</h3>',
+        currency: '$',
+        allowEmptySearch: false,
         searchQueryDisplay: '',
         searchQueryDisplayTemp: '<h3>Search results for {{query}} - {{numberOfProducts}}</h3>',
         searchResultContainer: '',
@@ -797,6 +799,10 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
                         self.reset();
 
                         self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
+
+                        if (self.options.allowEmptySearch) {
+                            self.params.query = '*';
+                        }
 
                         if (self.options.deferInitRender.indexOf('search') === -1)
                             jQuery(self.options.searchResultContainer).html('');
@@ -1679,7 +1685,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
                 product['unbxdprank'] = obj.response.start + start;
                 product['imageUrl'] = product[that.options.mappedFields.imageUrl];
                 product['title'] = product[that.options.mappedFields.title];
-                product['price'] = product[that.options.mappedFields.price];
+                product['price'] = product[that.options.mappedFields.price] ? that.options.currency + product[that.options.mappedFields.price] : '';
                 product['description'] = product[that.options.mappedFields.description];
                 start += 1;
                 return product;
