@@ -506,55 +506,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             return q;
         },
         getFacetStats: "",
-        processFacetStats: function (obj) {
-            // var divs = $("#amount div");
-            // var that = this;
-
-            // $("#slider-range-max").slider({
-            //     range: !0,
-            //         animate: !0,
-            //         min: obj[that.mappedFields.price].min,
-            //         max: obj[that.mappedFields.price].max,
-            //         values: [obj[[that.mappedFields.price]].values.min, obj[that.mappedFields.price].values.max],
-            //         create: function() {
-            //             jQuery("#amount").val("$" + obj[that.mappedFields.price].values.min + '  -  ' + "$" + obj[that.mappedFields.price].values.max);
-            //             divs.eq(0).html("$" + obj[that.mappedFields.price].values.min);
-            //             divs.eq(1).html("$" + obj[that.mappedFields.price].values.max);
-            //         },
-            //         slide: function(b, c) {
-            //             jQuery("#amount").val("$" + c.values[0] + '  -  ' + "$" + c.values[1]);
-            //             divs.eq(0).html("$" + c.values[0]);
-            //             divs.eq(1).html("$" + c.values[1]);
-            //         },
-            //         change: function(b, c) {
-            //             searchobj
-            //                 .clearRangeFiltes()
-            //                 .addRangeFilter(that.mappedFields.price, c.values[0], c.values[1])
-            //                 .setPage(1)
-            //                 .callResults(searchobj.paintResultSet, true);
-            //         }
-            // });
-
-            // $('input.unbxd-filter-by-price').on("click", function () {
-            //     searchobj
-            //         .clearRangeFiltes()
-            //         .addRangeFilter(this.mappedFields.price, slider_min, slider_max)
-            //         .setPage(1)
-            //         .callResults(searchobj.paintResultSet, true);
-            // })
-
-            // $('p.clear-unbxd-filter-by-price').on("click", function (e) {
-            //     event.preventDefault()
-
-            //     slider_min = window.unbxd_min;
-            //     slider_max = window.unbxd_max;
-
-            //     searchobj
-            //         .clearRangeFiltes()
-            //         .setPage(1)
-            //         .callResults(searchobj.paintResultSet, true);
-            // })
-        },
+        processFacetStats: function (obj) {},
         setDefaultFilters: function () {
 
         },
@@ -883,9 +835,6 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
                 jQuery(imageSelector)[0].src = swatchImage;
             });
 
-
-
-
             //click on facet checkboxes
             if (this.options.facetContainerSelector.length > 0) {
                 jQuery(this.options.facetContainerSelector).delegate(self.options.facetCheckBoxSelector, 'change', function (e) {
@@ -1082,7 +1031,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             return this;
         },
         addFilter: function (field, value) {
-            if (this.options.facetMultilevel && field === 'categoryPath') {
+            if (this.options.facetMultilevel && field === this.options.mappedFields.categoryField) {
                 this.params.categoryFilter = value;
             } else {
                 if (!(field in this.params.filters))
@@ -1092,7 +1041,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             return this;
         },
         removeFilter: function (field, value) {
-            if (this.options.facetMultilevel && field === 'categoryPath') {
+            if (this.options.facetMultilevel && field === this.options.mappedFields.categoryField) {
                 if (value !== '') {
                     var breadcrumbString = '';
                     if (value.indexOf('>') !== -1) {
@@ -1226,7 +1175,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             } else if (this.options.type == "browse" && this.params['categoryId'] != undefined) {
                 url += '&category-id=' + encodeURIComponent(this.params.categoryId);
             } else if (isTypeCategory(this.options.type) && this.params.categoryId !== undefined) {
-                url += "&p=" + encodeURIComponent(this.params.categoryId);
+                url += "&p=" + this.options.mappedFields.categoryField + ":\"" + encodeURIComponent(this.params.categoryId) + "\"" + '&pagetype=boolean';
             }
 
             if (this.params.hasOwnProperty('categoryFilter') && this.params.categoryFilter !== '') {
@@ -1439,7 +1388,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             this.params['extra']['version'] = 'V2';
 
             if (this.options.facetMultilevel) {
-                this.params['extra']['facet.multilevel'] = this.options.mappedFields.categoryPath;
+                this.params['extra']['facet.multilevel'] = 'categoryPath';
                 this.params['extra']['f.categoryPath.displayName'] = this.options.facetMultilevelName;
                 this.params['extra']['f.categoryPath.max.depth'] = '6';
                 this.params['extra']['f.categoryPath.facet.limit'] = '100';
@@ -1873,18 +1822,18 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             var currentCategoryLevel = 1;
             var breadcrumbs = {};
 
-            if (obj.facets.hasOwnProperty("text")) {
+            if (obj.facets && obj.facets.hasOwnProperty("text")) {
                 mod_textfacets = obj.facets.text.list;
             }
 
-            if (obj.facets.hasOwnProperty("range")) {
+            if (obj.facets && obj.facets.hasOwnProperty("range")) {
                 mod_rangefacets = obj.facets.range.list;
             }
 
             var parentCategoryItemsCount = 0;
             var currentChildCats = [];
 
-            if (obj.facets.hasOwnProperty("multilevel")) {
+            if (obj.facets && obj.facets.hasOwnProperty("multilevel")) {
                 if (obj.facets.multilevel.hasOwnProperty('bucket')) {
                     multilevelFacet = obj.facets.multilevel.bucket;
                     for (var i = 0; i < multilevelFacet.length; i++) {
