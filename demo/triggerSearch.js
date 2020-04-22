@@ -1,9 +1,14 @@
-
-window.searchobj = new window.Unbxd.setSearch({
+var config = {
     siteName: "<yoursiteKey>",
     APIKey: "<yourAPIkey>",
     type: 'search',
-    getCategoryId: '',
+    getCategoryId: function () {
+        var path = '';
+        if (window.Unbxd_Category_Page && window.Unbxd_Category_Page.path != undefined) {
+            path = window.Unbxd_Category_Page["path"];
+        }
+        return path;
+    },
     inputSelector: '#search_input',
     searchButtonSelector: '#search_button',
     spellCheck: '#did_you_mean',
@@ -155,7 +160,15 @@ window.searchobj = new window.Unbxd.setSearch({
         }
     },
     searchEndPoint: "https://search.unbxd.io"
-});
+}
+
+if (window.Unbxd_Category_Page && window.Unbxd_Category_Page.hasOwnProperty("path")) {
+    config['type'] = 'category';
+} else {
+    config['type'] = 'search';
+}
+
+window.searchobj = new window.Unbxd.setSearch(config);
 
 
 

@@ -1226,7 +1226,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             } else if (this.options.type == "browse" && this.params['categoryId'] != undefined) {
                 url += '&category-id=' + encodeURIComponent(this.params.categoryId);
             } else if (isTypeCategory(this.options.type) && this.params.categoryId !== undefined) {
-                url += "&p=" + encodeURIComponent(this.params.categoryId);
+                url += "&p=categoryPath:\"" + encodeURIComponent(this.params.categoryId) + "\"" + '&pagetype=boolean';
             }
 
             if (this.params.hasOwnProperty('categoryFilter') && this.params.categoryFilter !== '') {
@@ -1873,18 +1873,18 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             var currentCategoryLevel = 1;
             var breadcrumbs = {};
 
-            if (obj.facets.hasOwnProperty("text")) {
+            if (obj.facets && obj.facets.hasOwnProperty("text")) {
                 mod_textfacets = obj.facets.text.list;
             }
 
-            if (obj.facets.hasOwnProperty("range")) {
+            if (obj.facets && obj.facets.hasOwnProperty("range")) {
                 mod_rangefacets = obj.facets.range.list;
             }
 
             var parentCategoryItemsCount = 0;
             var currentChildCats = [];
 
-            if (obj.facets.hasOwnProperty("multilevel")) {
+            if (obj.facets && obj.facets.hasOwnProperty("multilevel")) {
                 if (obj.facets.multilevel.hasOwnProperty('bucket')) {
                     multilevelFacet = obj.facets.multilevel.bucket;
                     for (var i = 0; i < multilevelFacet.length; i++) {
