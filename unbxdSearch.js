@@ -1,5 +1,3 @@
-/** Please Note: This file contains code changes to support Preview Component in Search Self Serve, and hence canot be used directly as part of independent customer integrations */
-
 //uglifyjs unbxdSearch.js -o unbxdSearch.min.js && gzip -c unbxdSearch.min.js > unbxdSearch.min.js.gz && aws s3 cp unbxdSearch.min.js.gz s3://unbxd/unbxdSearch.js --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --content-encoding gzip --cache-control max-age=3600
 var unbxdSearchInit = function (jQuery, Handlebars) {
     window.Unbxd = window.Unbxd || {};
@@ -442,10 +440,6 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
         }
     });
 
-    Handlebars.registerHelper('getMaxPrice', function (pData) {
-        slider_max = getPriceVal(pData, 'max');
-    });
-
     Handlebars.registerHelper('getMinPrice', function (pData) {
         slider_min = getPriceVal(pData, 'min');
     });
@@ -507,9 +501,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
         },
         getFacetStats: "",
         processFacetStats: function (obj) {},
-        setDefaultFilters: function () {
-
-        },
+        setDefaultFilters: function () {},
         fields: [],
         onNoResult: function (obj) { },
         noEncoding: false,
@@ -824,7 +816,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
                 });
             }
 
-            jQuery('body').delegate(this.options.swatchesSelector, 'click', function (e) {
+            jQuery(this.options.searchResultContainer).delegate(this.options.swatchesSelector, 'click', function (e) {
 
                 e.preventDefault();
                 var box = jQuery(this);
