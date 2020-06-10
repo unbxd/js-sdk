@@ -1972,7 +1972,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
                 }
 
                 // Add parent category values                        
-                var parentCatsArray = breadcrumbsString.split(">");
+                var parentCatsArray = breadcrumbsString && breadcrumbsString.split(">");
                 var currentActiveCategory = parentCatsArray[parentCatsArray.length - 1];
                 while (parentCatsArray.length > 0) {
                     for (var j = 0; j < multilevelFacet.length; j++) {
