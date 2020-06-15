@@ -463,6 +463,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
         isPagination: false,
         setPagination: function (totalNumberOfProducts, pageSize, currentPage) { },
         paginationContainerSelector: '',
+        categoryUrlParam: "p",
         paginationTemp: [
             '{{#if hasFirst}}',
             '<span class="unbxd_first" unbxdaction="first"> &laquo; </span>',
@@ -555,6 +556,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             '{{/options}}',
             '</select>'
         ].join(''),
+        viewTypes: ['grid', 'list'],
         viewTypeContainerTemp: [
             '{{#options}}',
             '<li class="unbxd-{{#if selected}}current{{/if}}">',
@@ -566,10 +568,48 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             '</li>',
             '{{/options}}'
         ].join(''),
+        facetTemp: [
+            '<div class="facet-block">',
+            '{{#facets}}',
+            '<div class="facet-block">',
+            '<div class="facet-title">{{name}}</div>',
+            '<div class="facet-values">',
+            '<ul>', '{{#selected}}',
+    
+            '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{#isFacetMultilevel isMultilevel}}{{id}}{{else}}{{value}}{{/isFacetMultilevel}}">',
+            '<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{#isFacetMultilevel isMultilevel}}{{id}}{{else}}{{value}}{{/isFacetMultilevel}}" id="{{../facet_name}}_{{value}}">',
+            '<label for="{{../facet_name}}_{{value}}">', '{{prepareFacetValue value}} ({{count}})', '</label>',
+            '</li>',
+            '{{/selected}}',
+            '{{#unselected}}',
+            '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{#isFacetMultilevel isMultilevel}}{{id}}{{else}}{{value}}{{/isFacetMultilevel}}">',
+            '<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{#isFacetMultilevel isMultilevel}}{{id}}{{else}}{{value}}{{/isFacetMultilevel}}" id="{{../facet_name}}_{{value}}">',
+            '<label for="{{../facet_name}}_{{value}}">',
+            '{{prepareFacetValue value}} ({{count}})',
+            '</label>', '</li>', '{{/unselected}}',
+            '</ul>', '</div>', '</div>',
+            '{{/facets}}',
+            '{{#rangefacets}}<div class="facet-block">', '<div class="facet-title">{{name}}</div>',
+            '<div class="facet-values">', '<ul>', '{{#selected}}',
+            '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" unbxdParam_facetType="{{../type}}">',
+            '<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" ',
+            ' unbxdParam_facetType="{{../type}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">',
+            '<label for="{{../facet_name}}_{{value}}">',
+            '{{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})</label></li>',
+            '{{/selected}}', ' {{#unselected}}',
+            '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" unbxdParam_facetType="{{../type}}">',
+            '<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" ',
+            ' unbxdParam_facetType="{{../type}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">',
+            '<label for="{{../facet_name}}_{{value}}">', '{{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})</label></li>',
+            '{{/unselected}}', '</ul>', '</div>', '</div>', '{{/rangefacets}}'
+    
+        ].join(""),
         searchQueryParam: "q",
         retainbaseParam: false,
         baseParams: [],
-        requestHeaders: {}
+        requestHeaders: {},
+        categoryDepth: 4,
+        categoryLimit: 10
     };
 
     jQuery.extend(Unbxd.setSearch.prototype, {
@@ -1167,10 +1207,10 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             } else if (this.options.type == "browse" && this.params['categoryId'] != undefined) {
                 url += '&category-id=' + encodeURIComponent(this.params.categoryId);
             } else if (isTypeCategory(this.options.type) && this.params.categoryId !== undefined) {
-                url += "&p=" + this.options.mappedFields.categoryField + ":\"" + encodeURIComponent(this.params.categoryId) + "\"" + '&pagetype=boolean';
+                url += "&" + this.options.categoryUrlParam + "=" + encodeURIComponent(window.UnbxdAnalyticsConf["page"]) + "\"" + '&pagetype=boolean';
             }
 
-            if (this.params.hasOwnProperty('categoryFilter') && this.params.categoryFilter !== '') {
+            if (this.params.hasOwnProperty('categoryFilter') && this.params.categoryFilter) {
                 url += '&category-filter=' + encodeURIComponent(this.params.categoryFilter);
             }
 
@@ -1382,8 +1422,8 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             if (this.options.facetMultilevel) {
                 this.params['extra']['facet.multilevel'] = 'categoryPath';
                 this.params['extra']['f.categoryPath.displayName'] = this.options.facetMultilevelName;
-                this.params['extra']['f.categoryPath.max.depth'] = '6';
-                this.params['extra']['f.categoryPath.facet.limit'] = '100';
+                this.params['extra']['f.categoryPath.max.depth'] = this.options.categoryDepth;
+                this.params['extra']['f.categoryPath.facet.limit'] = this.options.categoryLimit;
                 this.params['extra']['f.categoryPath.facet.version'] = 'V2';
             }
 
@@ -1393,7 +1433,9 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             }
 
             if (this.options.isSwatches) {
-                this.params['extra']['variants.groupby'] = this.options.mappedFields.variantFields.groupBy;
+                if (this.options.mappedFields.variantFields && this.options.mappedFields.variantFields.groupBy) {
+                    this.params['extra']['variants.groupby'] = this.options.mappedFields.variantFields.groupBy;
+                }
             }
 
             newparams = JSON.stringify(this.params);

@@ -159,7 +159,9 @@ var config = {
             }
         }
     },
-    searchEndPoint: "https://search.unbxd.io"
+    searchEndPoint: "https://search.unbxd.io",
+    categoryUrlParam: "p",
+    categoryDepth: 4
 }
 
 if (window.Unbxd_Category_Page && window.Unbxd_Category_Page.hasOwnProperty("path")) {
