@@ -1,12 +1,12 @@
 //uglifyjs unbxdSearch.js -o unbxdSearch.min.js && gzip -c unbxdSearch.min.js > unbxdSearch.min.js.gz && aws s3 cp unbxdSearch.min.js.gz s3://unbxd/unbxdSearch.js --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --content-encoding gzip --cache-control max-age=3600
-var unbxdSearchInit = function(jQuery, Handlebars) {
+var unbxdSearchInit = function (jQuery, Handlebars) {
     window.Unbxd = window.Unbxd || {};
     Unbxd.jsSdkVersion = "2.0.3";
 
     // Production steps of ECMA-262, Edition 5, 15.4.4.14
     // Reference: http://es5.github.io/#x15.4.4.14
     if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function(searchElement, fromIndex) {
+        Array.prototype.indexOf = function (searchElement, fromIndex) {
 
             var k;
 
@@ -78,7 +78,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
      * for the 2nd argument (as in Firefox), and prevents errors when
      * called on other DOM objects.
      */
-    (function() {
+    (function () {
         'use strict';
         var _slice = Array.prototype.slice;
 
@@ -90,7 +90,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             // NamedNodeMap (attributes, entities, notations),
             // NodeList (e.g., getElementsByTagName), HTMLCollection (e.g., childNodes),
             // and will not fail on other DOM objects (as do DOM elements in IE < 9)
-            Array.prototype.slice = function(begin, end) {
+            Array.prototype.slice = function (begin, end) {
                 // IE < 9 gets unhappy with an undefined end argument
                 end = (typeof end !== 'undefined') ? end : this.length;
 
@@ -135,15 +135,15 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
     }());
 
     if (!Function.prototype.bind) {
-        Function.prototype.bind = function(oThis) {
+        Function.prototype.bind = function (oThis) {
             if (typeof this !== "function") {
                 throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
             }
 
             var aArgs = Array.prototype.slice.call(arguments, 1),
                 fToBind = this,
-                fNOP = function() {},
-                fBound = function() {
+                fNOP = function () { },
+                fBound = function () {
                     return fToBind.apply(this instanceof fNOP && oThis ? this : oThis, aArgs.concat(Array.prototype.slice.call(arguments)));
                 };
 
@@ -158,7 +158,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
     // Reference: http://es5.github.io/#x15.4.4.19
     if (!Array.prototype.map) {
 
-        Array.prototype.map = function(callback, thisArg) {
+        Array.prototype.map = function (callback, thisArg) {
 
             var T, A, k;
 
@@ -245,7 +245,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
     }
 
     if (!Array.prototype.filter) {
-        Array.prototype.filter = function(fun /*, thisArg*/ ) {
+        Array.prototype.filter = function (fun /*, thisArg*/) {
             'use strict';
 
             if (this === void 0 || this === null) {
@@ -282,7 +282,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
     // Production steps of ECMA-262, Edition 5, 15.4.4.21
     // Reference: http://es5.github.io/#x15.4.4.21
     if (!Array.prototype.reduce) {
-        Array.prototype.reduce = function(callback /*, initialValue*/ ) {
+        Array.prototype.reduce = function (callback /*, initialValue*/) {
             'use strict';
             if (this == null) {
                 throw new TypeError('Array.prototype.reduce called on null or undefined');
@@ -314,7 +314,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
         };
     }
 
-    if (!Object.keys) Object.keys = function(o) {
+    if (!Object.keys) Object.keys = function (o) {
         if (o !== Object(o))
             throw new TypeError('Object.keys called on a non-object');
         var k = [],
@@ -324,7 +324,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
         return k;
     };
 
-    Array.prototype.getUnique = function() {
+    Array.prototype.getUnique = function () {
         var u = {},
             a = [];
         for (var i = 0, l = this.length; i < l; ++i) {
@@ -338,14 +338,15 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
     }
 
     if (typeof String.prototype.trim !== 'function') {
-        String.prototype.trim = function() {
+        String.prototype.trim = function () {
             return this.replace(/^\s+|\s+$/g, '');
         };
     };
 
-    Unbxd.setSearch = function(options) {
-        this.options = jQuery.extend({}, this.defaultOptions, options);
 
+
+    Unbxd.setSearch = function (options) {
+        this.options = jQuery.extend({}, this.defaultOptions, options);
         this.init();
     }
 
@@ -373,13 +374,74 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
         return ("query" in params && params.query.trim().length > 0);
     };
 
-    Handlebars.registerHelper('prepareFacetName', function(txt) {
+    var slider_min = 0;
+    var slider_max = 0;
+
+    Handlebars.registerHelper('prepareFacetName', function (txt) {
         txt = txt.replace("_fq", "");
         return txt.replace("_", " ");
     });
 
-    Handlebars.registerHelper('prepareFacetValue', function(txt) {
+    Handlebars.registerHelper('prepareFacetValue', function (txt) {
         return txt.trim().length > 0 ? txt : "&nbsp;&nbsp;&nbsp;";
+    });
+
+    Handlebars.registerHelper('isFacetMultilevel', function (isMultilevel, options) {
+        return isMultilevel ? options.fn(this) : options.inverse(this);
+    });
+
+    Handlebars.registerHelper("ifGrid", function (viewType, options) {
+        if (viewType.value === 'grid') {
+            return options.fn(this);
+        } else {
+            return options.inverse(this);
+        }
+    });
+
+    Handlebars.registerHelper("productVariant", function (products, options) {
+        products = products.map(function (item, index) {
+            if (item.relevantDocument === "variant") {
+                var variant = item.variants[0];
+                item.imageUrl = variant[searchobj.options.mappedFields.variantFields.v_imageUrl];
+                item.productUrl = variant[searchobj.options.mappedFields.variantFields.v_productUrl];
+                item.price = variant[searchobj.options.mappedFields.variantFields.v_price];
+                item.title = variant[searchobj.options.mappedFields.variantFields.v_title];
+            }
+            if (searchobj.options.isSwatches) {
+                if (item.relevantDocument === "parent") {
+                    var variants = item.variants;
+                    variants.map(function (variant, index) {
+                        variant.swatch_background_image = variant[searchobj.options.mappedFields.variantFields.swatchFields.swatch_background_image];
+                        variant.swatch_backgrond_color = variant[searchobj.options.mappedFields.variantFields.swatchFields.swatch_background_color];
+                        variant.swatch_click_image = variant[searchobj.options.mappedFields.variantFields.swatchFields.swatch_click_image];
+                        return variant;
+                    });
+                }
+            }
+
+            return item;
+        });
+        return products;
+    });
+
+    Handlebars.registerHelper('isSwatches', function (options) {
+        if (searchobj.options.isSwatches && searchobj.options.mappedFields.variantFields.swatchFields && Object.keys(searchobj.options.mappedFields.variantFields.swatchFields).length) {
+            return options.fn(this);
+        } else {
+            return options.inverse(this);
+        }
+    });
+
+    Handlebars.registerHelper('getSwatchImage', function (images) {
+        if (Array.isArray(images)) {
+            return images[0];
+        } else {
+            return images;
+        }
+    });
+
+    Handlebars.registerHelper('getMinPrice', function (pData) {
+        slider_min = getPriceVal(pData, 'min');
     });
 
     Unbxd.setSearch.prototype.defaultOptions = {
@@ -389,18 +451,19 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
         getCategoryId: "",
         deferInitRender: [],
         spellCheck: '' //
-            ,
+        ,
         spellCheckTemp: '<h3>Did you mean : {{suggestion}}</h3>',
         searchQueryDisplay: '',
         searchQueryDisplayTemp: '<h3>Search results for {{query}} - {{numberOfProducts}}</h3>',
         searchResultContainer: '',
         searchResultSetTemp: '' //function or handlebars template, register any helpers if needed
-            ,
+        ,
         isAutoScroll: false,
         isClickNScroll: false,
         isPagination: false,
-        setPagination: function(totalNumberOfProducts, pageSize, currentPage) {},
+        setPagination: function (totalNumberOfProducts, pageSize, currentPage) { },
         paginationContainerSelector: '',
+        categoryUrlParam: "p",
         paginationTemp: [
             '{{#if hasFirst}}',
             '<span class="unbxd_first" unbxdaction="first"> &laquo; </span>',
@@ -415,8 +478,6 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             '<span class="unbxd_page" unbxdaction="{{page}}"> {{page}} </span>',
             '{{/if}}',
             '{{/pages}}',
-            '<span class="unbxd_pageof"> of </span>',
-            '<span class="unbxd_totalPages" unbxdaction="{{totalPages}}">{{totalPages}}</span>',
             '{{#if hasNext}}',
             '<span class="unbxd_next" unbxdaction="next"> &gt; </span>',
             '{{/if}}',
@@ -436,17 +497,17 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
         onFacetLoad: "",
         onIntialResultLoad: "",
         onPageLoad: "",
-        sanitizeQueryString: function(q) {
+        sanitizeQueryString: function (q) {
             return q;
         },
         getFacetStats: "",
-        processFacetStats: function(obj) {},
-        setDefaultFilters: function() {},
+        processFacetStats: function (obj) {},
+        setDefaultFilters: function () {},
         fields: [],
-        onNoResult: function(obj) {},
+        onNoResult: function (obj) { },
         noEncoding: false,
         heightDiffToTriggerNextPage: 100,
-        customReset: function() {},
+        customReset: function () { },
         bannerSelector: "",
         bannerTemp: '<a href="{{landingUrl}}"><img src="{{imageUrl}}"/></a>',
         bannerCount: 1,
@@ -462,7 +523,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             field: 'price',
             order: 'asc'
         }],
-        sortContainerType: 'select' /* value can be select or click */ ,
+        sortContainerType: 'select' /* value can be select or click */,
         sortContainerTemp: [
             '<select>',
             '{{#options}}',
@@ -483,7 +544,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             name: '24',
             value: '24'
         }],
-        pageSizeContainerType: 'select' /* value can be select or click */ ,
+        pageSizeContainerType: 'select' /* value can be select or click */,
         pageSizeContainerTemp: [
             '<select>',
             '{{#options}}',
@@ -495,6 +556,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             '{{/options}}',
             '</select>'
         ].join(''),
+        viewTypes: ['grid', 'list'],
         viewTypeContainerTemp: [
             '{{#options}}',
             '<li class="unbxd-{{#if selected}}current{{/if}}">',
@@ -506,10 +568,48 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             '</li>',
             '{{/options}}'
         ].join(''),
+        facetTemp: [
+            '<div class="facet-block">',
+            '{{#facets}}',
+            '<div class="facet-block">',
+            '<div class="facet-title">{{name}}</div>',
+            '<div class="facet-values">',
+            '<ul>', '{{#selected}}',
+    
+            '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{#isFacetMultilevel isMultilevel}}{{id}}{{else}}{{value}}{{/isFacetMultilevel}}">',
+            '<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{#isFacetMultilevel isMultilevel}}{{id}}{{else}}{{value}}{{/isFacetMultilevel}}" id="{{../facet_name}}_{{value}}">',
+            '<label for="{{../facet_name}}_{{value}}">', '{{prepareFacetValue value}} ({{count}})', '</label>',
+            '</li>',
+            '{{/selected}}',
+            '{{#unselected}}',
+            '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{#isFacetMultilevel isMultilevel}}{{id}}{{else}}{{value}}{{/isFacetMultilevel}}">',
+            '<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{#isFacetMultilevel isMultilevel}}{{id}}{{else}}{{value}}{{/isFacetMultilevel}}" id="{{../facet_name}}_{{value}}">',
+            '<label for="{{../facet_name}}_{{value}}">',
+            '{{prepareFacetValue value}} ({{count}})',
+            '</label>', '</li>', '{{/unselected}}',
+            '</ul>', '</div>', '</div>',
+            '{{/facets}}',
+            '{{#rangefacets}}<div class="facet-block">', '<div class="facet-title">{{name}}</div>',
+            '<div class="facet-values">', '<ul>', '{{#selected}}',
+            '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" unbxdParam_facetType="{{../type}}">',
+            '<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" ',
+            ' unbxdParam_facetType="{{../type}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">',
+            '<label for="{{../facet_name}}_{{value}}">',
+            '{{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})</label></li>',
+            '{{/selected}}', ' {{#unselected}}',
+            '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" unbxdParam_facetType="{{../type}}">',
+            '<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" ',
+            ' unbxdParam_facetType="{{../type}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">',
+            '<label for="{{../facet_name}}_{{value}}">', '{{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})</label></li>',
+            '{{/unselected}}', '</ul>', '</div>', '</div>', '{{/rangefacets}}'
+    
+        ].join(""),
         searchQueryParam: "q",
         retainbaseParam: false,
         baseParams: [],
-        requestHeaders: {}
+        requestHeaders: {},
+        categoryDepth: 4,
+        categoryLimit: 10
     };
 
     jQuery.extend(Unbxd.setSearch.prototype, {
@@ -543,16 +643,17 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
         defaultParams: {},
         isHistory: !!(window.history && history.pushState),
         popped: false //there is an edge case in Mozilla that fires popstate initially
-            ,
+        ,
         initialURL: '',
         isHashChange: false,
         currentHash: "",
         hashChangeInterval: null,
         ajaxCall: null,
-        init: function() {
+        init: function () {
             this.isHashChange = !!("onhashchange" in window.document.body);
 
             this.$input = jQuery(this.options.inputSelector);
+
             this.$input.val('');
             this.input = this.$input[0];
 
@@ -617,13 +718,13 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             )
                 this.callResults(this.paintResultSet);
         },
-        getClass: function(object) {
+        getClass: function (object) {
             return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1];
         },
-        setEvents: function() {
+        setEvents: function () {
             var self = this;
 
-            var changeViewType = function(e) {
+            var changeViewType = function (e) {
                 e.preventDefault();
                 var $t = jQuery(this);
                 var selected = $t.attr("unbxdviewtype");
@@ -636,11 +737,11 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 }
             };
 
-            var changeSort = function(e) {
+            var changeSort = function (e) {
                 e.preventDefault();
                 var $t = jQuery(this),
                     $selected = (e.type === 'change') ? $t.find(':selected') :
-                    (e.currentTarget === e.target) ? $t : undefined,
+                        (e.currentTarget === e.target) ? $t : undefined,
                     field = $selected && $selected.attr('unbxdsortfield'),
                     value = $selected && $selected.attr('unbxdsortvalue');
 
@@ -656,11 +757,11 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 }
             };
 
-            var changePageSize = function(e) {
+            var changePageSize = function (e) {
                 e.preventDefault();
                 var $t = jQuery(this),
                     $selected = (e.type === 'change') ? $t.find(':selected') :
-                    (e.currentTarget === e.target) ? $t : undefined,
+                        (e.currentTarget === e.target) ? $t : undefined,
                     pageSize = $selected && $selected.attr('unbxdpagesize');
 
                 if ($selected && pageSize) {
@@ -673,7 +774,8 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             if (this.options.type == "search") {
                 if ("form" in this.input && this.input.form) {
-                    jQuery(this.input.form).bind("submit", function(e) {
+                    jQuery(this.input.form).bind("submit", function (e) {
+
                         e.preventDefault();
 
                         self.reset();
@@ -690,7 +792,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                             self.callResults(self.paintResultSet, true);
                     });
                 } else {
-                    this.$input.bind('keydown', function(e) {
+                    this.$input.bind('keydown', function (e) {
                         if (e.which == 13) {
                             e.preventDefault();
 
@@ -710,7 +812,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                     });
 
                     if (this.options.searchButtonSelector.length) {
-                        jQuery(this.options.searchButtonSelector).bind("click", function(e) {
+                        jQuery(this.options.searchButtonSelector).bind("click", function (e) {
                             e.preventDefault();
 
                             self.reset();
@@ -732,7 +834,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             //click on somthing like "Load more results" to fetch next page
             if (this.options.isClickNScroll) {
-                jQuery(this.options.clickNScrollElementSelector).bind('click', function(e) {
+                jQuery(this.options.clickNScrollElementSelector).bind('click', function (e) {
                     e.preventDefault();
 
                     self.setPage(self.getPage() + 1);
@@ -744,7 +846,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             //to load results on scrolling down
             if (this.options.isAutoScroll) {
-                jQuery(window).scroll(function() {
+                jQuery(window).scroll(function () {
                     var wind = jQuery(window),
                         docu = jQuery(document);
                     if ((wind.scrollTop()) > (docu.height() - wind.height() - self.options.heightDiffToTriggerNextPage) && self.currentNumberOfProducts < self.totalNumberOfProducts && !self.isLoading) {
@@ -754,9 +856,20 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 });
             }
 
+            jQuery(this.options.searchResultContainer).delegate(this.options.swatchesSelector, 'click', function (e) {
+
+                e.preventDefault();
+                var box = jQuery(this);
+                var sku = box.attr('unbxdParam_sku');
+                var swatchImage = box.attr('unbxdparam_swatchImage');
+                var imageSelector = "#img-" + sku;
+
+                jQuery(imageSelector)[0].src = swatchImage;
+            });
+
             //click on facet checkboxes
             if (this.options.facetContainerSelector.length > 0) {
-                jQuery(this.options.facetContainerSelector).delegate(self.options.facetCheckBoxSelector, 'change', function(e) {
+                jQuery(this.options.facetContainerSelector).delegate(self.options.facetCheckBoxSelector, 'change', function (e) {
                     var box = jQuery(this),
                         el = box.parents(self.options.facetElementSelector),
                         facetName = box.attr('unbxdParam_facetName'),
@@ -782,7 +895,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             }
 
             if (this.options.clearSelectedFacetsSelector.length > 0) {
-                jQuery('body').delegate(this.options.clearSelectedFacetsSelector, 'click', function(e) {
+                jQuery('body').delegate(this.options.clearSelectedFacetsSelector, 'click', function (e) {
                     e.preventDefault();
 
                     self.clearFilters(true).setPage(1)
@@ -791,7 +904,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             }
 
             if (this.options.removeSelectedFacetSelector.length > 0) {
-                jQuery(this.options.selectedFacetContainerSelector).delegate(this.options.removeSelectedFacetSelector, 'click', function(e) {
+                jQuery(this.options.selectedFacetContainerSelector).delegate(this.options.removeSelectedFacetSelector, 'click', function (e) {
                     e.preventDefault();
                     var $t = jQuery(this),
                         name = $t.attr("unbxdParam_facetName"),
@@ -837,13 +950,13 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                         click: changePageSize
                     }, '[unbxdpagesize]');
                 }
-                jQuery(this.options.pageSizeContainerSelector).delegate('*', 'change', function(e) {
+                jQuery(this.options.pageSizeContainerSelector).delegate('*', 'change', function (e) {
 
                 });
             }
 
             if (this.options.paginationContainerSelector.length > 0) {
-                jQuery(this.options.paginationContainerSelector).delegate('*', 'click', function(e) {
+                jQuery(this.options.paginationContainerSelector).delegate('*', 'click', function (e) {
                     e.preventDefault();
                     var $t = jQuery(this),
                         keys = {
@@ -870,7 +983,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 self.popped = ('state' in window.history);
                 self.initialURL = location.href;
 
-                jQuery(window).bind('popstate', function(e) {
+                jQuery(window).bind('popstate', function (e) {
                     var initialPop = self.popped && location.href == self.initialURL;
                     self.popped = false;
 
@@ -893,7 +1006,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                     }
                 });
             } else if (this.isHashChange) {
-                jQuery(window).bind("hashchange", function(e) {
+                jQuery(window).bind("hashchange", function (e) {
                     var newhash = window.location.hash.substring(1);
                     if (newhash && newhash != self.currentHash) {
                         self.reset();
@@ -912,7 +1025,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                     }
                 });
             } else {
-                self.hashChangeInterval = setInterval(function() {
+                self.hashChangeInterval = setInterval(function () {
                     var newhash = location.hash.substring(1);
 
                     if (newhash && newhash != self.currentHash) {
@@ -935,38 +1048,53 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 jQuery(this.options.viewTypeContainerSelector).on("click", '[unbxdviewtype]', changeViewType);
             }
         },
-        addSort: function(field, dir) {
+        addSort: function (field, dir) {
             this.params.sort[field] = dir || "desc";
             return this;
         },
-        removeSort: function(field) {
+        removeSort: function (field) {
             if (field in this.params.sort)
                 delete this.params.sort[field];
 
             return this;
         },
-        resetSort: function() {
+        resetSort: function () {
             this.params.sort = {};
             return this;
         },
-        addFilter: function(field, value) {
-            if (!(field in this.params.filters))
-                this.params.filters[field] = {};
+        addFilter: function (field, value) {
+            if (this.options.facetMultilevel && field === this.options.mappedFields.categoryField) {
+                this.params.categoryFilter = value;
+            } else {
+                if (!(field in this.params.filters))
+                    this.params.filters[field] = {};
+                this.params.filters[field][value] = field;
+            }
+            return this;
+        },
+        removeFilter: function (field, value) {
+            if (this.options.facetMultilevel && field === this.options.mappedFields.categoryField) {
+                if (value !== '') {
+                    var breadcrumbString = '';
+                    if (value.indexOf('>') !== -1) {
+                        var breadcrumbArray = value.split('>');
+                        breadcrumbArray.pop();
+                        breadcrumbString = breadcrumbArray.join('>');
+                    }
+                    this.params.categoryFilter = breadcrumbString;
+                }
+            } else {
+                if (value in this.params.filters[field])
+                    delete this.params.filters[field][value];
 
-            this.params.filters[field][value] = field;
+                if (Object.keys(this.params.filters[field]).length == 0)
+                    delete this.params.filters[field];
+            }
+
 
             return this;
         },
-        removeFilter: function(field, value) {
-            if (value in this.params.filters[field])
-                delete this.params.filters[field][value];
-
-            if (Object.keys(this.params.filters[field]).length == 0)
-                delete this.params.filters[field];
-
-            return this;
-        },
-        clearFilters: function(clearRanges) {
+        clearFilters: function (clearRanges) {
             this.params.filters = {}
 
             if (clearRanges) {
@@ -974,7 +1102,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             }
             return this;
         },
-        addRangeFilter: function(field, lb, ub) {
+        addRangeFilter: function (field, lb, ub) {
             if (!(field in this.params.ranges))
                 this.params.ranges[field] = {};
 
@@ -985,7 +1113,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             return this;
         },
-        removeRangeFilter: function(field, lb, ub) {
+        removeRangeFilter: function (field, lb, ub) {
             if (!lb && !ub && field in this.params.ranges)
                 delete this.params.ranges[field];
 
@@ -997,37 +1125,37 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             return this;
         },
-        clearRangeFiltes: function() {
+        clearRangeFiltes: function () {
             this.params.ranges = {};
 
             return this;
         },
-        setPage: function(pageNo) {
+        setPage: function (pageNo) {
             this.params.extra.page = pageNo;
             return this;
         },
-        getPage: function() {
+        getPage: function () {
             return this.params.extra.page;
         },
-        setPageSize: function(pageSize) {
+        setPageSize: function (pageSize) {
             this.params.extra.rows = pageSize;
             return this;
         },
-        getPageSize: function() {
-                return this.params.extra.rows;
-            }
+        getPageSize: function () {
+            return this.params.extra.rows;
+        }
 
-            ,
-        setViewType: function(viewType) {
+        ,
+        setViewType: function (viewType) {
             this.params.extra.view = viewType;
             return this;
         },
-        getViewType: function() {
-                return this.params.extra.view;
-            }
+        getViewType: function () {
+            return this.params.extra.view;
+        }
 
-            ,
-        addQueryParam: function(key, value, dontOverried) {
+        ,
+        addQueryParam: function (key, value, dontOverried) {
             if (!(key in this.params.extra) || !dontOverried) {
                 this.params.extra[key] = value;
             } else {
@@ -1039,20 +1167,21 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             return this;
         },
-        isUsingPagination: function() {
+        isUsingPagination: function () {
             return !this.options.isAutoScroll && this.options.isPagination;
         },
-        getHostNPath: function() {
+        getHostNPath: function () {
             var handler = "search";
             if (isTypeBrowseOrCategory(this.options.type)) {
                 handler = this.options.type;
             }
-            return "//search.unbxdapi.com/" + this.options.APIKey + "/" + this.options.siteName + "/" + handler;
+            var searchEndPoint = this.options.searchEndPoint || "https://search.unbxd.io";
+            return searchEndPoint + "/" + this.options.APIKey + "/" + this.options.siteName + "/" + handler;
         },
-        getUrlSubstring: function() {
+        getUrlSubstring: function () {
             return window.location.search.substring(1) || window.location.hash.substring(1);
         },
-        url: function() {
+        url: function () {
             var host_path = this.getHostNPath();
 
             var url = "";
@@ -1061,7 +1190,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             var cur_url = this.getUrlSubstring();
             var urlParams = this.getQueryParams(cur_url);
             var baseParams = {};
-            if (typeof(this.options.baseParams) == "object" && this.options.baseParams.length > 0) {
+            if (typeof (this.options.baseParams) == "object" && this.options.baseParams.length > 0) {
                 for (i in urlParams) {
                     if ((urlParams.hasOwnProperty(i)) && !(i in this.params)) {
                         for (param in this.options.baseParams) {
@@ -1078,7 +1207,11 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             } else if (this.options.type == "browse" && this.params['categoryId'] != undefined) {
                 url += '&category-id=' + encodeURIComponent(this.params.categoryId);
             } else if (isTypeCategory(this.options.type) && this.params.categoryId !== undefined) {
-                url += "&p=" + encodeURIComponent(this.params.categoryId);
+                url += "&" + this.options.categoryUrlParam + "=" + encodeURIComponent(window.UnbxdAnalyticsConf["page"]) + "\"" + '&pagetype=boolean';
+            }
+
+            if (this.params.hasOwnProperty('categoryFilter') && this.params.categoryFilter) {
+                url += '&category-filter=' + encodeURIComponent(this.params.categoryFilter);
             }
 
             for (var x in this.params.filters) {
@@ -1186,7 +1319,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 baseParams: baseParams
             };
         },
-        callResults: function(callback, doPush) {
+        callResults: function (callback, doPush) {
             if (this.isLoading) {
                 this.ajaxCall.abort();
             }
@@ -1198,7 +1331,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             var self = this,
                 modifiedCB = callback.bind(self),
-                cb = function(data) {
+                cb = function (data) {
                     this.isLoading = false;
                     if (this.options.loaderSelector.length > 0)
                         jQuery(this.options.loaderSelector).hide();
@@ -1234,12 +1367,13 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             }
             this.ajaxCall = jQuery.ajax({
                 url: urlobj.url.replace(this.options.searchQueryParam + "=", "q="),
-                dataType: "jsonp",
+                dataType: "json",
+                method: "get",
                 jsonp: 'json.wrf',
                 success: cb.bind(self)
             });
         },
-        reset: function() {
+        reset: function () {
             this.totalNumberOfProducts = 0;
             this.currentNumberOfProducts = 0;
             jQuery(this.options.spellCheck).hide();
@@ -1263,7 +1397,8 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                     format: "json",
                     page: 1,
                     rows: 12
-                }
+                },
+                categoryFilter: ""
             };
 
             if (this.options.viewTypes && this.options.viewTypes.length > 0)
@@ -1277,16 +1412,38 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             return this;
         },
-        setDefaultParams: function(params) {
+        setDefaultParams: function (params) {
             var newparams, diff;
             var oldparams = JSON.stringify(params);
             this.options.setDefaultFilters.call(this);
+
+            this.params['extra']['version'] = 'V2';
+
+            if (this.options.facetMultilevel) {
+                this.params['extra']['facet.multilevel'] = 'categoryPath';
+                this.params['extra']['f.categoryPath.displayName'] = this.options.facetMultilevelName;
+                this.params['extra']['f.categoryPath.max.depth'] = this.options.categoryDepth;
+                this.params['extra']['f.categoryPath.facet.limit'] = this.options.categoryLimit;
+                this.params['extra']['f.categoryPath.facet.version'] = 'V2';
+            }
+
+            if (this.options.variants) {
+                this.params['extra']['variants'] = true;
+                this.params['extra']['variants.count'] = this.options.variantsCount || 1;
+            }
+
+            if (this.options.isSwatches) {
+                if (this.options.mappedFields.variantFields && this.options.mappedFields.variantFields.groupBy) {
+                    this.params['extra']['variants.groupby'] = this.options.mappedFields.variantFields.groupBy;
+                }
+            }
+
             newparams = JSON.stringify(this.params);
 
             if (Object.keys(this.defaultParams).length === 0)
                 this.defaultParams = JSON.parse(newparams);
         },
-        _processURL: function(url) {
+        _processURL: function (url) {
             var obj = typeof url == "string" ? this.getQueryParams(url) : url,
                 params = {
                     query: '',
@@ -1297,7 +1454,8 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                         format: "json",
                         page: 1,
                         rows: 12
-                    }
+                    },
+                    categoryFilter: ''
                 };
 
             //lets get filters
@@ -1332,6 +1490,11 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                         }
                     }
                 }
+            }
+
+            //lets get category-filters
+            if ("category-filter" in obj) {
+                params.categoryFilter = obj["category-filter"];
             }
 
             //lets get sort now
@@ -1379,10 +1542,10 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             return params;
         },
-        paintResultSet: function(obj) {
+        paintResultSet: function (obj) {
             this._internalPaintResultSet(obj, true);
         },
-        _internalPaintResultSet: function(obj, facetsAlso) {
+        _internalPaintResultSet: function (obj, facetsAlso) {
             if ("error" in obj)
                 return false;
 
@@ -1441,24 +1604,24 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 facetsAlso && this.paintFacets(obj);
             }
         },
-        paintOnlyResultSet: function(obj) {
+        paintOnlyResultSet: function (obj) {
             if (this.options.deferInitRender.indexOf('search') === -1)
                 jQuery(this.options.searchResultContainer).empty();
             this.paintProductPage(obj);
         },
-        paintAfterSpellCheck: function(obj) {
+        paintAfterSpellCheck: function (obj) {
             if (this.options.deferInitRender.indexOf('search') === -1)
                 jQuery(this.options.searchResultContainer).empty();
             this.paintProductPage(obj);
             this.paintFacets(obj);
         },
-        paintAfterFacetChange: function(obj) {
+        paintAfterFacetChange: function (obj) {
             if (this.options.deferInitRender.indexOf('search') === -1)
                 jQuery(this.options.searchResultContainer).empty();
             this.paintProductPage(obj);
             this.paintSelectedFacets();
         },
-        paintProductPage: function(obj) {
+        paintProductPage: function (obj) {
             var start = 1;
             if ("error" in obj)
                 return;
@@ -1494,8 +1657,13 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             this.paintSort(obj);
             this.paintPageSize(obj);
             this.paintPagination(obj);
-            obj.response.products = obj.response.products.map(function(product) {
+            var that = this;
+            obj.response.products = obj.response.products.map(function (product) {
                 product['unbxdprank'] = obj.response.start + start;
+                product['imageUrl'] = product[that.options.mappedFields.imageUrl];
+                product['title'] = product[that.options.mappedFields.title];
+                product['price'] = product[that.options.mappedFields.price];
+                product['description'] = product[that.options.mappedFields.description];
                 start += 1;
                 return product;
             });
@@ -1507,7 +1675,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 var currentViewType = this.getViewType();
                 if (!this.compiledResultTemp) {
                     this.compiledResultTemp = {};
-                    this.options.viewTypes.forEach(function(val) {
+                    this.options.viewTypes.forEach(function (val) {
                         this.compiledResultTemp[val] = Handlebars.compile(this.options.searchResultSetTemp[val]);
                     }.bind(this));
                 }
@@ -1543,7 +1711,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 jQuery(this.options.clickNScrollElementSelector)[(this.currentNumberOfProducts < this.totalNumberOfProducts) ? 'show' : 'hide']();
 
         },
-        paintSort: function(obj) {
+        paintSort: function (obj) {
             if ("error" in obj)
                 return;
             if (this.options.sortContainerSelector.length <= 0)
@@ -1552,7 +1720,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             if (!this.compiledSortContainerTemp)
                 this.compiledSortContainerTemp = Handlebars.compile(this.options.sortContainerTemp);
 
-            var sortOptions = this.options.sortOptions.map(function(opt) {
+            var sortOptions = this.options.sortOptions.map(function (opt) {
                 opt['selected'] = (opt.hasOwnProperty('field') && opt.field in this.params.sort && this.params.sort[opt.field] === opt.order) ?
                     true : (!opt.hasOwnProperty('field') && Object.keys(this.params.sort).length === 0) ? true : false;
                 return opt;
@@ -1562,51 +1730,51 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 options: sortOptions
             }));
         },
-        paintPageSize: function(obj) {
-                if ("error" in obj)
-                    return;
-                if (this.options.pageSizeContainerSelector.length <= 0)
-                    return;
-                if (!this.isUsingPagination())
-                    return;
+        paintPageSize: function (obj) {
+            if ("error" in obj)
+                return;
+            if (this.options.pageSizeContainerSelector.length <= 0)
+                return;
+            if (!this.isUsingPagination())
+                return;
 
-                if (!this.compiledPageSizeContainerTemp)
-                    this.compiledPageSizeContainerTemp = Handlebars.compile(this.options.pageSizeContainerTemp);
+            if (!this.compiledPageSizeContainerTemp)
+                this.compiledPageSizeContainerTemp = Handlebars.compile(this.options.pageSizeContainerTemp);
 
-                var pageSizeOptions = this.options.pageSizeOptions.map(function(opt) {
-                    opt['selected'] = (this.getPageSize() == opt.value) ? true : false;
-                    return opt;
-                }.bind(this));
+            var pageSizeOptions = this.options.pageSizeOptions.map(function (opt) {
+                opt['selected'] = (this.getPageSize() == opt.value) ? true : false;
+                return opt;
+            }.bind(this));
 
-                jQuery(this.options.pageSizeContainerSelector).html(this.compiledPageSizeContainerTemp({
-                    options: pageSizeOptions
-                }));
+            jQuery(this.options.pageSizeContainerSelector).html(this.compiledPageSizeContainerTemp({
+                options: pageSizeOptions
+            }));
+        }
+
+        ,
+        paintViewTypes: function (obj) {
+            if ("error" in obj || this.options.viewTypeContainerSelector.length <= 0) {
+                return;
             }
-
-            ,
-        paintViewTypes: function(obj) {
-                if ("error" in obj || this.options.viewTypeContainerSelector.length <= 0) {
-                    return;
-                }
-                if (!this.compiledViewTypesContainerTemp) {
-                    this.compiledViewTypesContainerTemp = Handlebars.compile(this.options.viewTypeContainerTemp);
-                }
-                var viewTypeOptions = this.options.viewTypes.map(function(opt) {
-
-                    var values = {};
-                    values["value"] = opt;
-                    values["selected"] = this.getViewType() == opt ? true : false;
-                    return values;
-
-                }.bind(this));
-                jQuery(this.options.viewTypeContainerSelector).html(this.compiledViewTypesContainerTemp({
-                    options: viewTypeOptions
-                }));
-                return this.getViewType();
+            if (!this.compiledViewTypesContainerTemp) {
+                this.compiledViewTypesContainerTemp = Handlebars.compile(this.options.viewTypeContainerTemp);
             }
+            var viewTypeOptions = this.options.viewTypes.map(function (opt) {
 
-            ,
-        paintPagination: function(obj) {
+                var values = {};
+                values["value"] = opt;
+                values["selected"] = this.getViewType() == opt ? true : false;
+                return values;
+
+            }.bind(this));
+            jQuery(this.options.viewTypeContainerSelector).html(this.compiledViewTypesContainerTemp({
+                options: viewTypeOptions
+            }));
+            return this.getViewType();
+        }
+
+        ,
+        paintPagination: function (obj) {
             if ("error" in obj)
                 return;
             if (this.options.paginationContainerSelector.length <= 0)
@@ -1634,7 +1802,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 current: false
             }];
 
-            var pagesToShow = seq.filter(function(obj) {
+            var pagesToShow = seq.filter(function (obj) {
                 return obj.page > 0 && obj.page <= this.totalPages;
             }.bind(this))
 
@@ -1649,7 +1817,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 hasLast: this.getPage() < this.totalPages ? true : false
             }));
         },
-        paintBanners: function(obj) {
+        paintBanners: function (obj) {
             if ("error" in obj)
                 return;
             if (this.options.bannerCount <= 0)
@@ -1663,7 +1831,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 this.compiledBannerTemp = Handlebars.compile(this.options.bannerTemp);
 
             bannersToDraw = banner.banners.slice(0, this.options.bannerCount)
-                .reduce(function(prev, curr) {
+                .reduce(function (prev, curr) {
                     if (curr.hasOwnProperty('bannerHtml') && curr['bannerHtml']) {
                         return prev.concat(curr.bannerHtml);
                     } else {
@@ -1677,73 +1845,309 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             jQuery(this.options.bannerSelector).html(bannersToDraw.join(''));
 
         },
-        paintFacets: function(obj) {
-            if ("error" in obj)
-                return;
+        paintFacets: function (obj) {
+            if ("error" in obj) return;
+            if (!obj.response.numberOfProducts) return this;
 
-            if (!obj.response.numberOfProducts)
-                return this;
+            // Changes made to adapt to the latest requirements
+            var mod_textfacets = [];
+            var mod_rangefacets = [];
+            var multilevelFacet = {};
+            var currentCategoryLevel = 1;
+            var breadcrumbs = {};
 
-            var facets = obj.facets,
+            if (obj.facets && obj.facets.hasOwnProperty("text")) {
+                mod_textfacets = obj.facets.text.list;
+            }
+
+            if (obj.facets && obj.facets.hasOwnProperty("range")) {
+                mod_rangefacets = obj.facets.range.list;
+            }
+
+            var parentCategoryItemsCount = 0;
+            var currentChildCats = [];
+
+            if (obj.facets && obj.facets.hasOwnProperty("multilevel")) {
+                if (obj.facets.multilevel.hasOwnProperty('bucket')) {
+                    multilevelFacet = obj.facets.multilevel.bucket;
+                    for (var i = 0; i < multilevelFacet.length; i++) {
+                        var multilevelFacetValues = [];
+                        for (var j = 0, len = multilevelFacet[i].values.length / 2; j < len; j++) {
+                            var multilevelFacetValue = {}
+                            multilevelFacetValue['name'] = (multilevelFacet[i]['values'][2 * j]).replace(/(^\s+|\s+$)/g, '');
+                            multilevelFacetValue['count'] = multilevelFacet[i]['values'][2 * j + 1];
+                            multilevelFacetValue['id'] = multilevelFacetValue['name'];
+                            multilevelFacetValue['level'] = multilevelFacet[0]['level'];
+                            if (multilevelFacetValue['name']) {
+                                multilevelFacetValues.push(multilevelFacetValue)
+                            }
+                            parentCategoryItemsCount += multilevelFacetValue['count']
+                            currentChildCats.push(multilevelFacetValue['name']);
+                        }
+                        multilevelFacet[i].values = multilevelFacetValues;
+                    }
+                    if (obj.facets.multilevel.hasOwnProperty("breadcrumb")) {
+                        breadcrumbs = obj.facets.multilevel.breadcrumb;
+                    }
+                }
+                else if (obj.facets.multilevel.hasOwnProperty('list')) {
+                    multilevelFacet = obj.facets.multilevel.list;
+                    for (var i = 0; i < multilevelFacet.length; i++) {
+                        var multilevelFacetValues = [];
+                        // Mock data for facets. To be removed when this information is returned in v2
+                        if (!multilevelFacet[i].displayName) {
+                            multilevelFacet[i].displayName = "CATEGORIES";
+                        }
+
+                        // Mock data for facets. To be removed when this information is returned in v2
+                        if (!multilevelFacet[i].multiLevelField) {
+                            multilevelFacet[i].multiLevelField = multilevelFacet[i].filterField;
+                        }
+
+                        if (multilevelFacet[i].hasOwnProperty("breadcrumb")) {
+                            breadcrumbs = multilevelFacet[i].breadcrumb;
+                        }
+                        for (var j = 0, len = multilevelFacet[i].values.length; j < len; j++) {
+                            var multilevelFacetValue = {}
+                            multilevelFacetValue['name'] = multilevelFacet[i]['values'][j].name;
+                            multilevelFacetValue['count'] = multilevelFacet[i]['values'][j].count;
+                            multilevelFacetValue['id'] = multilevelFacetValue['name'];
+                            multilevelFacetValue['level'] = multilevelFacet[0]['level'];
+                            if (multilevelFacetValue['name']) {
+                                multilevelFacetValues.push(multilevelFacetValue)
+                            }
+                            parentCategoryItemsCount += multilevelFacetValue['count']
+                            currentChildCats.push(multilevelFacetValue['name']);
+                        }
+                        multilevelFacet[i].values = multilevelFacetValues;
+
+                    }
+                }
+            }
+
+            var isBreadcrumbFound = false;
+            var breadcrumbList = [];
+            var breadcrumbsString = "";
+            var breadcrumbsObj = [];
+            if (breadcrumbs.hasOwnProperty("values")) {
+                // name for v2, value for v1 facet  
+                breadcrumbList.push(breadcrumbs.values[0].value || breadcrumbs.values[0].name);
+
+                // name for v2, value for v1 facet 
+                while (breadcrumbs.hasOwnProperty("child")) {
+                    breadcrumbs = breadcrumbs.child;
+                    breadcrumbList.push(breadcrumbs.values[0].value || breadcrumbs.values[0].name);
+                }
+
+                isBreadcrumbFound = true;
+            }
+
+            if (isBreadcrumbFound && breadcrumbList.length != 0) {
+                breadcrumbsString = breadcrumbList.join(">");
+                breadcrumbList = breadcrumbList.map(function (value) {
+                    var index = breadcrumbList.indexOf(value);
+                    if (index > 0) {
+                        return breadcrumbList.slice(0, index).join('>') + ">" + value;
+                    }
+                    return value;
+                });
+                breadcrumbsObj = breadcrumbList.map(function (value, index) {
+                    var values = value.split('>');
+                    var last_value = values[values.length - 1];
+                    return {
+                        level: index + 1,
+                        id: value,
+                        value: last_value,
+                        facet_name: "categoryPath"
+                    }
+                });
+                breadcrumbsObj = breadcrumbsObj.filter(function (breadcrumb) {
+                    if (breadcrumb.level == currentCategoryLevel) {
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
+
+            var modifiedfacets = {};
+
+            for (var i = 0; i < mod_textfacets.length; i++) {
+                mod_textfacets[i].type = "facet_fields";
+                modifiedfacets[mod_textfacets[i].facetName] = mod_textfacets[i];
+            }
+
+            for (var i = 0; i < mod_rangefacets.length; i++) {
+                mod_rangefacets[i].type = "facet_ranges";
+                modifiedfacets[mod_rangefacets[i].facetName] = mod_rangefacets[i];
+            }
+
+            if (Object.keys(multilevelFacet).length > 0) {
+                for (var i = 0; i < multilevelFacet.length; i++) {
+                    multilevelFacet[i].type = "facet_fields";
+                    multilevelFacet[i].id = "";
+                    var multilevelFacetName = multilevelFacet[i].multiLevelField;
+                    // if ("displayName" in multilevelFacet[i]) {
+                    //     multilevelFacetName = multilevelFacet[i].displayName
+                    // }
+                    modifiedfacets[multilevelFacetName] = multilevelFacet[i];
+                }
+
+                var levelFound = multilevelFacet[0].level;
+                var numberOfArrows = breadcrumbsString.split(">").length;
+
+                if (levelFound > numberOfArrows) {
+                    for (var i = 0; i < multilevelFacet[0].values.length; i++) {
+                        if (breadcrumbsString != "") {
+                            multilevelFacet[0].values[i].id = breadcrumbsString + ">" + multilevelFacet[0].values[i].id;
+                        }
+                    }
+                } else {
+                    var newBreadcrumbArray = breadcrumbsString.split(">");
+                    newBreadcrumbArray.pop();
+                    var newBreadcrumbString = newBreadcrumbArray.join(">");
+                    for (var i = 0; i < multilevelFacet[0].values.length; i++) {
+                        if (newBreadcrumbString != "") {
+                            multilevelFacet[0].values[i].id = newBreadcrumbString + ">" + multilevelFacet[0].values[i].id;
+                        }
+                    }
+                }
+
+                // Add parent category values                        
+                var parentCatsArray = breadcrumbsString && breadcrumbsString.split(">");
+                var currentActiveCategory = parentCatsArray[parentCatsArray.length - 1];
+                while (parentCatsArray.length > 0) {
+                    for (var j = 0; j < multilevelFacet.length; j++) {
+                        var parentCatName = parentCatsArray[parentCatsArray.length - 1];
+                        if (currentChildCats.indexOf(parentCatName) == -1) {
+                            multilevelFacet[j].values.unshift({
+                                // Use 'parentCategoryItemsCount' if you want to add parent counts as the total sum of all subcat items
+                                // Use 'numberOfProducts' if you want to show same product counts in all ancestral categories
+                                // 'count' : obj.response.numberOfProducts,
+                                'level': parentCatsArray.length,
+                                'name': parentCatName,
+                                'id': parentCatsArray.join('>'),
+                                'activeCategory': parentCatName == currentActiveCategory ? true : false,
+                                'parentCat': parentCatName ? true : false
+                            });
+                            parentCatsArray.pop();
+                        } else {
+                            parentCatsArray.pop();
+                        }
+                    }
+                    multilevelFacet[multilevelFacet.length - 1]['activeCategory'] = true;
+                }
+                for (var i = 0; i < multilevelFacet[0].values.length; i++) {
+                    if (multilevelFacet[0].values[i].name == currentActiveCategory) {
+                        multilevelFacet[0].values[i]['activeCategory'] = true;
+                        break;
+                    }
+                }
+            }
+
+            var facets = modifiedfacets,
                 facetKeys = Object.keys(facets),
                 textfacets = [],
                 rangefacets = [],
-                singlefacet = {},
-                self = this,
+                singlefacet = {}, self = this,
                 facetVal = "",
                 facetValStart = "",
                 facetValEnd = "",
                 isSelected = false,
                 selectedOnly = [];
-
             var positionExists = false;
             for (var x in facets) {
                 if ("position" in facets[x]) {
-                    positionExists = true;
+                    positionExists = true
                 }
-                break;
+                break
             }
             var sortable = [];
             for (var facet in facets) {
-                sortable.push(positionExists ? ([facet, facets[facet]["position"]]) : [facet]);
+                sortable.push(positionExists ? [facet, facets[facet]["position"]] : [facet])
             }
-
             if (positionExists) {
-                sortable.sort(function(a, b) {
+                sortable.sort(function (a, b) {
                     return a[1] - b[1]
-                });
+                })
             }
-            for (var newI = 0; newI < sortable.length; newI++) {
 
+            for (var newI = 0; newI < sortable.length; newI++) {
                 var x = sortable[newI][0];
-                // for(var x in facets) {
                 singlefacet = {
-                    name: self.prepareFacetName(x),
+                    name: facets[x].hasOwnProperty('displayName') ? self.prepareFacetName(facets[x].displayName) : self.prepareFacetName(x),
                     facet_name: x,
                     type: facets[x]['type'],
                     selected: [],
                     unselected: [],
-                    unordered: []
+                    unordered: [],
+                    isMultilevel: (facets[x].hasOwnProperty("multiLevelField")) ? true : false
                 };
+                // custom solution
+                if (singlefacet["facet_name"] == "categoryPath") {
+                    singlefacet['breadcrumbs'] = breadcrumbsString;
+                }
 
                 if (singlefacet.type !== 'facet_ranges') {
-                    for (var i = 0, len = facets[x]['values'].length / 2; i < len; i++) {
-                        facetVal = facets[x]['values'][2 * i];
+                    if (singlefacet.isMultilevel) {
+                        for (var i = 0, len = facets[x]['values'].length; i < len; i++) {
+                            facetVal = facets[x]['values'][i].name;
+                            if (facetVal != "") {
+                                facetValId = facets[x]['values'][i].id;
+                                isSelected = (facets[x].id == "") && (facetValId == self.params.categoryFilter || facets[x]['values'][i].parentCat) || facets[x]['values'][i].activeCategory ? true : false;
 
-                        if (facetVal.trim().length == 0)
-                            continue;
+                                singlefacet[isSelected ? "selected" : "unselected"].push({
+                                    value: facetVal,
+                                    count: facets[x]['values'][i].count,
+                                    level: facets[x]['values'][i].level,
+                                    parentCat: facets[x]['values'][i].parentCat ? true : false,
+                                    activeCategory: facets[x]['values'][i].activeCategory ? true : false,
+                                    id: facetValId,
+                                    isMultilevel: true
+                                });
+                                singlefacet.unordered.push({
+                                    value: facetVal,
+                                    count: facets[x]['values'][i].count,
+                                    level: facets[x]['values'][i].level,
+                                    parentCat: facets[x]['values'][i].parentCat ? true : false,
+                                    activeCategory: facets[x]['values'][i].activeCategory ? true : false,
+                                    id: facetValId,
+                                    isSelected: isSelected,
+                                    isMultilevel: true
+                                });
+                            }
+                        }
+                    } else {
+                        if (facets[x].displayName) {
+                            if (facets[x].displayName.indexOf('{multi-select-and}') > -1) {
+                                if (!window.Unbxd['multiselectAndFacets']) {
+                                    window.Unbxd['multiselectAndFacets'] = [];
+                                }
+                                if (window.Unbxd['multiselectAndFacets'].indexOf(x) == -1) {
+                                    window.Unbxd['multiselectAndFacets'].push(x);
+                                }
+                                // Adding the multiselect-and fields in the query params for exclusion
+                                this.addQueryParam('facet.multiselect.exclude', x);
+                            }
+                        }
 
-                        isSelected = x in self.params.filters && facetVal in self.params.filters[x] && self.params.filters[x][facetVal] == x ? true : false;
+                        for (var i = 0, len = facets[x]['values'].length / 2; i < len; i++) {
+                            facetVal = facets[x]['values'][2 * i];
+                            if (facetVal.trim().length == 0) continue;
+                            isSelected = x in self.params.filters && facetVal in self.params.filters[x] && self.params.filters[x][facetVal] == x ? true : false;
 
-                        singlefacet[isSelected ? "selected" : "unselected"].push({
-                            value: facetVal,
-                            count: facets[x]['values'][2 * i + 1]
-                        });
-                        singlefacet.unordered.push({
-                            value: facetVal,
-                            count: facets[x]['values'][2 * i + 1],
-                            isSelected: isSelected
-                        });
+                            singlefacet[isSelected ? "selected" : "unselected"].push({
+                                value: facetVal,
+                                count: facets[x]['values'][2 * i + 1],
+                                isMultilevel: false
+                            });
+                            singlefacet.unordered.push({
+                                value: facetVal,
+                                count: facets[x]['values'][2 * i + 1],
+                                isSelected: isSelected,
+                                isMultilevel: false
+                            });
+                        }
                     }
 
                     if ((singlefacet.unordered.length) > 0) textfacets.push(singlefacet);
@@ -1772,39 +2176,29 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                     }
 
                     if ((singlefacet.unordered.length) > 0) rangefacets.push(singlefacet);
-
                 }
             }
 
-            if (this.getClass(this.options.facetTemp) == 'Function') {
+            if (this.getClass(this.options.facetTemp) == "Function") {
                 this.options.facetTemp.call(this, {
                     facets: textfacets,
                     rangefacets: rangefacets
-                });
+                })
             } else {
-                if (!this.compiledFacetTemp && this.options.facetTemp.length)
-                    this.compiledFacetTemp = Handlebars.compile(this.options.facetTemp);
-
+                if (!this.compiledFacetTemp && this.options.facetTemp.length) this.compiledFacetTemp = Handlebars.compile(this.options.facetTemp);
                 this.options.facetContainerSelector.length && jQuery(this.options.facetContainerSelector).html(this.compiledFacetTemp({
                     facets: textfacets,
                     rangefacets: rangefacets
-                }));
+                }))
             }
-
             this.paintSelectedFacets();
-
-            if (this.options.deferInitRender.indexOf('search') > -1) {
-                this.options.deferInitRender = [];
+            if (this.options.deferInitRender.indexOf("search") > -1) {
+                this.options.deferInitRender = []
             }
-
             if (typeof this.options.onFacetLoad == "function") {
-                this.options.onFacetLoad.call(this, obj);
+                this.options.onFacetLoad.call(this, obj)
             }
-
-            if (this.options.getFacetStats.length &&
-                typeof this.options.processFacetStats == "function" &&
-                "stats" in obj && obj.stats[this.options.getFacetStats] != null) {
-
+            if (this.options.getFacetStats.length && typeof this.options.processFacetStats == "function" && "stats" in obj && obj.stats[this.options.getFacetStats] != null) {
                 obj.stats[this.options.getFacetStats].values = {
                     min: obj.stats[this.options.getFacetStats].min,
                     max: obj.stats[this.options.getFacetStats].max
@@ -1812,19 +2206,15 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 if (this.options.getFacetStats in this.params.ranges) {
                     for (var x in this.params.ranges[this.options.getFacetStats]) {
                         obj.stats[this.options.getFacetStats].values = {
-                            min: this.params.ranges[this.options.getFacetStats][x].lb != "*" ?
-                                this.params.ranges[this.options.getFacetStats][x].lb : obj.stats[this.options.getFacetStats].min,
-                            max: this.params.ranges[this.options.getFacetStats][x].ub != "*" ?
-                                this.params.ranges[this.options.getFacetStats][x].ub : obj.stats[this.options.getFacetStats].max
-                        };
+                            min: this.params.ranges[this.options.getFacetStats][x].lb != "*" ? this.params.ranges[this.options.getFacetStats][x].lb : obj.stats[this.options.getFacetStats].min,
+                            max: this.params.ranges[this.options.getFacetStats][x].ub != "*" ? this.params.ranges[this.options.getFacetStats][x].ub : obj.stats[this.options.getFacetStats].max
+                        }
                     }
-
                 }
-
                 this.options.processFacetStats.call(this, obj.stats);
             }
         },
-        paintSelectedFacets: function() {
+        paintSelectedFacets: function () {
             var selFacetKeysLength = Math.max(Object.keys(this.params.filters).length,
                 Object.keys(this.params.ranges).length);
             var selectedFacets = {};
@@ -1854,13 +2244,13 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 jQuery(this.options.selectedFacetHolderSelector).hide();
             }
         },
-        prepareFacetName: function(txt) {
+        prepareFacetName: function (txt) {
             txt = txt.replace("_fq", "");
             return txt.replace("_", " ");
         },
-        getQueryParams: function(q) {
+        getQueryParams: function (q) {
             var e, //replace + character before decoding the URL
-                d = function(s) {
+                d = function (s) {
                     return decodeURIComponent(s.replace(/\+/g, " ")).trim();
                 },
                 //splits on equals
@@ -1897,7 +2287,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             return urlParams;
         },
         _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-        encode: function(e) {
+        encode: function (e) {
             var t = "",
                 n, r, i, s, o, u, a, f = 0;
             e = this._utf8_encode(e);
@@ -1918,7 +2308,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             }
             return t;
         },
-        decode: function(e) {
+        decode: function (e) {
             var t = "",
                 n, r, i, s, o, u, a, f = 0;
             e = e.replace(/[^A-Za-z0-9\+\/\=]/g, "");
@@ -1942,7 +2332,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             return t;
         },
-        _utf8_encode: function(e) {
+        _utf8_encode: function (e) {
             e = e.replace(/\r\n/g, "\n");
             var t = "";
             for (var n = 0; n < e.length; n++) {
@@ -1960,7 +2350,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             }
             return t;
         },
-        _utf8_decode: function(e) {
+        _utf8_decode: function (e) {
             var t = "",
                 n = 0;
             var r = c1 = c2 = 0;
@@ -1982,12 +2372,12 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             }
             return t;
         },
-        log: function(str) {
+        log: function (str) {
             if (this.readCookie("debug") === '1') {
                 console.log("Unbxd : " + str);
             }
         },
-        decodeAndParse: function(s) {
+        decodeAndParse: function (s) {
             if (s.indexOf('"') === 0) {
                 // This is a quoted cookie as according to RFC2068, unescape...
                 s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
@@ -1995,11 +2385,11 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             return this.decodeCookie(s);
         },
-        decodeCookie: function(s) {
+        decodeCookie: function (s) {
             var pluses = /\+/g;
             return decodeURIComponent(s.replace(pluses, ' '));
         },
-        cookie: function(key) {
+        cookie: function (key) {
             // Read
             var cookies = document.cookie.split('; ');
             var result;
@@ -2020,7 +2410,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             return result;
         },
-        readCookie: function(name) {
+        readCookie: function (name) {
             try {
                 return this.cookie('unbxd.' + name);
             } catch (e) {
@@ -2029,7 +2419,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
 
             return undefined;
         },
-        getDeviceInfo: function() {
+        getDeviceInfo: function () {
             var smallDeviceMaxWidth = 768,
                 mediumDeviceMaxWidth = 992;
             if (window.outerWidth < smallDeviceMaxWidth) {
@@ -2040,13 +2430,13 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
                 return "Desktop";
             }
         },
-        getUserType: function() {
+        getUserType: function () {
             return this.readCookie('visit') === "repeat" ? "repeat" : "new";
         },
-        getUserId: function() {
+        getUserId: function () {
             return this.readCookie('userId');
         },
-        getDefaultRequestHeaders: function() {
+        getDefaultRequestHeaders: function () {
             var self = this,
                 userId = this.getUserId(),
                 defaultRequestHeaders = {
@@ -2061,7 +2451,7 @@ var unbxdSearchInit = function(jQuery, Handlebars) {
             }
             return defaultRequestHeaders;
         },
-        serializeRequestHeaders: function(headers) {
+        serializeRequestHeaders: function (headers) {
             if (jQuery.param) {
                 return jQuery.param(headers)
             } else {
