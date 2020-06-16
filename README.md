@@ -126,6 +126,21 @@ Consider a normal search page with basic layout as shown in the figure below and
 		,onIntialResultLoad : function(obj){}
 		,onPageLoad : function(obj){}
 		,onNoResult : function(obj){}
+		,facetMultilevel: true
+		,facetMultilevelName: 'CATEGORY'
+		,mappedFields: {
+			'price': price,
+			'title': name,
+			'imageUrl': imageurl,
+			'description': desc,
+			'variantFields': {
+				'v_imageUrl':v_imageUrl,
+				'v_productUrl':v_productUrl,
+				'v_price':v_price,
+				'v_title':v_title
+			}
+		}
+		,variants: false,
 		,bannerSelector: ".banner"
 		,bannerTemp: "<a href='{{landingUrl}}'><img src='{{imageUrl}}'/></a>"
 		,fields : ['image_url','title','brand','price','uniqueId']
@@ -704,6 +719,13 @@ JSON used for this template:
 	,fields : ['image_url','title','brand','price','uniqueId']
 	...
 ```
+- **mappedFields** : Mapping from Unbxd fields to catalog fields Ex: 'price': price.
+variantFields: Mapping of fields of variant products. Ex: variantFields: {v_imageUrl: v_imageurl} 
+Similarly for price, title etc.
+variantFields.groupBy: Required for swatches to group variants data based on given 'groupBy' field.
+- **facetMultilevel** : Set this to true for category facets. Default is true
+- **facetMultilevelName** : Display name of category facets
+- **variants** : Set this to true, if client has variant products to display in the search view. Default is false
 - **searchQueryParam** : searh query param name to be shown in browser url, default is "q"    
 - **retainbaseParam** : Set this to true, if you want to retain some extra url params from the SRP
 - **baseParams** : Array of params which will be retained from SRP. This will come into picture only if retainbaseParam is set to true

@@ -1,168 +1,86 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>UNBXD - Search</title>
-    <!-- <link rel="stylesheet" type="text/css" href="../node_modules/jquery-ui/themes/base/jquery.ui.theme.css">
-    <link rel="stylesheet" type="text/css" href="../node_modules/jquery-ui/themes/base/jquery.ui.slider.css"> -->
-    
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.theme.min.css">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <!-- <link rel="stylesheet" type="text/css" href="../node_modules/jquery-ui/themes/base/jquery.ui.slider.css"> -->
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <head>
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.theme.min.css">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/unbxdSearch.css">   
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script type="text/javascript" src="js/jquery.ui.widget.js"></script>
-    <script type="text/javascript" src="js/jquery.ui.mouse.js"></script>
-    <script type="text/javascript" src="js/jquery.ui.slider.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
-    <script type="text/javascript" src="../unbxdSearch.js"></script>
-</head>
-<body>
-    <div class="header-container clearfix">
-        <div class="header row clearfix">
-            <div class="header-search">
-                <div class="search-input-button-holder clearfix">
-                    <form method="GET" action="search.html">
-                        <input type="text" class="search-input lt" id="search_input" value="" unbxdattr="sq" name="q" autocomplete="off"/>
-                        <button type="submit" class="search-button lt" id="search_button" unbxdattr="sq_bt"></button>
-                    </form>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script type="text/javascript" src="js/jquery.ui.widget.js"></script>
+        <script type="text/javascript" src="js/jquery.ui.mouse.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+        <script type="text/javascript" src="../UnbxdSearch_IO.js"></script>
+        
+    </head>
+    <body>
+        <div class="search-preview">
+            <div class="header-container clearfix">
+                <div class="header row clearfix">
+                    <div class="header-search">
+                        <div class="search-input-button-holder clearfix">
+                            <form method="GET" action="">
+                                <input type="text" class="search-input lt" id="search_input" unbxdattr="sq" name="q" autoComplete="off" placeholder="Search..." />
+                                <button type="submit" class="search-button lt" id="search_button" unbxdattr="sq_bt"></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="preview-search-container">
+                <div class="row clearfix banner">
+                </div>
+                <div class="row clearfix">
+                    <div class="lt search-facet-column" id="facets_container">
+                    </div>
+                    <div class="rt search-result-column">
+                        <h2 class="result-spell-check" id="did_you_mean">
+                        </h2>
+                        <h3 class="result-title-count" id="search_title">
+                        </h3>
+                        <div class="search-header-options">
+                            <div class="page-size-container">
+                                <span>Results Per Page:</span>
+                                <div class="result-page-size-options"></div>
+                            </div>
+                            <div class="sort-by-container">
+                                <span>Sort By:</span>
+                                <div class="result-sort-options">
+                                </div>
+                            </div>
+                            <div class="change-view">
+                                <span>View By:</span>
+                                <div class="view-types">
+                                    <div class="list-view">
+                                        List View
+                            </div>
+                                    <div class="grid-view">
+                                        Grid View
+                            </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-pagination">
+                        </div>
+                        <div class="result-selected-facets clearfix" id="selected_facets">
+                        </div>
+                        <ul class="search-result-list clearfix" id="results_container">
+                        </ul>
+                        <div class="result-loader" id="ajax_loader">
+                            <a href="#"><img src="/images/blueLoader.svg" />Loading more...</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    Copyright &copy; <span class="year"></span> Unbxd
                 </div>
             </div>
         </div>
-    </div>
-    <div class="search-container">
-      <div class="row clearfix banner">
-      </div>
-        <div class="row clearfix">
-            <div class="lt search-facet-column" id="facets_container">
-            </div>
-            <div class="rt search-result-column">
-                <h2 class="result-spell-check" id="did_you_mean">
-                </h2>
-                <h3 class="result-title-count" id="search_title">
-                </h3>
-		<div class="result-page-size-options">
-        </div>
-        <div class="sort-by-container">
-            <span>Sort By:</span>
-            <div class="result-sort-options">
-        </div>
-		</div>
-        <div class="change-view"></div>
-		<div class="result-pagination">
-		</div>
-                <div class="result-selected-facets clearfix" id="selected_facets">
-                </div>
-                <ul class="search-result-list clearfix" id="results_container">
-                </ul>
-                <div class="result-loader" id="ajax_loader">
-                <a href="#"><img src="../images/loader.gif">Loading more...</a>
-            </div>
-            </div>
-        </div>
-    </div>
-    <div class="footer">
-        Copyright &copy; 2014 Unbxd
-    </div>
-    <script type="text/javascript">
-        //search configuration here
-        window.searchobj = new Unbxd.setSearch({
-            // siteName: 'allianceonline_co_uk-u1423569528226',
-            // APIKey: 'f2ada89f21e1345bc660786663fb1a09',
-            //  siteName: 'demosite-u1407617955968',
-            //  APIKey: '64a4a2592a648ac8415e13c561e44991',
-            siteName: '2modern_com-u1435315921404',
-            APIKey: '2880cec60e264bc9b342a379666d4439',
-            // demo siteKey on io 
-            // siteName: 'demo-unbxd700181503576558',
-            // APIKey: 'fb853e3332f2645fac9d71dc63e09ec1',
-            type: 'search',
-            getCategoryId: '',
-            inputSelector: '#search_input',
-            searchButtonSelector: '#search_button',
-            spellCheck: '#did_you_mean',
-            spellCheckTemp: 'Did you mean : {{suggestion}} ?',
-            searchQueryDisplay: '#search_title',
-            searchQueryDisplayTemp: 'Showing results for {{query}} - {{start}}-{{end}} of {{numberOfProducts}} Results',
-            pageSize: 24,
-            noEncoding: true,
-            searchResultSetTemp: {
-                "grid": ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">', '<div class="result-image-container">', '<span class="result-image-horizontal-holder">', '<img src="{{{imageUrl}}}" alt="{{{title}}}">', '</span>', '</div>', '<div class="result-brand">{{{brand}}}</div>', '<div class="result-title">{{{title}}}</div>', '<div class="result-price">', '${{price}}', '</div>', '</a></li>{{/products}}'].join(''),
-
-                "list": ['{{#products}}<li><a href="product.html?pid={{uniqueId}}" id="pdt-{{uniqueId}}" class="result-item" unbxdParam_sku="{{uniqueId}}" unbxdParam_pRank="{{unbxdprank}}" unbxdAttr="product">', '<div class="result-image-container">', '<span class="result-image-horizontal-holder">', '<img src="{{{imageUrl}}}" alt="{{{title}}}">', '</span>', '</div>', '<div class="result-brand">{{{brand}}}</div>', '<div class="result-title">{{{title}}}</div>', '<div class="result-price">', '${{price}}', '</div>', '</a></li>{{/products}}'].join('')
-            },
-            searchResultContainer: '#results_container',
-            isClickNScroll: false,
-            clickNScrollSelector: '',
-            isAutoScroll: true,
-            isPagination: false,
-            paginationContainerSelector: '.result-pagination',
-            viewTypes: ['grid'],
-            viewTypeContainerSelector: '',
-            facetTemp: ['<div class="facet-block">', '<div class="facet-title">PRICE</div>', '<div class="facet-values">', '<div id="slider-range-max">', '</div>', '<div id="amount" class="clearfix"><div class="lt"></div><div class="rt"></div></div>', '</div>', '</div>', '{{#facets}}', '<div class="facet-block">', '<div class="facet-title">{{name}}</div>', '<div class="facet-values">', '<ul>', '{{#selected}}', '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">', '<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">', '<label for="{{../facet_name}}_{{value}}">', '{{prepareFacetValue value}} ({{count}})', '</label>', '</li>', '{{/selected}}', '{{#unselected}}', '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}">', '<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">', '<label for="{{../facet_name}}_{{value}}">', '{{prepareFacetValue value}} ({{count}})', '</label>', '</li>', '{{/unselected}}', '</ul>', '</div>', '</div>{{/facets}}', '{{#rangefacets}}<div class="facet-block">', '<div class="facet-title">{{name}}</div>', '<div class="facet-values">', '<ul>', '{{#selected}}', '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" unbxdParam_facetType="{{../type}}">', '<input type="checkbox" checked class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" ', ' unbxdParam_facetType="{{../type}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">', '<label for="{{../facet_name}}_{{value}}">', '{{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})</label></li>', '{{/selected}}', ' {{#unselected}}', '<li unbxdParam_facetName="{{../facet_name}}" unbxdParam_facetValue="{{value}}" unbxdParam_facetType="{{../type}}">', '<input type="checkbox" class="filter-checkbox" unbxdParam_facetName="{{../facet_name}}" ', ' unbxdParam_facetType="{{../type}}" unbxdParam_facetValue="{{value}}" id="{{../facet_name}}_{{value}}">', '<label for="{{../facet_name}}_{{value}}">', '{{prepareFacetValue begin}} - {{prepareFacetValue end}} ({{count}})</label></li>', '{{/unselected}}', '</ul>', '</div>', '</div>', '{{/rangefacets}}'].join(''),
-            facetContainerSelector: "#facets_container",
-            facetCheckBoxSelector: "input[type='checkbox']",
-            facetElementSelector: "label",
-            facetOnSelect: function(el) {},
-            facetOnDeselect: function(el) {},
-            facetMultiSelect: true,
-            selectedFacetTemp: [
-                'Selected:', '{{#each filters}}', '{{#each this}}', '<div class="selected-facet clearfix">', '<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>', '<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>', '</div>', '{{/each}}', '{{/each}}', '{{#each ranges}}', '{{#each this}}', '<div class="selected-facet clearfix">', '<div class="selected-facet-name lt">{{{prepareFacetValue @key}}}</div>', '<div class="selected-facet-delete rt" unbxdParam_facetName="{{this}}" unbxdParam_facetValue="{{@key}}">&times;</div>', '</div>', '{{/each}}', '{{/each}}'
-            ].join(''),
-            selectedFacetContainerSelector: "#selected_facets",
-            clearSelectedFacetsSelector: "#clear_all_selected_facets",
-            removeSelectedFacetSelector: ".selected-facet-delete",
-            selectedFacetHolderSelector: "",
-            loaderSelector: "" //".result-loader"
-                ,
-            onFacetLoad: function() {
-                console.log('onFacetLoad', arguments, this);
-            },
-            sanitizeQueryString: function(q) {
-                return q;
-            },
-            loaderSelector: ".result-loader",
-            getFacetStats: "price",
-            processFacetStats: function(obj) {
-                var divs = $("#amount div");
-
-                jQuery("#slider-range-max").slider({
-                    range: !0,
-                    animate: !0,
-                    min: obj.price.min,
-                    max: obj.price.max,
-                    values: [obj.price.values.min, obj.price.values.max],
-                    create: function() {
-                        jQuery("#amount").val("$" + obj.price.values.min + '  -  ' + "$" + obj.price.values.max);
-                        divs.eq(0).html("$" + obj.price.values.min);
-                        divs.eq(1).html("$" + obj.price.values.max);
-                    },
-                    slide: function(b, c) {
-                        jQuery("#amount").val("$" + c.values[0] + '  -  ' + "$" + c.values[1]);
-                        divs.eq(0).html("$" + c.values[0]);
-                        divs.eq(1).html("$" + c.values[1]);
-                    },
-                    change: function(b, c) {
-                        searchobj
-                            .clearRangeFiltes()
-                            .addRangeFilter("price", c.values[0], c.values[1])
-                            .setPage(1)
-                            .callResults(searchobj.paintResultSet, true);
-                    }
-                });
-            },
-            setDefaultFilters: function() {},
-            onIntialResultLoad: function() {
-                console.log('onIntialResultLoad', arguments, this);
-            },
-            onPageLoad: function() {
-                console.log('onPageLoad', arguments, this);
-            },
-            deferInitRender: [],
-            bannerSelector: '.banner',
-            sortContainerSelector: '.result-sort-options',
-            pageSizeContainerSelector: '.result-page-size-options'
-        });
+    </body>
+    <script>
+            var date = new Date();
+            var year = date.getFullYear();
+            document.getElementsByClassName("year")[0].innerHTML=year;
     </script>
-</body>
+    <script type="text/javascript" src="triggerSearch.js"></script>
 </html>
