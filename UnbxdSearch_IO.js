@@ -453,6 +453,8 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
         spellCheck: '' //
         ,
         spellCheckTemp: '<h3>Did you mean : {{suggestion}}</h3>',
+        currency: '$',
+        allowEmptySearch: false,
         searchQueryDisplay: '',
         searchQueryDisplayTemp: '<h3>Search results for {{query}} - {{numberOfProducts}}</h3>',
         searchResultContainer: '',
@@ -782,6 +784,10 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
 
                         self.params.query = self.options.sanitizeQueryString.call(self, self.input.value);
 
+                        if (self.options.allowEmptySearch && !self.params.query) {
+                            self.params.query = '*';
+                        }
+
                         if (self.options.deferInitRender.indexOf('search') === -1)
                             jQuery(self.options.searchResultContainer).html('');
 
@@ -1063,7 +1069,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             return this;
         },
         addFilter: function (field, value) {
-            if (this.options.facetMultilevel && field === this.options.mappedFields.categoryField) {
+            if (this.options.facetMultilevel && field === (this.options.mappedFields.categoryField || 'categoryPath')) {
                 this.params.categoryFilter = value;
             } else {
                 if (!(field in this.params.filters))
@@ -1073,7 +1079,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             return this;
         },
         removeFilter: function (field, value) {
-            if (this.options.facetMultilevel && field === this.options.mappedFields.categoryField) {
+            if (this.options.facetMultilevel && field === (this.options.mappedFields.categoryField || 'categoryPath')) {
                 if (value !== '') {
                     var breadcrumbString = '';
                     if (value.indexOf('>') !== -1) {
@@ -1662,7 +1668,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
                 product['unbxdprank'] = obj.response.start + start;
                 product['imageUrl'] = product[that.options.mappedFields.imageUrl];
                 product['title'] = product[that.options.mappedFields.title];
-                product['price'] = product[that.options.mappedFields.price];
+                product['price'] = product[that.options.mappedFields.price] ? that.options.currency + product[that.options.mappedFields.price] : '';
                 product['description'] = product[that.options.mappedFields.description];
                 start += 1;
                 return product;
@@ -1855,6 +1861,12 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             var multilevelFacet = {};
             var currentCategoryLevel = 1;
             var breadcrumbs = {};
+
+            // When there are no facets returned in the search response
+            if (!obj.facets) {
+                jQuery(this.options.facetContainerSelector).style.display = "none";
+                jQuery(this.options.searchResultContainer).style.width = "100%";
+            }
 
             if (obj.facets && obj.facets.hasOwnProperty("text")) {
                 mod_textfacets = obj.facets.text.list;

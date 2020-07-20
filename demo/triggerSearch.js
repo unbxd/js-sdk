@@ -145,7 +145,7 @@ var config = {
         "title": "title",
         "description": "description",
         "price": "price",
-        "categoryPath": "categoryPath",
+        "categoryField": "categoryField",
         "variantFields": {
             "imageUrl": "v_imageUrl",
             "productUrl": "v_productUrl",
