@@ -374,6 +374,10 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
         return ("query" in params && params.query.trim().length > 0);
     };
 
+    Handlebars.registerHelper('getSpellCheckUrl', function(suggestion) {
+        return searchobj.options.spellCheckUrl(suggestion);
+    });
+
     var slider_min = 0;
     var slider_max = 0;
 
