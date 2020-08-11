@@ -1868,8 +1868,8 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
 
             // When there are no facets returned in the search response
             if (!obj.facets) {
-                jQuery(this.options.facetContainerSelector).style.display = "none";
-                jQuery(this.options.searchResultContainer).style.width = "100%";
+                jQuery(this.options.facetContainerWrapperSelector)[0].style.display = "none";
+                jQuery(this.options.searchResultContainer)[0].style.width = "100%";
             }
 
             if (obj.facets && obj.facets.hasOwnProperty("text")) {
