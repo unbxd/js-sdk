@@ -28,7 +28,7 @@
   "homepage": "https://github.com/unbxd/js-sdk",
   "devDependencies": {
     "chai": "^4.2.0",
-    "handlebars": "^4.0.5",
+    "handlebars": "^4.4.5",
     "jquery": "^3.3.1",
     "jquery-ui": "^1.12.1",
     "karma": "^4.0.0",
