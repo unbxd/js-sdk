@@ -1073,7 +1073,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             return this;
         },
         addFilter: function (field, value) {
-            if (this.options.facetMultilevel && field === (this.options.mappedFields.categoryField || 'categoryPath')) {
+            if (this.options.facetMultilevel && field === (this.options.mappedFields.categoryPath || 'categoryPath')) {
                 this.params.categoryFilter = value;
             } else {
                 if (!(field in this.params.filters))
@@ -1083,7 +1083,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             return this;
         },
         removeFilter: function (field, value) {
-            if (this.options.facetMultilevel && field === (this.options.mappedFields.categoryField || 'categoryPath')) {
+            if (this.options.facetMultilevel && field === (this.options.mappedFields.categoryPath || 'categoryPath')) {
                 if (value !== '') {
                     var breadcrumbString = '';
                     if (value.indexOf('>') !== -1) {
