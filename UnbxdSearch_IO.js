@@ -406,10 +406,11 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
         products = products.map(function (item, index) {
             if (item.relevantDocument === "variant") {
                 var variant = item.variants[0];
-                item.imageUrl = variant[searchobj.options.mappedFields.variantFields.v_imageUrl];
-                item.productUrl = variant[searchobj.options.mappedFields.variantFields.v_productUrl];
-                item.price = variant[searchobj.options.mappedFields.variantFields.v_price];
-                item.title = variant[searchobj.options.mappedFields.variantFields.v_title];
+                var variantFields = searchobj.options.mappedFields.variantFields;
+                item.imageUrl = variantFields ? variant[variantFields.v_imageUrl] : '';
+                item.productUrl = variantFields ? variant[variantFields.v_productUrl] : '';
+                item.price = variantFields ? variant[variantFields.v_price] : '';
+                item.title = variantFields ? variant[variantFields.v_title] : '';
             }
             if (searchobj.options.isSwatches) {
                 if (item.relevantDocument === "parent") {
