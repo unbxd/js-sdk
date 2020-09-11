@@ -1429,11 +1429,6 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
 
             this.params['extra']['version'] = 'V2';
 
-            if (this.options.facetMultilevel) {
-                /** With self serve user can configure category facets in the portal itself */
-                this.params['extra']['f.categoryPath.facet.version'] = 'V2';
-            }
-
             if (this.options.variants) {
                 this.params['extra']['variants'] = true;
                 this.params['extra']['variants.count'] = this.options.variantsCount || 1;
