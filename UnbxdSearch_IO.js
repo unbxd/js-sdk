@@ -1430,14 +1430,6 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
 
             this.params['extra']['version'] = 'V2';
 
-            if (this.options.facetMultilevel) {
-                this.params['extra']['facet.multilevel'] = 'categoryPath';
-                this.params['extra']['f.categoryPath.displayName'] = this.options.facetMultilevelName;
-                this.params['extra']['f.categoryPath.max.depth'] = this.options.categoryDepth;
-                this.params['extra']['f.categoryPath.facet.limit'] = this.options.categoryLimit;
-                this.params['extra']['f.categoryPath.facet.version'] = 'V2';
-            }
-
             if (this.options.variants) {
                 this.params['extra']['variants'] = true;
                 this.params['extra']['variants.count'] = this.options.variantsCount || 1;
