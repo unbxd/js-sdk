@@ -2093,7 +2093,8 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
                     selected: [],
                     unselected: [],
                     unordered: [],
-                    isMultilevel: (facets[x].hasOwnProperty("multiLevelField")) ? true : false
+                    isMultilevel: (facets[x].hasOwnProperty("multiLevelField")) ? true : false,
+                    position: facets[x].position || 999
                 };
                 // custom solution
                 if (singlefacet["facet_name"] == "categoryPath") {
