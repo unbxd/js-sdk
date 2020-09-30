@@ -512,6 +512,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
         setDefaultFilters: function () {},
         fields: [],
         onNoResult: function (obj) { },
+        onEmptySearch: function (obj) {},
         noEncoding: false,
         heightDiffToTriggerNextPage: 100,
         customReset: function () { },
@@ -793,9 +794,10 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
                             self.params.query = '*';
                         }
 
-                        if (self.options.deferInitRender.indexOf('search') === -1)
+                        if (self.options.deferInitRender.indexOf('search') === -1) {
                             jQuery(self.options.searchResultContainer).html('');
-
+                            self.options.onEmptySearch.call(self);
+                        }  
                         self.setPage(1)
                             .setPageSize(self.options.pageSize)
 
