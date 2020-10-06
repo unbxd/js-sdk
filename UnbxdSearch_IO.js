@@ -1015,6 +1015,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
 
                     if ((old_params.query) || (old_params.categoryId)) {
                         self.params = old_params;
+                        self.$input.val(self.params.query !== "*" ? self.params.query : "");
                         self.callResults(self.paintResultSet);
                     }
                 });
