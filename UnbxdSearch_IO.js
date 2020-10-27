@@ -883,6 +883,7 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
             //click on facet checkboxes
             if (this.options.facetContainerSelector.length > 0) {
                 jQuery(this.options.facetContainerSelector).delegate(self.options.facetCheckBoxSelector, 'change', function (e) {
+                    e.stopImmediatePropagation();
                     var box = jQuery(this),
                         el = box.parents(self.options.facetElementSelector),
                         facetName = box.attr('unbxdParam_facetName'),
