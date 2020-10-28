@@ -1577,14 +1577,16 @@ var unbxdSearchInit = function (jQuery, Handlebars) {
                     if (this.params.extra.page > 1)
                         this.params.extra.page = this.params.extra.page - 1;
 
+                    this.params.didYouMeanQuery = this.params.query;
                     this.params.query = obj.didYouMean[0].suggestion;
-
+                    
                     if (!this.compiledSpellCheckTemp)
                         this.compiledSpellCheckTemp = Handlebars.compile(this.options.spellCheckTemp);
 
                     jQuery(this.options.spellCheck).html(this.compiledSpellCheckTemp({
                         suggestion: obj.didYouMean[0].suggestion,
-                        numberOfProducts: obj.response.numberOfProducts
+                        numberOfProducts: obj.response.numberOfProducts,
+                        didYouMeanQuery: this.params.didYouMeanQuery                        
                     })).show();
 
                     facetsAlso ? this.callResults(this.paintAfterSpellCheck) : this.callResults(this.paintOnlyResultSet);
