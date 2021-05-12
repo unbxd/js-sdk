@@ -10,7 +10,7 @@
     "colors": "^1.0.3",
     "cryptiles": "^4.1.2",
     "hoek": "^4.2.1",
-    "nodemailer": "^5.1.1",
+    "nodemailer": "^6.4.16",
     "sshpk": "^1.13.2"
   },
   "scripts": {
